@@ -1,5 +1,3 @@
-# this is an example of the Uber API
-# as a demonstration of an API spec in YAML
 swagger: '2.0'
 info:
   title: Catalog API
@@ -537,7 +535,7 @@ paths:
       responses:
         204:
           description: Template deleted
-  /templates/{templateId}/states/{stateId}:
+  /templates/{templateId}/states/{stateName}:
     put:
       summary: Update template state
       parameters:
@@ -545,7 +543,7 @@ paths:
           in: path
           required: true
           type: string
-        - name: stateId
+        - name: stateName
           in: path
           required: true
           type: string
