@@ -1,0 +1,764 @@
+# this is an example of the Uber API
+# as a demonstration of an API spec in YAML
+swagger: '2.0'
+info:
+  title: Catalog API
+  version: "0.0.1"
+# the domain of the service
+host: catalog.example.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+consumes:
+   - application/json
+paths:
+  /services:
+    get:
+      summary: Services List
+      responses:
+        200:
+          description: An array of services
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Service'
+    post:
+      summary: Create Service
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/AddService"
+      responses:
+        201:
+          description: Created service
+          schema:
+              $ref: '#/definitions/Service'
+  /services/{serviceId}:
+    get:
+      summary: Service details
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Service object
+          schema:
+              $ref: '#/definitions/Service'
+    put:
+      summary: Update Service
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/UpdateService"
+      responses:
+        200:
+          description: Service Updated
+          schema:
+              $ref: '#/definitions/Service'
+    delete:
+      summary: Delete Service
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+         description: Service deleted
+  /services/{serviceId}/plans:
+    get:
+      summary: Service Plan List
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: An array of plans
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Plan'
+    post:
+      summary: Create Plan
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/AddPlan"
+      responses:
+        201:
+          description: Created service
+          schema:
+              $ref: '#/definitions/Plan'
+  /services/{serviceId}/plans/{planId}:
+    get:
+      summary: Service Plan
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: planId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Plan object
+          schema:
+              $ref: '#/definitions/Plan'
+    put:
+      summary: Update Plan
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: planId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/UpdatePlan"
+      responses:
+        200:
+          description: Plan object
+          schema:
+              $ref: '#/definitions/Plan'
+    delete:
+      summary: Delete Plan
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: planId
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Plan deleted
+  /services/{serviceId}/instances:
+    get:
+      summary: Service Instance List
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: An array of instances
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Instance'
+    post:
+      summary: Create Service Instance
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/AddInstance"
+      responses:
+        201:
+          description: Created instance
+          schema:
+              $ref: '#/definitions/Instance'
+  /services/{serviceId}/instances/{instanceId}:
+    get:
+      summary: Service Instance object
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Instance object
+          schema:
+              $ref: '#/definitions/Instance'
+    put:
+      summary: Update Service Instance
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/UpdateInstance"
+      responses:
+        200:
+          description: Instance updated
+          schema:
+              $ref: '#/definitions/Instance'
+    delete:
+      summary: Delete Service Instance
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Instance deleted
+  /applications:
+    get:
+      summary: List Applications
+      responses:
+        200:
+          description: Instance object
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Application'
+    post:
+      summary: Add Application
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/AddApplication"
+      responses:
+        201:
+          description: Application created
+          schema:
+              $ref: '#/definitions/Application'
+  /applications/{applicationId}:
+    get:
+      summary: Get Application object
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Instance object
+          schema:
+              $ref: '#/definitions/Application'
+    put:
+      summary: Update Application
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/UpdateApplication"
+      responses:
+        200:
+          description: Application updated
+          schema:
+              $ref: '#/definitions/Application'
+    delete:
+      summary: Delete Application
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Application deleted
+  /applications/{applicationId}/instances:
+    get:
+      summary: List Application Instances
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Instance list
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Instance'
+    post:
+      summary: Add Application Instance
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/AddInstance"
+      responses:
+        201:
+          description: Instance created
+          schema:
+              $ref: '#/definitions/Instance'
+  /applications/{applicationId}/instances/{instanceId}:
+    get:
+      summary: Get Application Instance object
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Instance object
+          schema:
+              $ref: '#/definitions/Instance'
+    put:
+      summary: Update Application Instance
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/UpdateInstance"
+      responses:
+        200:
+          description: Instance updated
+          schema:
+              $ref: '#/definitions/Instance'
+    delete:
+      summary: Delete Application Instance
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Instance deleted
+  /instances:
+    get:
+      summary: List all instances
+      responses:
+        200:
+          description: Instance list
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Instance'
+  /instances/{instanceId}:
+    get:
+      summary: Get instance object
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Instance object
+          schema:
+            $ref: '#/definitions/Instance'
+  /instances/{instanceId}/states/{stateId}:
+    put:
+      summary: Update instance state
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+        - name: stateId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Instance state updated
+  /instances/{instanceId}/bindings/{bindingId}:
+    put:
+      summary: Add another instance to current instance dependency list
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+        - name: bindingId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: List of instance dependencies
+          schema:
+            type: array
+            items:
+              type: string
+    delete:
+      summary: Delete another instanse from instance dependency list
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+        - name: bindingId
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Instance dependency deleted
+  /instances/{instanceId}/meta/{key}:
+    put:
+      summary: Add or update meta parameter for instance
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+        - name: key
+          in: path
+          required: true
+          type: string
+        - name: value
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/MetaValue"
+      responses:
+        200:
+          description: List of instance parameters
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Meta'
+    delete:
+      summary: Delete instance meta parameter
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+        - name: key
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Instance parameter deleted
+  /templates:
+    get:
+      summary: List templates
+      responses:
+        200:
+          description: List of templates
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Template'
+    post:
+      summary: Add template
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Template'
+      responses:
+        201:
+          description: Template added
+          schema:
+            $ref: '#/definitions/Template'
+  /templates/{templateId}:
+    delete:
+      summary: Delete template
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Template deleted
+  /templates/{templateId}/states/{stateId}:
+    put:
+      summary: Update template state
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          type: string
+        - name: stateId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Template state updated
+definitions:
+  Service:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      templateId:
+        type: string
+      bindable:
+        type: boolean
+      state:
+        type: string
+  AddService:
+    type: object
+    required:
+      - name
+      - description
+      - templateId
+      - bindable
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      templateId:
+        type: string
+      bindable:
+        type: boolean
+      state:
+        type: string
+  UpdateService:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      templateId:
+        type: string
+      bindable:
+        type: boolean
+      state:
+        type: string
+  Plan:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      cost:
+        type: string
+  AddPlan:
+    type: object
+    required:
+      - name
+      - description
+      - cost
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      cost:
+        type: string
+  UpdatePlan:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      cost:
+        type: string
+  Instance:
+    type: object
+    properties:
+      id:
+        type: string
+      type:
+        type: string
+      classId:
+        type: string
+      state:
+        type: string
+      meta:
+        type: array
+        items:
+          $ref: '#/definitions/Meta'
+      bindings:
+        type: array
+        items:
+          type:
+            string
+  AddInstance:
+    type: object
+    required:
+      - type
+      - classId
+    properties:
+      type:
+        type: string
+      classId:
+        type: string
+      state:
+        type: string
+      meta:
+        type: array
+        items:
+           $ref: '#/definitions/Meta'
+      bindings:
+        type: array
+        items:
+          type:
+            string
+  UpdateInstance:
+    type: object
+    properties:
+      type:
+        type: string
+      classId:
+        type: string
+      state:
+        type: string
+      meta:
+        type: array
+        items:
+          $ref: '#/definitions/Meta'
+      bindings:
+        type: array
+        items:
+          type:
+            string
+  Application:
+    type: object
+    properties:
+      id:
+        type: string
+      templateId:
+        type: string
+      image:
+        type: string
+      replication:
+        type: integer
+      type:
+        type: string
+      state:
+        type: string
+  AddApplication:
+    type: object
+    required:
+      - type
+      - image
+      - replication
+      - templateId
+      - state
+    properties:
+      templateId:
+        type: string
+      image:
+        type: string
+      replication:
+        type: integer
+      type:
+        type: string
+      state:
+        type: string
+  UpdateApplication:
+    type: object
+    properties:
+      templateId:
+        type: string
+      image:
+        type: string
+      replication:
+        type: integer
+      type:
+        type: string
+      state:
+        type: string
+  Meta:
+    type: object
+    required:
+      - key
+      - value
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+  MetaValue:
+    type: object
+    required:
+      - value
+    properties:
+      value:
+        type: string
+  Template:
+    type: object
+    properties:
+      templateId:
+        type: string
+      state:
+        type: string
