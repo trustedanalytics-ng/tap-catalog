@@ -415,33 +415,19 @@ paths:
           description: Instance object
           schema:
             $ref: '#/definitions/Instance'
-  /instances/{instanceId}/states/{stateId}:
-    put:
-      summary: Update instance state
-      parameters:
-        - name: instanceId
-          in: path
-          required: true
-          type: string
-        - name: stateId
-          in: path
-          required: true
-          type: string
-      responses:
-        200:
-          description: Instance state updated
-  /instances/{instanceId}/bindings/{bindingId}:
-    put:
+  /instances/{instanceId}/bindings:
+    post:
       summary: Add another instance to current instance dependency list
       parameters:
         - name: instanceId
           in: path
           required: true
           type: string
-        - name: bindingId
-          in: path
+        - name: body
+          in: body
           required: true
-          type: string
+          schema:
+            $ref: '#/definitions/Binding'
       responses:
         200:
           description: List of instance dependencies
@@ -449,6 +435,7 @@ paths:
             type: array
             items:
               type: string
+  /instances/{instanceId}/bindings/{bindingId}:
     delete:
       summary: Delete another instanse from instance dependency list
       parameters:
@@ -463,30 +450,25 @@ paths:
       responses:
         204:
           description: Instance dependency deleted
-  /instances/{instanceId}/meta/{key}:
-    put:
-      summary: Add or update meta parameter for instance
+  /instances/{instanceId}/meta:
+    post:
+      summary: Add meta parameter for instance
       parameters:
         - name: instanceId
           in: path
           required: true
           type: string
-        - name: key
-          in: path
-          required: true
-          type: string
-        - name: value
+        - name: body
           in: body
           required: true
           schema:
-            $ref: "#/definitions/MetaValue"
+            $ref: "#/definitions/Meta"
       responses:
-        200:
-          description: List of instance parameters
+        201:
+          description: Meta parameter
           schema:
-            type: array
-            items:
               $ref: '#/definitions/Meta'
+  /instances/{instanceId}/meta/{key}:
     delete:
       summary: Delete instance meta parameter
       parameters:
@@ -535,18 +517,18 @@ paths:
       responses:
         204:
           description: Template deleted
-  /templates/{templateId}/states/{stateName}:
     put:
-      summary: Update template state
+      summary: Update template
       parameters:
         - name: templateId
           in: path
           required: true
           type: string
-        - name: stateName
-          in: path
+        - name: body
+          in: body
           required: true
-          type: string
+          schema:
+            $ref: '#/definitions/UpdateTemplate'
       responses:
         200:
           description: Template state updated
@@ -584,6 +566,11 @@ definitions:
         type: boolean
       state:
         type: string
+      plans:
+        type:
+          array
+        items:
+          $ref: '#/definitions/AddPlan'
   UpdateService:
     type: object
     properties:
@@ -648,8 +635,7 @@ definitions:
       bindings:
         type: array
         items:
-          type:
-            string
+          $ref: '#/definitions/Binding'
   AddInstance:
     type: object
     required:
@@ -669,8 +655,7 @@ definitions:
       bindings:
         type: array
         items:
-          type:
-            string
+          $ref: '#/definitions/Binding'
   UpdateInstance:
     type: object
     properties:
@@ -687,8 +672,7 @@ definitions:
       bindings:
         type: array
         items:
-          type:
-            string
+          $ref: '#/definitions/Binding'
   Application:
     type: object
     properties:
@@ -746,17 +730,22 @@ definitions:
         type: string
       value:
         type: string
-  MetaValue:
-    type: object
-    required:
-      - value
-    properties:
-      value:
-        type: string
   Template:
     type: object
     properties:
       templateId:
         type: string
       state:
+        type: string
+  UpdateTemplate:
+    type: object
+    properties:
+      state:
+        type: string
+  Binding:
+    type: object
+    required:
+      - id
+    properties:
+      id:
         type: string
