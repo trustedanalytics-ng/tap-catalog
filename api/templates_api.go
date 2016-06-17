@@ -17,8 +17,10 @@ package api
 
 import (
 	"net/http"
-	"github.com/tapng/tap-catalog/webutils"
+
 	"github.com/gocraft/web"
+
+	"github.com/trustedanalytics/tap-catalog/webutils"
 )
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {

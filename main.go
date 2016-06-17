@@ -21,9 +21,11 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
-	"github.com/gocraft/web"
-	"github.com/tapng/tap-catalog/api"
 	"os"
+
+	"github.com/gocraft/web"
+
+	"github.com/trustedanalytics/tap-catalog/api"
 )
 
 type appHandler func(web.ResponseWriter, *web.Request) error

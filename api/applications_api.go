@@ -17,7 +17,7 @@ package api
 
 import (
 	"net/http"
-	"github.com/tapng/tap-catalog/webutils"
+	"github.com/trustedanalytics/tap-catalog/webutils"
 	"github.com/gocraft/web"
 )
 

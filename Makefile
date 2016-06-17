@@ -1,8 +1,9 @@
-APDIR=$(go list ./... | grep -v /vendor/)
+APDIR=$(shell go list ./... | grep -v /vendor/)
 GOBIN=$(GOPATH)/bin
 
 build:
 	CGO_ENABLED=0 go install -tags netgo ${APDIR}
+	go fmt $(APDIR)
 
 run: build
 	${GOPATH}/bin/tap-catalog
@@ -22,3 +23,6 @@ verify_gopath:
 		echo "GOPATH not set. You need to set GOPATH before run this command";\
 		exit 1 ;\
 	fi
+
+tests: verify_gopath
+	go test --cover $(APP_DIR_LIST)

@@ -16,10 +16,12 @@
 package api
 
 import (
-	"github.com/gocraft/web"
-	"github.com/tapng/tap-catalog/webutils"
 	"net/http"
 	"log"
+	
+	"github.com/gocraft/web"
+
+	"github.com/trustedanalytics/tap-catalog/webutils"
 )
 
 type Context struct{}
