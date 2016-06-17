@@ -67,6 +67,23 @@ paths:
           description: Service Updated
           schema:
               $ref: '#/definitions/Service'
+    patch:
+      summary: Update Service
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/PatchService"
+      responses:
+        200:
+          description: Service Updated
+          schema:
+              $ref: '#/definitions/Service'
     delete:
       summary: Delete Service
       parameters:
@@ -142,6 +159,27 @@ paths:
           required: true
           schema:
               $ref: "#/definitions/UpdatePlan"
+      responses:
+        200:
+          description: Plan object
+          schema:
+              $ref: '#/definitions/Plan'
+    patch:
+      summary: Update Plan
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: planId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/PatchPlan"
       responses:
         200:
           description: Plan object
@@ -231,6 +269,27 @@ paths:
           description: Instance updated
           schema:
               $ref: '#/definitions/Instance'
+    patch:
+      summary: Update Service Instance
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          type: string
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/PatchInstance"
+      responses:
+        200:
+          description: Instance updated
+          schema:
+              $ref: '#/definitions/Instance'
     delete:
       summary: Delete Service Instance
       parameters:
@@ -293,6 +352,23 @@ paths:
           required: true
           schema:
               $ref: "#/definitions/UpdateApplication"
+      responses:
+        200:
+          description: Application updated
+          schema:
+              $ref: '#/definitions/Application'
+    patch:
+      summary: Update Application
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/PatchApplication"
       responses:
         200:
           description: Application updated
@@ -373,6 +449,27 @@ paths:
           required: true
           schema:
               $ref: "#/definitions/UpdateInstance"
+      responses:
+        200:
+          description: Instance updated
+          schema:
+              $ref: '#/definitions/Instance'
+    patch:
+      summary: Update Application Instance
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          type: string
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/PatchInstance"
       responses:
         200:
           description: Instance updated
@@ -535,6 +632,13 @@ paths:
 definitions:
   Service:
     type: object
+    required:
+      - id
+      - name
+      - description
+      - templateId
+      - bindable
+      - state
     properties:
       id:
         type: string
@@ -555,6 +659,7 @@ definitions:
       - description
       - templateId
       - bindable
+      - state
     properties:
       name:
         type: string
@@ -573,6 +678,25 @@ definitions:
           $ref: '#/definitions/AddPlan'
   UpdateService:
     type: object
+    required:
+      - name
+      - description
+      - templateId
+      - bindable
+      - state
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      templateId:
+        type: string
+      bindable:
+        type: boolean
+      state:
+        type: string
+  PatchService:
+    type: object
     properties:
       name:
         type: string
@@ -586,6 +710,11 @@ definitions:
         type: string
   Plan:
     type: object
+    required:
+      - id
+      - name
+      - description
+      - cost
     properties:
       id:
         type: string
@@ -610,6 +739,19 @@ definitions:
         type: string
   UpdatePlan:
     type: object
+    required:
+      - name
+      - description
+      - cost
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      cost:
+        type: string
+  PatchPlan:
+    type: object
     properties:
       name:
         type: string
@@ -619,6 +761,11 @@ definitions:
         type: string
   Instance:
     type: object
+    required:
+      - id
+      - type
+      - classId
+      - state
     properties:
       id:
         type: string
@@ -641,6 +788,7 @@ definitions:
     required:
       - type
       - classId
+      - state
     properties:
       type:
         type: string
@@ -657,6 +805,27 @@ definitions:
         items:
           $ref: '#/definitions/Binding'
   UpdateInstance:
+    type: object
+    required:
+      - type
+      - classId
+      - state
+    properties:
+      type:
+        type: string
+      classId:
+        type: string
+      state:
+        type: string
+      meta:
+        type: array
+        items:
+          $ref: '#/definitions/Meta'
+      bindings:
+        type: array
+        items:
+          $ref: '#/definitions/Binding'
+  PatchInstance:
     type: object
     properties:
       type:
@@ -675,6 +844,13 @@ definitions:
           $ref: '#/definitions/Binding'
   Application:
     type: object
+    required:
+      - type
+      - image
+      - replication
+      - templateId
+      - state
+      - id
     properties:
       id:
         type: string
@@ -709,6 +885,25 @@ definitions:
         type: string
   UpdateApplication:
     type: object
+    required:
+      - type
+      - image
+      - replication
+      - templateId
+      - state
+    properties:
+      templateId:
+        type: string
+      image:
+        type: string
+      replication:
+        type: integer
+      type:
+        type: string
+      state:
+        type: string
+  PatchApplication:
+    type: object
     properties:
       templateId:
         type: string
@@ -732,6 +927,9 @@ definitions:
         type: string
   Template:
     type: object
+    required:
+      - templateId
+      - state
     properties:
       templateId:
         type: string
@@ -739,6 +937,8 @@ definitions:
         type: string
   UpdateTemplate:
     type: object
+    required:
+      - state
     properties:
       state:
         type: string
