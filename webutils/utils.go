@@ -23,6 +23,7 @@ import (
 	"log"
 
 	"github.com/gocraft/web"
+	"net/http"
 )
 
 type TapJWTToken struct {
@@ -75,4 +76,12 @@ func WriteJson(rw web.ResponseWriter, response interface{}, status_code int) err
 	return nil
 }
 
+func Respond400(rw web.ResponseWriter, err error) {
+	rw.WriteHeader(http.StatusBadRequest)
+	fmt.Fprintf(rw, "%s", err.Error())
+}
 
+func Respond404(rw web.ResponseWriter, err error) {
+	rw.WriteHeader(http.StatusNotFound)
+	fmt.Fprintf(rw, "%s", err.Error())
+}

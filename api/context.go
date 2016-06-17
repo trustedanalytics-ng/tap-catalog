@@ -16,9 +16,9 @@
 package api
 
 import (
-	"net/http"
 	"log"
-	
+	"net/http"
+
 	"github.com/gocraft/web"
 
 	"github.com/trustedanalytics/tap-catalog/webutils"
@@ -34,4 +34,3 @@ func (c *Context) Error(rw web.ResponseWriter, r *web.Request, err interface{}) 
 	log.Println("Respond500: reason: error ", err)
 	rw.WriteHeader(http.StatusInternalServerError)
 }
-

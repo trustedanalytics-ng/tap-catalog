@@ -639,6 +639,7 @@ definitions:
       - templateId
       - bindable
       - state
+      - plans
     properties:
       id:
         type: string
@@ -652,6 +653,12 @@ definitions:
         type: boolean
       state:
         type: string
+        enum: ["deploying", "ready", "offline"]
+      plans:
+        type:
+          array
+        items:
+          $ref: '#/definitions/AddPlan'
   AddService:
     type: object
     required:
@@ -671,6 +678,7 @@ definitions:
         type: boolean
       state:
         type: string
+        enum: ["deploying", "ready", "offline"]
       plans:
         type:
           array
@@ -695,6 +703,12 @@ definitions:
         type: boolean
       state:
         type: string
+        enum: ["deploying", "ready", "offline"]
+      plans:
+        type:
+          array
+        items:
+          $ref: '#/definitions/AddPlan'
   PatchService:
     type: object
     properties:
@@ -708,6 +722,12 @@ definitions:
         type: boolean
       state:
         type: string
+        enum: ["deploying", "ready", "offline"]
+      plans:
+        type:
+          array
+        items:
+          $ref: '#/definitions/AddPlan'
   Plan:
     type: object
     required:
@@ -775,6 +795,7 @@ definitions:
         type: string
       state:
         type: string
+        enum: ["requested", "deploying", "stopped", "running", "to_be_destroyed", "destroying", "unavailable"]
       meta:
         type: array
         items:
@@ -796,6 +817,7 @@ definitions:
         type: string
       state:
         type: string
+        enum: ["requested", "deploying", "stopped", "running", "to_be_destroyed", "destroying", "unavailable"]
       meta:
         type: array
         items:
@@ -817,6 +839,7 @@ definitions:
         type: string
       state:
         type: string
+        enum: ["requested", "deploying", "stopped", "running", "to_be_destroyed", "destroying", "unavailable"]
       meta:
         type: array
         items:
@@ -834,6 +857,7 @@ definitions:
         type: string
       state:
         type: string
+        enum: ["requested", "deploying", "stopped", "running", "to_be_destroyed", "destroying", "unavailable"]
       meta:
         type: array
         items:
@@ -862,8 +886,10 @@ definitions:
         type: integer
       type:
         type: string
+        enum: ["java", "go", "nodejs"]
       state:
         type: string
+        enum: ["requested", "building", "ready"]
   AddApplication:
     type: object
     required:
@@ -881,8 +907,10 @@ definitions:
         type: integer
       type:
         type: string
+        enum: ["java", "go", "nodejs"]
       state:
         type: string
+        enum: ["requested", "building", "ready"]
   UpdateApplication:
     type: object
     required:
@@ -900,8 +928,10 @@ definitions:
         type: integer
       type:
         type: string
+        enum: ["java", "go", "nodejs"]
       state:
         type: string
+        enum: ["requested", "building", "ready"]
   PatchApplication:
     type: object
     properties:
@@ -913,8 +943,10 @@ definitions:
         type: integer
       type:
         type: string
+        enum: ["java", "go", "nodejs"]
       state:
         type: string
+        enum: ["requested", "building", "ready"]
   Meta:
     type: object
     required:

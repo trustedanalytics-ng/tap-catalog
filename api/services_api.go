@@ -20,6 +20,7 @@ import (
 
 	"github.com/gocraft/web"
 
+	"github.com/trustedanalytics/tap-catalog/api/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
 )
 
@@ -32,11 +33,25 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Create Service", http.StatusCreated)
+	reqService := models.Service{}
+
+	err := webutils.ReadJson(req, &reqService)
+	if err != nil {
+		webutils.Respond400(rw, err)
+	}
+	webutils.WriteJson(rw, reqService, http.StatusCreated)
 }
 
 func (c *Context) UpdateService(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Update Service", http.StatusOK)
+	serviceId := req.PathParams["serviceId"]
+	reqService := models.Service{}
+	reqService.Id = serviceId
+
+	err := webutils.ReadJson(req, &reqService)
+	if err != nil {
+		webutils.Respond400(rw, err)
+	}
+	webutils.WriteJson(rw, reqService, http.StatusOK)
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {

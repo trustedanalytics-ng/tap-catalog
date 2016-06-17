@@ -16,9 +16,10 @@
 package api
 
 import (
-	"net/http"
-	"github.com/trustedanalytics/tap-catalog/webutils"
 	"github.com/gocraft/web"
+	"github.com/trustedanalytics/tap-catalog/api/models"
+	"github.com/trustedanalytics/tap-catalog/webutils"
+	"net/http"
 )
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
@@ -30,11 +31,25 @@ func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Create Application", http.StatusCreated)
+	reqApplication := models.Application{}
+
+	err := webutils.ReadJson(req, &reqApplication)
+	if err != nil {
+		webutils.Respond400(rw, err)
+	}
+	webutils.WriteJson(rw, reqApplication, http.StatusCreated)
 }
 
 func (c *Context) UpdateApplication(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Update Application", http.StatusOK)
+	applicationId := req.PathParams["applicationId"]
+	reqApplication := models.Application{}
+	reqApplication.Id = applicationId
+
+	err := webutils.ReadJson(req, &reqApplication)
+	if err != nil {
+		webutils.Respond400(rw, err)
+	}
+	webutils.WriteJson(rw, reqApplication, http.StatusOK)
 }
 
 func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {

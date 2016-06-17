@@ -20,8 +20,8 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"time"
 	"os"
+	"time"
 
 	"github.com/gocraft/web"
 
@@ -29,7 +29,6 @@ import (
 )
 
 type appHandler func(web.ResponseWriter, *web.Request) error
-
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -39,59 +38,59 @@ func main() {
 	basicAuthRouter := r.Subrouter(api.Context{}, "/v1")
 	basicAuthRouter.Middleware((*api.Context).BasicAuthorizeMiddleware)
 
-
 	r.Get("/", (*api.Context).Index)
 
 	r.Error((*api.Context).Error)
 	basicAuthRouter.Get("/services", (*api.Context).Services)
-	basicAuthRouter.Get("/services/:service_id", (*api.Context).GetService)
+	basicAuthRouter.Get("/services/:serviceId", (*api.Context).GetService)
 	basicAuthRouter.Post("/services", (*api.Context).AddService)
-	basicAuthRouter.Put("/services/:service_id", (*api.Context).UpdateService)
-	basicAuthRouter.Patch("/services/:service_id", (*api.Context).UpdateService)
-	basicAuthRouter.Delete("/services/:service_id", (*api.Context).DeleteService)
+	basicAuthRouter.Put("/services/:serviceId", (*api.Context).UpdateService)
+	basicAuthRouter.Patch("/services/:serviceId", (*api.Context).UpdateService)
+	basicAuthRouter.Delete("/services/:serviceId", (*api.Context).DeleteService)
 
 	basicAuthRouter.Get("/services/:service_id/plans", (*api.Context).Plans)
-	basicAuthRouter.Get("/services/:service_id/plans/:plan_id", (*api.Context).GetPlan)
+	basicAuthRouter.Get("/services/:service_id/plans/:planId", (*api.Context).GetPlan)
 	basicAuthRouter.Post("/services/:service_id/plans", (*api.Context).AddPlan)
-	basicAuthRouter.Patch("/services/:service_id/plans/:plan_id", (*api.Context).UpdatePlan)
-	basicAuthRouter.Put("/services/:service_id/plans/:plan_id", (*api.Context).UpdatePlan)
-	basicAuthRouter.Delete("/services/:service_id/plans/:plan_id", (*api.Context).DeletePlan)
+	basicAuthRouter.Patch("/services/:service_id/plans/:planId", (*api.Context).UpdatePlan)
+	basicAuthRouter.Put("/services/:service_id/plans/:planId", (*api.Context).UpdatePlan)
+	basicAuthRouter.Delete("/services/:service_id/plans/:planId", (*api.Context).DeletePlan)
 
 	basicAuthRouter.Get("/services/:service_id/instances", (*api.Context).Instances)
-	basicAuthRouter.Get("/services/:service_id/instances/:instances_id", (*api.Context).GetInstance)
+	basicAuthRouter.Get("/services/:service_id/instances/:instanceId", (*api.Context).GetInstance)
 	basicAuthRouter.Post("/services/:service_id/instances", (*api.Context).AddInstance)
-	basicAuthRouter.Patch("/services/:service_id/instances/:instances_id", (*api.Context).UpdateInstance)
-	basicAuthRouter.Put("/services/:service_id/instances/:instances_id", (*api.Context).UpdateInstance)
-	basicAuthRouter.Delete("/services/:service_id/instances/:instances_id", (*api.Context).DeleteInstance)
+	basicAuthRouter.Patch("/services/:service_id/instances/:instanceId", (*api.Context).UpdateInstance)
+	basicAuthRouter.Put("/services/:service_id/instances/:instanceId", (*api.Context).UpdateInstance)
+	basicAuthRouter.Delete("/services/:service_id/instances/:instanceId", (*api.Context).DeleteInstance)
 
 	basicAuthRouter.Get("/applications", (*api.Context).Applications)
-	basicAuthRouter.Get("/applications/:application_id", (*api.Context).GetApplication)
+	basicAuthRouter.Get("/applications/:applicationId", (*api.Context).GetApplication)
 	basicAuthRouter.Post("/applications", (*api.Context).AddApplication)
-	basicAuthRouter.Put("/applications/:application_id", (*api.Context).UpdateApplication)
-	basicAuthRouter.Patch("/applications/:application_id", (*api.Context).UpdateApplication)
-	basicAuthRouter.Delete("/applications/:application_id", (*api.Context).DeleteApplication)
+	basicAuthRouter.Put("/applications/:applicationId", (*api.Context).UpdateApplication)
+	basicAuthRouter.Patch("/applications/:applicationId", (*api.Context).UpdateApplication)
+	basicAuthRouter.Delete("/applications/:applicationId", (*api.Context).DeleteApplication)
 
 	basicAuthRouter.Get("/applications/:application_id/instances", (*api.Context).Instances)
-	basicAuthRouter.Get("/applications/:application_id/instances/:instances_id", (*api.Context).GetInstance)
+	basicAuthRouter.Get("/applications/:application_id/instances/:instanceId", (*api.Context).GetInstance)
 	basicAuthRouter.Post("/applications/:application_id/instances", (*api.Context).AddInstance)
-	basicAuthRouter.Put("/applications/:application_id/instances/:instances_id", (*api.Context).UpdateInstance)
-	basicAuthRouter.Patch("/applications/:application_id/instances/:instances_id", (*api.Context).UpdateInstance)
-	basicAuthRouter.Delete("/applications/:application_id/instances/:instances_id", (*api.Context).DeleteInstance)
+	basicAuthRouter.Put("/applications/:application_id/instances/:instanceId", (*api.Context).UpdateInstance)
+	basicAuthRouter.Patch("/applications/:application_id/instances/:instanceId", (*api.Context).UpdateInstance)
+	basicAuthRouter.Delete("/applications/:application_id/instances/:instanceId", (*api.Context).DeleteInstance)
 
 	basicAuthRouter.Get("/instances", (*api.Context).Instances)
-	basicAuthRouter.Get("/instances/:instances_id", (*api.Context).GetInstance)
-	basicAuthRouter.Delete("/instances/:instances_id", (*api.Context).DeleteInstance)
-	basicAuthRouter.Patch("/instances/:instances_id", (*api.Context).UpdateInstance)
+	basicAuthRouter.Get("/instances/:instanceId", (*api.Context).GetInstance)
+	basicAuthRouter.Delete("/instances/:instanceId", (*api.Context).DeleteInstance)
+	basicAuthRouter.Patch("/instances/:instanceId", (*api.Context).UpdateInstance)
 
 	basicAuthRouter.Post("/instances/:instances_id/bindings", (*api.Context).AddInstanceBinding)
-	basicAuthRouter.Delete("/instances/:instances_id/bindings/:binding_id", (*api.Context).DeleteInstanceBinding)
+	basicAuthRouter.Delete("/instances/:instances_id/bindings/:bindingId", (*api.Context).DeleteInstanceBinding)
 	basicAuthRouter.Post("/instances/:instances_id/meta", (*api.Context).AddInstanceMetadata)
 	basicAuthRouter.Delete("/instances/:instances_id/meta/:key", (*api.Context).DeleteInstanceMetadata)
 
 	basicAuthRouter.Get("/templates", (*api.Context).Templates)
-	basicAuthRouter.Get("/templates/:template_id", (*api.Context).GetTemplate)
-	basicAuthRouter.Delete("/templates/:template_id", (*api.Context).DeleteTemplate)
-	basicAuthRouter.Put("/templates/:templates_id", (*api.Context).UpdateTemplateState)
+	basicAuthRouter.Post("/templates", (*api.Context).AddTemplate)
+	basicAuthRouter.Get("/templates/:templateId", (*api.Context).GetTemplate)
+	basicAuthRouter.Delete("/templates/:templateId", (*api.Context).DeleteTemplate)
+	basicAuthRouter.Put("/templates/:templateId", (*api.Context).UpdateTemplate)
 
 	port := os.Getenv("PORT")
 	log.Println("Will listen on:", "0.0.0.0:"+port)
