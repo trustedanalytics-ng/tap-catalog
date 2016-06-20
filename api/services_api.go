@@ -20,6 +20,7 @@ import (
 
 	"github.com/gocraft/web"
 
+	"github.com/nu7hatch/gouuid"
 	"github.com/trustedanalytics/tap-catalog/api/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
 )
@@ -29,16 +30,24 @@ func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Single Service", http.StatusOK)
+	serviceId := req.PathParams["serviceId"]
+	webutils.WriteJson(rw, serviceId, http.StatusOK)
 }
 
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	reqService := models.Service{}
 
-	err := webutils.ReadJson(req, &reqService)
+	serviceId, err := uuid.NewV4()
+	if err != nil {
+		webutils.Respond500(rw, err)
+	}
+	err = webutils.ReadJson(req, &reqService)
+
 	if err != nil {
 		webutils.Respond400(rw, err)
 	}
+
+	reqService.Id = serviceId.String()
 	webutils.WriteJson(rw, reqService, http.StatusCreated)
 }
 
@@ -55,5 +64,6 @@ func (c *Context) UpdateService(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Delete Service", http.StatusNoContent)
+	serviceId := req.PathParams["serviceId"]
+	webutils.WriteJson(rw, serviceId, http.StatusNoContent)
 }

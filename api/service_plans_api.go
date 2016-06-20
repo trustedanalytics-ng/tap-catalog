@@ -20,25 +20,46 @@ import (
 
 	"github.com/gocraft/web"
 
+	"github.com/nu7hatch/gouuid"
+	"github.com/trustedanalytics/tap-catalog/api/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
 )
 
 func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "List Plans", http.StatusOK)
+	serviceId := req.PathParams["serviceId"]
+	webutils.WriteJson(rw, serviceId, http.StatusOK)
 }
 
 func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Single Plan", http.StatusOK)
+	serviceId := req.PathParams["serviceId"]
+	planId := req.PathParams["planId"]
+	webutils.WriteJson(rw, serviceId+planId, http.StatusOK)
 }
 
 func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Create Plan", http.StatusCreated)
+	serviceId := req.PathParams["serviceId"]
+	planId, err := uuid.NewV4()
+	if err != nil {
+		webutils.Respond500(rw, err)
+	}
+
+	reqPlan := models.ServicePlan{}
+	webutils.ReadJson(req, &reqPlan)
+	reqPlan.Id = planId.String()
+
+	webutils.WriteJson(rw, planId.String()+serviceId, http.StatusCreated)
 }
 
 func (c *Context) UpdatePlan(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Update Plan", http.StatusOK)
+	serviceId := req.PathParams["serviceId"]
+	planId := req.PathParams["planId"]
+
+	webutils.WriteJson(rw, planId+serviceId, http.StatusOK)
 }
 
 func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Delete Plan", http.StatusNoContent)
+	serviceId := req.PathParams["serviceId"]
+	planId := req.PathParams["planId"]
+
+	webutils.WriteJson(rw, planId+serviceId, http.StatusNoContent)
 }

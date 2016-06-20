@@ -29,7 +29,8 @@ func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Single Template", http.StatusOK)
+	templateId := req.PathParams["templateId"]
+	webutils.WriteJson(rw, templateId, http.StatusOK)
 }
 
 func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
@@ -39,11 +40,13 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	if err != nil {
 		webutils.Respond400(rw, err)
 	}
+
 	webutils.WriteJson(rw, reqTemplate, http.StatusCreated)
 }
 
 func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Delete Template", http.StatusNoContent)
+	templateId := req.PathParams["templateId"]
+	webutils.WriteJson(rw, templateId, http.StatusNoContent)
 }
 
 func (c *Context) UpdateTemplate(rw web.ResponseWriter, req *web.Request) {

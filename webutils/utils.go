@@ -81,6 +81,11 @@ func Respond400(rw web.ResponseWriter, err error) {
 	fmt.Fprintf(rw, "%s", err.Error())
 }
 
+func Respond500(rw web.ResponseWriter, err error) {
+	rw.WriteHeader(http.StatusInternalServerError)
+	fmt.Fprintf(rw, "%s", err.Error())
+}
+
 func Respond404(rw web.ResponseWriter, err error) {
 	rw.WriteHeader(http.StatusNotFound)
 	fmt.Fprintf(rw, "%s", err.Error())
