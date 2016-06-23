@@ -17,7 +17,7 @@ package api
 
 import (
 	"github.com/gocraft/web"
-	"github.com/trustedanalytics/tap-catalog/api/models"
+	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
 	"net/http"
 )
