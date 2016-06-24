@@ -39,6 +39,7 @@ func (c *EtcdConnector) GetKeyIntoStruct(key string, result interface{}) error {
 	}
 
 	resp, err := kapi.Get(context.Background(), key, nil)
+
 	if err != nil {
 		logger.Error("Getinng key value error:", err)
 		return err
@@ -47,8 +48,29 @@ func (c *EtcdConnector) GetKeyIntoStruct(key string, result interface{}) error {
 	return nil
 }
 
+func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
+	logger.Debug("Getting nodes of key:", key)
+
+	kapi, err := getKVApiV2Connector()
+
+	resultNode := client.Node{}
+	if err != nil {
+		logger.Error("Can't connect with ETCD:", err)
+		return resultNode, err
+	}
+
+	resp, err := kapi.Get(context.Background(), key, &client.GetOptions{Recursive: true})
+
+	if err != nil {
+		logger.Error("Getinng key value error:", err)
+		return resultNode, err
+	}
+
+	return *resp.Node, nil
+}
+
 func (c *EtcdConnector) Set(key string, value interface{}) error {
-	logger.Debug("Getting value of key:", key)
+	logger.Debug("Setting value of key:", key)
 	valueByte, err := json.Marshal(value)
 	if err != nil {
 		logger.Error("Can't marshall etcd key value!:", err)
