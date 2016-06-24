@@ -21,8 +21,12 @@ import (
 	"github.com/gocraft/web"
 
 	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/webutils"
+	"github.com/trustedanalytics/tap-go-common/logger"
 )
+
+var logger = logger_wrapper.InitLogger("templates_api")
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, "List Templates", http.StatusOK)
@@ -30,7 +34,13 @@ func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
-	webutils.WriteJson(rw, templateId, http.StatusOK)
+
+	result, err := c.repository.GetData(data.Templates, templateId)
+	if err != nil {
+		webutils.Respond500(rw, err)
+	}
+
+	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
@@ -41,6 +51,16 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 		webutils.Respond400(rw, err)
 	}
 
+	templateKeyStore := map[string]interface{}{}
+
+	templateKeyStore = c.mapper.ToKeyValue(data.Templates, reqTemplate)
+
+	err = c.repository.StoreData(templateKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+	}
+
+	//TODO return data saved in etcd not from request
 	webutils.WriteJson(rw, reqTemplate, http.StatusCreated)
 }
 
@@ -53,7 +73,7 @@ func (c *Context) UpdateTemplate(rw web.ResponseWriter, req *web.Request) {
 	reqTemplate := models.Template{}
 	templateId := req.PathParams["templateId"]
 
-	reqTemplate.TemplateId = templateId
+	reqTemplate.Id = templateId
 
 	err := webutils.ReadJson(req, &reqTemplate)
 	if err != nil {

@@ -19,6 +19,16 @@ deps_update: verify_gopath
 bin/govendor: verify_gopath
 	go get -v -u github.com/kardianos/govendor
 
+deps_fetch_specific: bin/govendor
+	@if [ "$(DEP_URL)" = "" ]; then\
+		echo "DEP_URL not set. Run this comand as follow:";\
+		echo " make deps_fetch_specific DEP_URL=github.com/nu7hatch/gouuid";\
+	exit 1 ;\
+	fi
+	@echo "Fetchinf specific deps in newest versions"
+
+	$(GOBIN)/govendor fetch -v $(DEP_URL)
+
 verify_gopath:
 	@if [ -z "$(GOPATH)" ] || [ "$(GOPATH)" = "" ]; then\
 		echo "GOPATH not set. You need to set GOPATH before run this command";\

@@ -19,9 +19,10 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-	"github.com/nu7hatch/gouuid"
 
+	"github.com/nu7hatch/gouuid"
 	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/webutils"
 )
 
@@ -31,7 +32,13 @@ func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	webutils.WriteJson(rw, serviceId, http.StatusOK)
+
+	result, err := c.repository.GetData(data.Services, serviceId)
+	if err != nil {
+		webutils.Respond500(rw, err)
+	}
+
+	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
@@ -48,6 +55,25 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqService.Id = serviceId.String()
+	if reqService.Plans != nil {
+		for i, plan := range reqService.Plans {
+			planId, err := uuid.NewV4()
+			if err != nil {
+				webutils.Respond500(rw, err)
+			}
+			plan.Id = planId.String()
+			reqService.Plans[i] = plan
+		}
+	}
+
+	serviceKeyStore := map[string]interface{}{}
+
+	serviceKeyStore = c.mapper.ToKeyValue(data.Services, reqService)
+
+	err = c.repository.StoreData(serviceKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+	}
 	webutils.WriteJson(rw, reqService, http.StatusCreated)
 }
 

@@ -21,10 +21,14 @@ import (
 
 	"github.com/gocraft/web"
 
+	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/webutils"
 )
 
-type Context struct{}
+type Context struct {
+	mapper     data.DataMapper
+	repository data.RepositoryConnector
+}
 
 func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, "I'm OK", http.StatusOK)
