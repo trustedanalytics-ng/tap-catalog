@@ -7,4 +7,5 @@ type Application struct {
 	Type        string `json:"type"`
 	TemplateId  string `json:"templateId"`
 	State       string `json:"state"`
+	AuditTrail  AuditTrail
 }

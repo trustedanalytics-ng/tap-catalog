@@ -1,6 +1,7 @@
 package models
 
 type Template struct {
-	TemplateId string `json:"templateId"`
+	Id         string `json:"templateId"`
 	State      string `json:"state"`
+	AuditTrail AuditTrail
 }

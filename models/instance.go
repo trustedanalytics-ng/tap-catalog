@@ -1,12 +1,13 @@
 package models
 
 type Instance struct {
-	Id       string             `json:"id"`
-	Type     string             `json:"type"`
-	ClassId  string             `json:"classId"`
-	Bindings []InstanceBindings `json:"bindings"`
-	Metadata []InstanceMetadata `json:"meta"`
-	State    string             `json:"state"`
+	Id         string             `json:"id"`
+	Type       string             `json:"type"`
+	ClassId    string             `json:"classId"`
+	Bindings   []InstanceBindings `json:"bindings"`
+	Metadata   []InstanceMetadata `json:"meta"`
+	State      string             `json:"state"`
+	AuditTrail AuditTrail
 }
 
 type InstanceState string
@@ -27,6 +28,6 @@ type InstanceBindings struct {
 }
 
 type InstanceMetadata struct {
-	Key   string `json:"key"`
+	Id    string `json:"key"`
 	Value string `json:"value"`
 }

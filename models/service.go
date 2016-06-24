@@ -8,6 +8,7 @@ type Service struct {
 	TemplateId  string        `json:"templateId"`
 	State       string        `json:"state"`
 	Plans       []ServicePlan `json:"plans"`
+	AuditTrail  AuditTrail
 }
 
 type ServicePlan struct {
@@ -15,6 +16,7 @@ type ServicePlan struct {
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
 	Cost        ServicePlanCost `json:"cost"`
+	AuditTrail  AuditTrail
 }
 
 type ServicePlanCost struct {

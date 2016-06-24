@@ -2,7 +2,7 @@ package data
 
 import (
 	"github.com/coreos/etcd/client"
-	"github.com/trustedanalytics/tap-catalog/api/models"
+	"github.com/trustedanalytics/tap-catalog/models"
 	"reflect"
 )
 
