@@ -12,7 +12,8 @@ run-local: build
 	PORT=8181 CATALOG_USER=admin CATALOG_PASS=admin ${GOPATH}/bin/tap-catalog
 
 deps_update: verify_gopath
-	$(GOBIN)/govendor update +external
+	$(GOBIN)/govendor remove +all
+	$(GOBIN)/govendor add +external
 	@echo "Done"
 
 bin/govendor: verify_gopath
