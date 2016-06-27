@@ -2,11 +2,11 @@ package models
 
 type Instance struct {
 	Id         string             `json:"id"`
-	Type       string             `json:"type"`
+	Type       InstanceType       `json:"type"`
 	ClassId    string             `json:"classId"`
 	Bindings   []InstanceBindings `json:"bindings"`
 	Metadata   []InstanceMetadata `json:"meta"`
-	State      string             `json:"state"`
+	State      InstanceState      `json:"state"`
 	AuditTrail AuditTrail
 }
 
@@ -31,3 +31,11 @@ type InstanceMetadata struct {
 	Id    string `json:"key"`
 	Value string `json:"value"`
 }
+
+type InstanceType string
+
+const (
+	InstanceTypeApplication   InstanceType = "application"
+	InstanceTypeService       InstanceType = "service"
+	InstanceTypeServiceBroker InstanceType = "service_broker"
+)

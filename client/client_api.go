@@ -13,10 +13,11 @@ import (
 
 type TapCatalogApi interface {
 	GetInstance(instanceId string) (models.Instance, error)
-	GetTemplateByInstance(instanceId string, instance models.Instance) (*models.Template, error)
 	UpdateInstance(instanceId string, instance models.Instance) (models.Instance, error)
+	GetService(serviceId string) (models.Service, error)
 	UpdateService(serviceId string, instance models.Service) (models.Service, error)
 	UpdatePlan(serviceId, planId string, instance models.ServicePlan) (models.ServicePlan, error)
+	GetApplication(applicationId string) (models.Application, error)
 	UpdateApplication(applicationId string, instance models.Application) (models.Application, error)
 }
 
@@ -63,11 +64,6 @@ func (c *TapCatalogApiConnector) GetInstance(instanceId string) (models.Instance
 	return result, nil
 }
 
-//todo finish me
-func (c *TapCatalogApiConnector) GetTemplateByInstance(instanceId string, instance models.Instance) (*models.Template, error) {
-	return nil, nil
-}
-
 func (c *TapCatalogApiConnector) UpdateInstance(instanceId string, instance models.Instance) (models.Instance, error) {
 	result := models.Instance{}
 
@@ -78,6 +74,26 @@ func (c *TapCatalogApiConnector) UpdateInstance(instanceId string, instance mode
 
 	url := fmt.Sprintf("%s/instances/%s", c.Address, instanceId)
 	status, body, err := brokerHttp.RestPATCH(url, string(reqBody), &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
+	if err != nil {
+		return result, err
+	}
+
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return result, err
+	}
+
+	if status != http.StatusOK {
+		return result, errors.New("Bad response status: " + strconv.Itoa(status) + ". Body: " + string(body))
+	}
+	return result, nil
+}
+
+func (c *TapCatalogApiConnector) GetService(serviceId string) (models.Service, error) {
+	result := models.Service{}
+
+	url := fmt.Sprintf("%s/services/%s", c.Address, serviceId)
+	status, body, err := brokerHttp.RestGET(url, &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
 	if err != nil {
 		return result, err
 	}
@@ -128,6 +144,26 @@ func (c *TapCatalogApiConnector) UpdatePlan(serviceId, planId string, instance m
 
 	url := fmt.Sprintf("%s/services/%s/plans/%s", c.Address, serviceId, planId)
 	status, body, err := brokerHttp.RestPATCH(url, string(reqBody), &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
+	if err != nil {
+		return result, err
+	}
+
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return result, err
+	}
+
+	if status != http.StatusOK {
+		return result, errors.New("Bad response status: " + strconv.Itoa(status) + ". Body: " + string(body))
+	}
+	return result, nil
+}
+
+func (c *TapCatalogApiConnector) GetApplication(applicationId string) (models.Application, error) {
+	result := models.Application{}
+
+	url := fmt.Sprintf("%s/applications/%s", c.Address, applicationId)
+	status, body, err := brokerHttp.RestGET(url, &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
 	if err != nil {
 		return result, err
 	}
