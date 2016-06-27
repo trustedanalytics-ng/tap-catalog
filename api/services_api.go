@@ -36,6 +36,7 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetData(data.Services, serviceId)
 	if err != nil {
 		webutils.Respond500(rw, err)
+		return
 	}
 
 	webutils.WriteJson(rw, result, http.StatusOK)
@@ -47,11 +48,13 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	serviceId, err := uuid.NewV4()
 	if err != nil {
 		webutils.Respond500(rw, err)
+		return
 	}
 	err = webutils.ReadJson(req, &reqService)
 
 	if err != nil {
 		webutils.Respond400(rw, err)
+		return
 	}
 
 	reqService.Id = serviceId.String()
@@ -73,6 +76,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	err = c.repository.StoreData(serviceKeyStore)
 	if err != nil {
 		webutils.Respond500(rw, err)
+		return
 	}
 	webutils.WriteJson(rw, reqService, http.StatusCreated)
 }
@@ -85,6 +89,7 @@ func (c *Context) UpdateService(rw web.ResponseWriter, req *web.Request) {
 	err := webutils.ReadJson(req, &reqService)
 	if err != nil {
 		webutils.Respond400(rw, err)
+		return
 	}
 	webutils.WriteJson(rw, reqService, http.StatusOK)
 }

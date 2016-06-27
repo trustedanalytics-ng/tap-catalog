@@ -38,6 +38,7 @@ func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetData(data.Templates, templateId)
 	if err != nil {
 		webutils.Respond500(rw, err)
+		return
 	}
 
 	webutils.WriteJson(rw, result, http.StatusOK)
@@ -49,6 +50,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	err := webutils.ReadJson(req, &reqTemplate)
 	if err != nil {
 		webutils.Respond400(rw, err)
+		return
 	}
 
 	templateKeyStore := map[string]interface{}{}
@@ -58,6 +60,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	err = c.repository.StoreData(templateKeyStore)
 	if err != nil {
 		webutils.Respond500(rw, err)
+		return
 	}
 
 	//TODO return data saved in etcd not from request
@@ -78,6 +81,7 @@ func (c *Context) UpdateTemplate(rw web.ResponseWriter, req *web.Request) {
 	err := webutils.ReadJson(req, &reqTemplate)
 	if err != nil {
 		webutils.Respond400(rw, err)
+		return
 	}
 
 	webutils.WriteJson(rw, reqTemplate, http.StatusOK)

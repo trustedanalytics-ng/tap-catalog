@@ -36,6 +36,7 @@ func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetData(data.Instances, instanceId)
 	if err != nil {
 		webutils.Respond500(rw, err)
+		return
 	}
 
 	webutils.WriteJson(rw, result, http.StatusOK)
@@ -44,31 +45,52 @@ func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 	reqInstance := models.Instance{}
 
-	serviceId, err := uuid.NewV4()
+	instanceId, err := uuid.NewV4()
 	if err != nil {
 		webutils.Respond500(rw, err)
+		return
 	}
 	err = webutils.ReadJson(req, &reqInstance)
 
 	if err != nil {
 		webutils.Respond400(rw, err)
+		return
 	}
 
-	reqInstance.Id = serviceId.String()
+	reqInstance.Id = instanceId.String()
 
-	serviceKeyStore := map[string]interface{}{}
+	instanceKeyStore := map[string]interface{}{}
 
-	serviceKeyStore = c.mapper.ToKeyValue(data.Instances, reqInstance)
+	instanceKeyStore = c.mapper.ToKeyValue(data.Instances, reqInstance)
 
-	err = c.repository.StoreData(serviceKeyStore)
+	err = c.repository.StoreData(instanceKeyStore)
 	if err != nil {
 		webutils.Respond500(rw, err)
+		return
 	}
 	webutils.WriteJson(rw, reqInstance, http.StatusCreated)
 }
 
 func (c *Context) UpdateInstance(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Update Instance", http.StatusOK)
+	instanceId := req.PathParams["instanceId"]
+	reqInstance := models.Instance{}
+	reqInstance.Id = instanceId
+
+	err := webutils.ReadJson(req, &reqInstance)
+	if err != nil {
+		webutils.Respond400(rw, err)
+		return
+	}
+	instanceKeyStore := map[string]interface{}{}
+
+	instanceKeyStore = c.mapper.ToKeyValue(data.Instances, reqInstance)
+
+	err = c.repository.StoreData(instanceKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, reqInstance, http.StatusOK)
 }
 
 func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {

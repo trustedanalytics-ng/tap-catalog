@@ -41,6 +41,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	planId, err := uuid.NewV4()
 	if err != nil {
 		webutils.Respond500(rw, err)
+		return
 	}
 
 	reqPlan := models.ServicePlan{}
