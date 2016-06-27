@@ -20,6 +20,9 @@ import (
 
 	"github.com/gocraft/web"
 
+	"github.com/nu7hatch/gouuid"
+	"github.com/trustedanalytics/tap-catalog/data"
+	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
 )
 
@@ -28,19 +31,44 @@ func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Single Instance", http.StatusOK)
+	instanceId := req.PathParams["instanceId"]
+
+	result, err := c.repository.GetData(data.Instances, instanceId)
+	if err != nil {
+		webutils.Respond500(rw, err)
+	}
+
+	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Create Instance", http.StatusCreated)
+	reqInstance := models.Instance{}
+
+	serviceId, err := uuid.NewV4()
+	if err != nil {
+		webutils.Respond500(rw, err)
+	}
+	err = webutils.ReadJson(req, &reqInstance)
+
+	if err != nil {
+		webutils.Respond400(rw, err)
+	}
+
+	reqInstance.Id = serviceId.String()
+
+	serviceKeyStore := map[string]interface{}{}
+
+	serviceKeyStore = c.mapper.ToKeyValue(data.Instances, reqInstance)
+
+	err = c.repository.StoreData(serviceKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+	}
+	webutils.WriteJson(rw, reqInstance, http.StatusCreated)
 }
 
 func (c *Context) UpdateInstance(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, "Update Instance", http.StatusOK)
-}
-
-func (c *Context) UpdateInstanceState(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Update Instance State", http.StatusOK)
 }
 
 func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {

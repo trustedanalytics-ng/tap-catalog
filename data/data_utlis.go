@@ -1,6 +1,9 @@
 package data
 
-import "reflect"
+import (
+	"github.com/coreos/etcd/client"
+	"reflect"
+)
 
 func getStructId(structObject reflect.Value) string {
 	idProperty := structObject.FieldByName("Id")
@@ -31,4 +34,14 @@ func mergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[stri
 		result[k] = v
 	}
 	return result
+}
+
+func toStruct(rootKey string, node client.Node, output reflect.Value, outputTemplate interface{}) {
+	dataParser := DataParser{dataDirKey: rootKey}
+	for _, node := range node.Nodes {
+		dataParser.dataNode = node
+		if !node.Dir {
+			dataParser.parseToStruct(outputTemplate, output)
+		}
+	}
 }

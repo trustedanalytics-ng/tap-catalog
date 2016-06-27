@@ -4,6 +4,7 @@ import (
 	"github.com/coreos/etcd/client"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 type DataParser struct {
@@ -43,6 +44,7 @@ func (d *DataParser) mapToEtcdKey(field reflect.StructField) string {
 func setValue(field reflect.Value, value string) error {
 	if field.CanSet() {
 		if field.Kind() == reflect.String {
+			value = strings.Replace(value, "\"", "", -1)
 			field.SetString(value)
 		}
 		if field.Kind() == reflect.Bool {
@@ -72,6 +74,9 @@ func (t *DataMapper) FromKeyValue(dataType string, rootKey string, dataNode clie
 	case Services:
 		service_parser := ServiceParser{}
 		return service_parser.ToService(rootKey, dataNode)
+	case Instances:
+		instance_parser := InstanceParser{}
+		return instance_parser.ToInstance(rootKey, dataNode)
 	}
 
 	//TODO add errror

@@ -6,4 +6,6 @@ const (
 	Applications = "/Applications"
 	Services     = "/Services"
 	Plans        = "/Plans"
+	Bindings     = "/Bindings"
+	Metadata     = "/Metadata"
 )
