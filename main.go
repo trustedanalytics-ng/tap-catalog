@@ -92,10 +92,18 @@ func main() {
 	basicAuthRouter.Delete("/templates/:templateId", (*api.Context).DeleteTemplate)
 	basicAuthRouter.Put("/templates/:templateId", (*api.Context).UpdateTemplate)
 
-	port := os.Getenv("PORT")
-	log.Println("Will listen on:", "0.0.0.0:"+port)
-	err := http.ListenAndServe("0.0.0.0:"+port, r)
+	port := os.Getenv("CATALOG_PORT")
+	log.Println("Will listen on:", port)
+
+	var err error
+	if os.Getenv("CATALOG_SSL_CERT_FILE_LOCATION") != "" {
+		err = http.ListenAndServeTLS(":"+port, os.Getenv("CATALOG_SSL_CERT_FILE_LOCATION"),
+			os.Getenv("CATALOG_SSL_KEY_FILE_LOCATION"), r)
+	} else {
+		err = http.ListenAndServe(":"+port, r)
+	}
+
 	if err != nil {
-		log.Println("Couldn't serve app on port ", port, " Application will be closed now.")
+		log.Panicln("Couldn't serve app on port:", port, " Error:", err)
 	}
 }

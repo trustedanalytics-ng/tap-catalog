@@ -1,0 +1,23 @@
+{
+  "kind": "Service",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "catalog",
+    "labels": {
+      "id": "catalog"
+    }
+  },
+  "spec": {
+    "type": "NodePort",
+    "selector": {
+      "id": "catalog"
+    },
+    "ports": [
+      {
+        "port": 8083,
+        "protocol": "TCP",
+        "name":"rest"
+      }
+    ]
+  }
+}

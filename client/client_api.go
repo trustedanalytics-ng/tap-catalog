@@ -47,7 +47,7 @@ func NewTapCatalogApiWithSSLAndBasicAuth(address, username, password, certPemFil
 func (c *TapCatalogApiConnector) GetInstance(instanceId string) (models.Instance, error) {
 	result := models.Instance{}
 
-	url := fmt.Sprintf("%s/instances/%s", c.Address, instanceId)
+	url := fmt.Sprintf("%s/v1/instances/%s", c.Address, instanceId)
 	status, body, err := brokerHttp.RestGET(url, &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
 	if err != nil {
 		return result, err
@@ -72,7 +72,7 @@ func (c *TapCatalogApiConnector) UpdateInstance(instanceId string, instance mode
 		return result, err
 	}
 
-	url := fmt.Sprintf("%s/instances/%s", c.Address, instanceId)
+	url := fmt.Sprintf("%s/v1/instances/%s", c.Address, instanceId)
 	status, body, err := brokerHttp.RestPATCH(url, string(reqBody), &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
 	if err != nil {
 		return result, err
@@ -92,7 +92,7 @@ func (c *TapCatalogApiConnector) UpdateInstance(instanceId string, instance mode
 func (c *TapCatalogApiConnector) GetService(serviceId string) (models.Service, error) {
 	result := models.Service{}
 
-	url := fmt.Sprintf("%s/services/%s", c.Address, serviceId)
+	url := fmt.Sprintf("%s/v1/services/%s", c.Address, serviceId)
 	status, body, err := brokerHttp.RestGET(url, &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
 	if err != nil {
 		return result, err
@@ -117,7 +117,7 @@ func (c *TapCatalogApiConnector) UpdateService(serviceId string, instance models
 		return result, err
 	}
 
-	url := fmt.Sprintf("%s/services/%s", c.Address, serviceId)
+	url := fmt.Sprintf("%s/v1/services/%s", c.Address, serviceId)
 	status, body, err := brokerHttp.RestPATCH(url, string(reqBody), &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
 	if err != nil {
 		return result, err
@@ -142,7 +142,7 @@ func (c *TapCatalogApiConnector) UpdatePlan(serviceId, planId string, instance m
 		return result, err
 	}
 
-	url := fmt.Sprintf("%s/services/%s/plans/%s", c.Address, serviceId, planId)
+	url := fmt.Sprintf("%s/v1/services/%s/plans/%s", c.Address, serviceId, planId)
 	status, body, err := brokerHttp.RestPATCH(url, string(reqBody), &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
 	if err != nil {
 		return result, err
@@ -162,7 +162,7 @@ func (c *TapCatalogApiConnector) UpdatePlan(serviceId, planId string, instance m
 func (c *TapCatalogApiConnector) GetApplication(applicationId string) (models.Application, error) {
 	result := models.Application{}
 
-	url := fmt.Sprintf("%s/applications/%s", c.Address, applicationId)
+	url := fmt.Sprintf("%s/v1/applications/%s", c.Address, applicationId)
 	status, body, err := brokerHttp.RestGET(url, &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
 	if err != nil {
 		return result, err
@@ -187,7 +187,7 @@ func (c *TapCatalogApiConnector) UpdateApplication(applicationId string, instanc
 		return result, err
 	}
 
-	url := fmt.Sprintf("%s/applications/%s", c.Address, applicationId)
+	url := fmt.Sprintf("%s/v1/applications/%s", c.Address, applicationId)
 	status, body, err := brokerHttp.RestPATCH(url, string(reqBody), &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
 	if err != nil {
 		return result, err

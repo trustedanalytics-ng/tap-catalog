@@ -9,7 +9,24 @@ run: build
 	${GOPATH}/bin/tap-catalog
 
 run-local: build
-	PORT=8181 CATALOG_USER=admin CATALOG_PASS=admin ${GOPATH}/bin/tap-catalog
+	CATALOG_PORT=8083 CATALOG_USER=admin CATALOG_PASS=admin ${GOPATH}/bin/tap-catalog
+
+docker_build: build
+	rm -Rf application && mkdir application
+	cp -Rf $(GOBIN)/tap-catalog application/
+	docker build -t tap-catalog .
+
+push_docker: docker_builds
+	docker tag tap-catalog $(REPOSITORY_URL)/tap-catalog:latest
+	docker push $(REPOSITORY_URL)/tap-catalog:latest
+
+kubernetes_deploy:
+	kubectl create -f configmap.json
+	kubectl create -f service.json
+	kubectl create -f deployment.json
+
+etcd_deploy:
+	kubectl create -f etcd.yml
 
 deps_update: verify_gopath
 	$(GOBIN)/govendor remove +all

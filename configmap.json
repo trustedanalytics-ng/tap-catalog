@@ -1,0 +1,20 @@
+{
+  "kind": "ConfigMap",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "catalog-credentials",
+    "labels": {
+      "id": "catalog-credentials"
+    }
+  },
+  "data": {
+    "catalog-port": "8083",
+    "catalog-user": "admin",
+    "catalog-pass": "password",
+    "catalog-ssl-cert-file-location": "",
+    "catalog-ssl-key-file-location": "",
+    "catalog-ssl-ca-file-location": "",
+    "insecure-skip-verify": "true",
+    "broker-log-level": "DEBUG"
+  }
+}
