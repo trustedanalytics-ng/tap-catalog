@@ -91,6 +91,17 @@ func (c *Context) UpdateService(rw web.ResponseWriter, req *web.Request) {
 		webutils.Respond400(rw, err)
 		return
 	}
+
+	servicesKeyStore := map[string]interface{}{}
+
+	servicesKeyStore = c.mapper.ToKeyValue(data.Services, reqService)
+
+	err = c.repository.StoreData(servicesKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+
 	webutils.WriteJson(rw, reqService, http.StatusOK)
 }
 

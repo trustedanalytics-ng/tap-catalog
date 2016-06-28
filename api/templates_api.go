@@ -84,5 +84,14 @@ func (c *Context) UpdateTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
+	templateKeyStore := map[string]interface{}{}
+
+	templateKeyStore = c.mapper.ToKeyValue(data.Templates, reqTemplate)
+
+	err = c.repository.StoreData(templateKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
 	webutils.WriteJson(rw, reqTemplate, http.StatusOK)
 }
