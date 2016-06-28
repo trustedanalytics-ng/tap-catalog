@@ -10,13 +10,9 @@ type RepositoryConnector struct {
 }
 
 func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
-
 	var err error
-
 	for k, v := range keyStore {
-
 		err = t.etcdClient.Set(k, v)
-
 		//TODO push at once all values from map
 		//TODO add error handling
 

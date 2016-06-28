@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"github.com/coreos/etcd/client"
 	"reflect"
 	"strconv"
@@ -77,8 +78,10 @@ func (t *DataMapper) FromKeyValue(dataType string, rootKey string, dataNode clie
 	case Instances:
 		instance_parser := InstanceParser{}
 		return instance_parser.ToInstance(rootKey, dataNode)
+	case Applications:
+		application_parser := ApplicationParser{}
+		return application_parser.ToApplication(rootKey, dataNode)
 	}
 
-	//TODO add errror
-	return nil, nil
+	return nil, errors.New("Unrecognize dataType - " + dataType)
 }

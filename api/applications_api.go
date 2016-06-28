@@ -17,6 +17,8 @@ package api
 
 import (
 	"github.com/gocraft/web"
+	"github.com/nu7hatch/gouuid"
+	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
 	"net/http"
@@ -27,7 +29,14 @@ func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Single Application", http.StatusOK)
+	applicationId := req.PathParams["applicationId"]
+
+	result, err := c.repository.GetData(data.Applications, applicationId)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
@@ -36,6 +45,25 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 	err := webutils.ReadJson(req, &reqApplication)
 	if err != nil {
 		webutils.Respond400(rw, err)
+		return
+	}
+
+	applicationId, err := uuid.NewV4()
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	reqApplication.Id = applicationId.String()
+
+	applicationKeyStore := map[string]interface{}{}
+
+	applicationKeyStore = c.mapper.ToKeyValue(data.Applications, reqApplication)
+
+	err = c.repository.StoreData(applicationKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
 	}
 	webutils.WriteJson(rw, reqApplication, http.StatusCreated)
 }
@@ -49,6 +77,17 @@ func (c *Context) UpdateApplication(rw web.ResponseWriter, req *web.Request) {
 	if err != nil {
 		webutils.Respond400(rw, err)
 	}
+
+	applicationKeyStore := map[string]interface{}{}
+
+	applicationKeyStore = c.mapper.ToKeyValue(data.Applications, reqApplication)
+
+	err = c.repository.StoreData(applicationKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+
 	webutils.WriteJson(rw, reqApplication, http.StatusOK)
 }
 
