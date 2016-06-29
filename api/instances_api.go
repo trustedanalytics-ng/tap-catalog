@@ -74,13 +74,15 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) UpdateInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 	reqInstance := models.Instance{}
-	reqInstance.Id = instanceId
 
 	err := webutils.ReadJson(req, &reqInstance)
 	if err != nil {
 		webutils.Respond400(rw, err)
 		return
 	}
+
+	//todo check if reqInstance.Id==instanceId
+	reqInstance.Id = instanceId
 	instanceKeyStore := map[string]interface{}{}
 
 	instanceKeyStore = c.mapper.ToKeyValue(data.Instances, reqInstance)
