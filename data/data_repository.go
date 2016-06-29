@@ -10,6 +10,7 @@ type RepositoryConnector struct {
 }
 
 func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
+	////TODO for updates  add another methods with SetOptions.PrevValue options. In order to
 	var err error
 	for k, v := range keyStore {
 		err = t.etcdClient.Set(k, v)
@@ -23,6 +24,10 @@ func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
 	}
 
 	return nil
+}
+
+func (t *RepositoryConnector) DeleteData(key string) error {
+	return t.etcdClient.DeleteDir(key)
 }
 
 func (t *RepositoryConnector) GetData(dataType string, key string) (interface{}, error) {

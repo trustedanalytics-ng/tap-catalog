@@ -31,9 +31,7 @@ func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 
-	key := c.mapper.ToKey(data.Applications, applicationId)
-
-	result, err := c.repository.GetData(data.Applications, key)
+	result, err := c.repository.GetData(data.Applications, c.buildApplicationKey(applicationId))
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -94,5 +92,15 @@ func (c *Context) UpdateApplication(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Delete Application", http.StatusNoContent)
+	applicationId := req.PathParams["applicationId"]
+	err := c.repository.DeleteData(c.buildApplicationKey(applicationId))
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, "", http.StatusNoContent)
+}
+
+func (c *Context) buildApplicationKey(applicationId string) string {
+	return c.mapper.ToKey(data.Applications, applicationId)
 }

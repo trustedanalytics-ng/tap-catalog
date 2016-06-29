@@ -71,6 +71,7 @@ func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
 
 func (c *EtcdConnector) Set(key string, value interface{}) error {
 	logger.Debug("Setting value of key:", key)
+
 	valueByte, err := json.Marshal(value)
 	if err != nil {
 		logger.Error("Can't marshall etcd key value!:", err)
@@ -114,6 +115,16 @@ func (c *EtcdConnector) Update(key string, value interface{}) error {
 }
 
 func (c *EtcdConnector) Delete(key string) error {
+	options := client.DeleteOptions{Recursive: true}
+	return c.delete(key, &options)
+}
+
+func (c *EtcdConnector) DeleteDir(key string) error {
+	options := client.DeleteOptions{Recursive: true, Dir: true}
+	return c.delete(key, &options)
+}
+
+func (c *EtcdConnector) delete(key string, options *client.DeleteOptions) error {
 	logger.Debug("Deleting value of key:", key)
 	kapi, err := getKVApiV2Connector()
 	if err != nil {
@@ -121,7 +132,7 @@ func (c *EtcdConnector) Delete(key string) error {
 		return err
 	}
 
-	_, err = kapi.Delete(context.Background(), key, nil)
+	_, err = kapi.Delete(context.Background(), key, options)
 	if err != nil {
 		logger.Error("Getinng key value error:", err)
 		return err

@@ -33,9 +33,7 @@ func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
-	key := c.mapper.ToKey(data.Services, serviceId)
-
-	result, err := c.repository.GetData(data.Services, key)
+	result, err := c.repository.GetData(data.Services, c.buildServiceKey(serviceId))
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -109,5 +107,14 @@ func (c *Context) UpdateService(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
+	err := c.repository.DeleteData(c.buildServiceKey(serviceId))
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
 	webutils.WriteJson(rw, serviceId, http.StatusNoContent)
+}
+
+func (c *Context) buildServiceKey(serviceId string) string {
+	return c.mapper.ToKey(data.Services, serviceId)
 }

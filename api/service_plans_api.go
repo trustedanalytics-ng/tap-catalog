@@ -105,8 +105,17 @@ func (c *Context) UpdatePlan(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
+	err := c.repository.DeleteData(c.buildPlanKey(serviceId, planId))
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
 
-	webutils.WriteJson(rw, planId+serviceId, http.StatusNoContent)
+	webutils.WriteJson(rw, "", http.StatusNoContent)
+}
+
+func (c *Context) buildPlanKey(serviceId, planId string) string {
+	return buildHomeDir(serviceId) + "/" + planId
 }
 
 func buildHomeDir(serviceId string) string {

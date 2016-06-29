@@ -35,9 +35,7 @@ func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 
-	key := c.mapper.ToKey(data.Templates, templateId)
-
-	result, err := c.repository.GetData(data.Templates, key)
+	result, err := c.repository.GetData(data.Templates, c.buildTemplateKey(templateId))
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -71,7 +69,14 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
-	webutils.WriteJson(rw, templateId, http.StatusNoContent)
+
+	err := c.repository.DeleteData(c.buildTemplateKey(templateId))
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	webutils.WriteJson(rw, "", http.StatusNoContent)
 }
 
 func (c *Context) UpdateTemplate(rw web.ResponseWriter, req *web.Request) {
@@ -96,4 +101,8 @@ func (c *Context) UpdateTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 	webutils.WriteJson(rw, reqTemplate, http.StatusOK)
+}
+
+func (c *Context) buildTemplateKey(templateId string) string {
+	return c.mapper.ToKey(data.Templates, templateId)
 }

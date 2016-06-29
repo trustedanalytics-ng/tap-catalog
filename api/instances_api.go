@@ -32,9 +32,8 @@ func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
-	key := c.mapper.ToKey(data.Instances, instanceId)
 
-	result, err := c.repository.GetData(data.Instances, key)
+	result, err := c.repository.GetData(data.Instances, c.buildInstanceKey(instanceId))
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -95,7 +94,17 @@ func (c *Context) UpdateInstance(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Delete Instance", http.StatusNoContent)
+	instanceId := req.PathParams["instanceId"]
+	err := c.repository.DeleteData(c.buildInstanceKey(instanceId))
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, "", http.StatusNoContent)
+}
+
+func (c *Context) buildInstanceKey(instanceId string) string {
+	return c.mapper.ToKey(data.Instances, instanceId)
 }
 
 func (c *Context) AddInstanceBinding(rw web.ResponseWriter, req *web.Request) {
