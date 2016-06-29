@@ -6,7 +6,7 @@ import (
 
 type RepositoryConnector struct {
 	etcdClient etcd.EtcdConnector
-	wrapper    DataMapper
+	mapper     DataMapper
 }
 
 func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
@@ -25,13 +25,12 @@ func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
 	return nil
 }
 
-func (t *RepositoryConnector) GetData(dataType string, id string) (interface{}, error) {
-	key := t.wrapper.ToKey(dataType, id)
+func (t *RepositoryConnector) GetData(dataType string, key string) (interface{}, error) {
 	node, err := t.etcdClient.GetKeyNodes(key)
 
 	if err != nil {
 		return "", err
 	}
 
-	return t.wrapper.FromKeyValue(dataType, key, node)
+	return t.mapper.FromKeyValue(dataType, key, node)
 }

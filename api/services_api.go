@@ -33,7 +33,9 @@ func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
-	result, err := c.repository.GetData(data.Services, serviceId)
+	key := c.mapper.ToKey(data.Services, serviceId)
+
+	result, err := c.repository.GetData(data.Services, key)
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return

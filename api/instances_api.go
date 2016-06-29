@@ -32,8 +32,9 @@ func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
+	key := c.mapper.ToKey(data.Instances, instanceId)
 
-	result, err := c.repository.GetData(data.Instances, instanceId)
+	result, err := c.repository.GetData(data.Instances, key)
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return

@@ -31,7 +31,9 @@ func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 
-	result, err := c.repository.GetData(data.Applications, applicationId)
+	key := c.mapper.ToKey(data.Applications, applicationId)
+
+	result, err := c.repository.GetData(data.Applications, key)
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return

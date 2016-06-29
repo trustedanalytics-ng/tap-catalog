@@ -81,6 +81,10 @@ func (t *DataMapper) FromKeyValue(dataType string, rootKey string, dataNode clie
 	case Applications:
 		application_parser := ApplicationParser{}
 		return application_parser.ToApplication(rootKey, dataNode)
+	case Plans:
+		service_parser := ServiceParser{}
+		return service_parser.ToPlan(rootKey, dataNode)
+
 	}
 
 	return nil, errors.New("Unrecognize dataType - " + dataType)

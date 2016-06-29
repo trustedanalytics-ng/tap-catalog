@@ -21,6 +21,7 @@ import (
 	"github.com/gocraft/web"
 	"github.com/nu7hatch/gouuid"
 
+	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
 )
@@ -33,7 +34,16 @@ func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
-	webutils.WriteJson(rw, serviceId+planId, http.StatusOK)
+
+	key := c.mapper.ToKey(buildHomeDir(serviceId), planId)
+
+	result, err := c.repository.GetData(data.Plans, key)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
@@ -45,17 +55,51 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqPlan := models.ServicePlan{}
-	webutils.ReadJson(req, &reqPlan)
+	err = webutils.ReadJson(req, &reqPlan)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+
 	reqPlan.Id = planId.String()
 
-	webutils.WriteJson(rw, planId.String()+serviceId, http.StatusCreated)
+	planKeyStore := map[string]interface{}{}
+
+	planKeyStore = c.mapper.ToKeyValue(buildHomeDir(serviceId), reqPlan)
+
+	err = c.repository.StoreData(planKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	webutils.WriteJson(rw, reqPlan, http.StatusCreated)
 }
 
 func (c *Context) UpdatePlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
 
-	webutils.WriteJson(rw, planId+serviceId, http.StatusOK)
+	reqPlan := models.ServicePlan{}
+	err := webutils.ReadJson(req, &reqPlan)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	reqPlan.Id = planId
+
+	planKeyStore := map[string]interface{}{}
+
+	planKeyStore = c.mapper.ToKeyValue(buildHomeDir(serviceId), reqPlan)
+
+	err = c.repository.StoreData(planKeyStore)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	webutils.WriteJson(rw, reqPlan, http.StatusOK)
 }
 
 func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
@@ -63,4 +107,8 @@ func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
 	planId := req.PathParams["planId"]
 
 	webutils.WriteJson(rw, planId+serviceId, http.StatusNoContent)
+}
+
+func buildHomeDir(serviceId string) string {
+	return data.Services + "/" + serviceId + data.Plans
 }

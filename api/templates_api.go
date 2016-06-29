@@ -35,7 +35,9 @@ func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 
-	result, err := c.repository.GetData(data.Templates, templateId)
+	key := c.mapper.ToKey(data.Templates, templateId)
+
+	result, err := c.repository.GetData(data.Templates, key)
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return

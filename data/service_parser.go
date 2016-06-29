@@ -23,8 +23,10 @@ func (t *ServiceParser) ToService(rootKey string, dataNode client.Node) (models.
 			dataParser.parseToStruct(models.Service{}, reflectResultValues)
 		} else {
 			for _, planNode := range node.Nodes {
-				plan := models.ServicePlan{}
-				t.ToPlan(planNode.Key, *planNode, reflect.ValueOf(&plan).Elem())
+				plan, err := t.ToPlan(planNode.Key, *planNode)
+				if err != nil {
+					return result, err
+				}
 				result.Plans = append(result.Plans, plan)
 			}
 		}
@@ -33,14 +35,18 @@ func (t *ServiceParser) ToService(rootKey string, dataNode client.Node) (models.
 	return result, nil
 }
 
-func (t *ServiceParser) ToPlan(rootKey string, node client.Node, output reflect.Value) {
+func (t *ServiceParser) ToPlan(rootKey string, node client.Node) (models.ServicePlan, error) {
+	result := models.ServicePlan{}
+	reflectResultValues := reflect.ValueOf(&result).Elem()
 	dataParser := DataParser{dataDirKey: rootKey}
 	for _, node := range node.Nodes {
 		dataParser.dataNode = node
 		if !node.Dir {
-			dataParser.parseToStruct(models.ServicePlan{}, output)
+			dataParser.parseToStruct(models.ServicePlan{}, reflectResultValues)
 		} else {
 			//TODO add audittrail and cost parsing
 		}
 	}
+
+	return result, nil
 }
