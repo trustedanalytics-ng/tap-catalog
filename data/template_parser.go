@@ -21,8 +21,7 @@ func (t *TemplateParser) ToTemplate(rootKey string, dataNode client.Node) (model
 			logger.Debug("Template Id - ", result.Id)
 			logger.Debug("Templaet State - ", result.State)
 		} else {
-			//TODO add Audittrail
-			//return result, errors.New("Unexpected key found in template Node")
+			//TODO DPNG-8765 add Audittrail
 		}
 	}
 

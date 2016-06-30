@@ -22,7 +22,7 @@ func (t *ApplicationParser) ToApplication(rootKey string, dataNode client.Node) 
 		if !node.Dir {
 			dataParser.parseToStruct(models.Application{}, reflectResultValues)
 		} else {
-			//TODO add AuditTrail parser
+			//TODO DPNG-8765 add AuditTrail parser
 		}
 	}
 

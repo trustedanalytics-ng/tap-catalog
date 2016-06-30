@@ -18,8 +18,8 @@ func (t *InstanceParser) ToInstance(rootKey string, dataNode client.Node) (model
 	dataParser := DataParser{dataDirKey: rootKey}
 
 	for _, node := range dataNode.Nodes {
-		logger.Debug("Service Key: ", node.Key)
-		logger.Debug("Service Value: ", node.Value)
+		logger.Debug("Instance Key: ", node.Key)
+		logger.Debug("Instance Value: ", node.Value)
 		dataParser.dataNode = node
 		if !node.Dir {
 			dataParser.parseToStruct(models.Instance{}, reflectResultValues)

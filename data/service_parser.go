@@ -44,7 +44,7 @@ func (t *ServiceParser) ToPlan(rootKey string, node client.Node) (models.Service
 		if !node.Dir {
 			dataParser.parseToStruct(models.ServicePlan{}, reflectResultValues)
 		} else {
-			//TODO add audittrail and cost parsing
+			//TODO DPNG-8533 DPNG-8765 add audittrail and cost parsing
 		}
 	}
 

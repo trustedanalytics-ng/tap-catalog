@@ -21,5 +21,5 @@ type ServicePlan struct {
 
 type ServicePlanCost struct {
 	Currency string `json:"currency"`
-	//TODO define other attributes of cost
+	//TODO DPNG-8533 define other attributes of cost
 }

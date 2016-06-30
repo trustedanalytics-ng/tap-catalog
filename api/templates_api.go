@@ -68,7 +68,6 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	//TODO return data saved in etcd not from request
 	webutils.WriteJson(rw, reqTemplate, http.StatusCreated)
 }
 
