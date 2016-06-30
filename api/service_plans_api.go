@@ -28,7 +28,12 @@ import (
 
 func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	webutils.WriteJson(rw, serviceId, http.StatusOK)
+	result, err := c.repository.GetListOfData(data.Plans, buildHomeDir(serviceId))
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {

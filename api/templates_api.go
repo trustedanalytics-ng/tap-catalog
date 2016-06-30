@@ -29,7 +29,12 @@ import (
 var logger = logger_wrapper.InitLogger("templates_api")
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "List Templates", http.StatusOK)
+	result, err := c.repository.GetListOfData(data.Templates, data.Templates)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {

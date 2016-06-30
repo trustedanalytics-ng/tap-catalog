@@ -27,7 +27,12 @@ import (
 )
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "List Instances", http.StatusOK)
+	result, err := c.repository.GetListOfData(data.Instances, data.Instances)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {

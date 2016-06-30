@@ -27,7 +27,12 @@ import (
 )
 
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "List Services", http.StatusOK)
+	result, err := c.repository.GetListOfData(data.Services, data.Services)
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
