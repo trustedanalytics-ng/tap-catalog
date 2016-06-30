@@ -16,17 +16,14 @@ docker_build: build
 	cp -Rf $(GOBIN)/tap-catalog application/
 	docker build -t tap-catalog .
 
-push_docker: docker_builds
+push_docker: docker_build
 	docker tag tap-catalog $(REPOSITORY_URL)/tap-catalog:latest
 	docker push $(REPOSITORY_URL)/tap-catalog:latest
 
 kubernetes_deploy:
-	kubectl create -f configmap.json
-	kubectl create -f service.json
-	kubectl create -f deployment.json
-
-etcd_deploy:
-	kubectl create -f etcd.yml
+	kubectl create -f configmap.yaml
+	kubectl create -f service.yaml
+	kubectl create -f deployment.yaml
 
 deps_update: verify_gopath
 	$(GOBIN)/govendor remove +all
