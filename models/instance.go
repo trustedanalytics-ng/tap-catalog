@@ -1,5 +1,12 @@
 package models
 
+import "reflect"
+
+func init() {
+	RegisterType("Metadata", reflect.TypeOf(&InstanceMetadata{}))
+	RegisterType("Bindings", reflect.TypeOf(&InstanceBindings{}))
+}
+
 type Instance struct {
 	Id         string             `json:"id"`
 	Type       InstanceType       `json:"type"`
@@ -7,7 +14,7 @@ type Instance struct {
 	Bindings   []InstanceBindings `json:"bindings"`
 	Metadata   []InstanceMetadata `json:"meta"`
 	State      InstanceState      `json:"state"`
-	AuditTrail AuditTrail
+	AuditTrail AuditTrail         `json:"-"`
 }
 
 type InstanceState string

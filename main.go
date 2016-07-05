@@ -58,7 +58,7 @@ func main() {
 	basicAuthRouter.Get("/services/:serviceId/instances", (*api.Context).Instances)
 	basicAuthRouter.Get("/services/:serviceId/instances/:instanceId", (*api.Context).GetInstance)
 	basicAuthRouter.Post("/services/:serviceId/instances", (*api.Context).AddInstance)
-	basicAuthRouter.Patch("/services/:serviceId/instances/:instanceId", (*api.Context).UpdateInstance)
+	basicAuthRouter.Patch("/services/:serviceId/instances/:instanceId", (*api.Context).PatchInstance)
 	basicAuthRouter.Put("/services/:serviceId/instances/:instanceId", (*api.Context).UpdateInstance)
 	basicAuthRouter.Delete("/services/:serviceId/instances/:instanceId", (*api.Context).DeleteInstance)
 

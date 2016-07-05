@@ -9,7 +9,7 @@ run: build
 	${GOPATH}/bin/tap-catalog
 
 run-local: build
-	CATALOG_PORT=8083 CATALOG_USER=admin CATALOG_PASS=admin ${GOPATH}/bin/tap-catalog
+	CATALOG_PORT=8083 CATALOG_USER=admin CATALOG_PASS=password ${GOPATH}/bin/tap-catalog
 
 docker_build: build
 	rm -Rf application && mkdir application

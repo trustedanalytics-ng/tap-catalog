@@ -1,8 +1,9 @@
 package data
 
 import (
-	"github.com/coreos/etcd/client"
 	"reflect"
+
+	"github.com/coreos/etcd/client"
 )
 
 func getStructId(structObject reflect.Value) string {
@@ -13,6 +14,14 @@ func getStructId(structObject reflect.Value) string {
 	return idProperty.Interface().(string)
 }
 
+func unwrapPointer(structObject reflect.Value) reflect.Value {
+	if structObject.Kind() == reflect.Ptr {
+		return unwrapPointer(reflect.Indirect(structObject))
+	} else {
+		return structObject
+	}
+}
+
 func isCollection(property reflect.Value) bool {
 	return property.Kind() == reflect.Array || property.Kind() == reflect.Slice
 }
@@ -21,11 +30,11 @@ func (t *DataMapper) isObject(property reflect.Value) bool {
 	return property.Kind() == reflect.Slice || isCollection(property)
 }
 
-func buildEtcdKey(dirKey string, field reflect.StructField, id interface{}) string {
-	return dirKey + "/" + id.(string) + "/" + field.Name
+func buildEtcdKey(dirKey string, fieldName, id string) string {
+	return dirKey + "/" + id + "/" + fieldName
 }
 
-func mergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[string]interface{} {
+func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[string]interface{} {
 	result := map[string]interface{}{}
 	for k, v := range map1 {
 		result[k] = v

@@ -21,9 +21,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 
 	"github.com/gocraft/web"
-	"net/http"
+
+	"github.com/trustedanalytics/tap-catalog/models"
 )
 
 type TapJWTToken struct {
@@ -89,4 +91,15 @@ func Respond500(rw web.ResponseWriter, err error) {
 func Respond404(rw web.ResponseWriter, err error) {
 	rw.WriteHeader(http.StatusNotFound)
 	fmt.Fprintf(rw, "%s", err.Error())
+}
+
+func ReadPatch(req *web.Request) ([]models.Patch, error) {
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	patches := []models.Patch{}
+	err = json.Unmarshal(body, &patches)
+	return patches, err
 }

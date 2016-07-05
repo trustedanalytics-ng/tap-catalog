@@ -19,8 +19,8 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-
 	"github.com/nu7hatch/gouuid"
+
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
@@ -98,6 +98,45 @@ func (c *Context) UpdateInstance(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 	webutils.WriteJson(rw, reqInstance, http.StatusOK)
+}
+
+func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
+	instanceId := req.PathParams["instanceId"]
+	instance, err := c.repository.GetData(data.Instances, c.buildInstanceKey(instanceId))
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	patches, err := webutils.ReadPatch(req)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	instanceKeyStore, err := c.mapper.ToKeyValueByPatches(c.buildInstanceKey(instanceId), models.Instance{}, patches)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	err = c.repository.StoreData(instanceKeyStore)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	instance, err = c.repository.GetData(data.Instances, c.buildInstanceKey(instanceId))
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, instance, http.StatusOK)
 }
 
 func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
