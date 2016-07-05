@@ -19,8 +19,8 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-
 	"github.com/nu7hatch/gouuid"
+
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
@@ -86,28 +86,43 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, reqService, http.StatusCreated)
 }
 
-func (c *Context) UpdateService(rw web.ResponseWriter, req *web.Request) {
+func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	reqService := models.Service{}
-	reqService.Id = serviceId
-
-	err := webutils.ReadJson(req, &reqService)
+	service, err := c.repository.GetData(data.Services, c.buildServiceKey(serviceId))
 	if err != nil {
-		webutils.Respond400(rw, err)
-		return
-	}
-
-	servicesKeyStore := map[string]interface{}{}
-
-	servicesKeyStore = c.mapper.ToKeyValue(data.Services, reqService)
-
-	err = c.repository.StoreData(servicesKeyStore)
-	if err != nil {
+		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, reqService, http.StatusOK)
+	patches, err := webutils.ReadPatch(req)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildServiceKey(serviceId), models.Service{}, patches)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	err = c.repository.ApplyPatchedValues(patchedValues)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	service, err = c.repository.GetData(data.Services, c.buildServiceKey(serviceId))
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, service, http.StatusOK)
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {

@@ -76,30 +76,6 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, reqInstance, http.StatusCreated)
 }
 
-func (c *Context) UpdateInstance(rw web.ResponseWriter, req *web.Request) {
-	instanceId := req.PathParams["instanceId"]
-	reqInstance := models.Instance{}
-
-	err := webutils.ReadJson(req, &reqInstance)
-	if err != nil {
-		webutils.Respond400(rw, err)
-		return
-	}
-
-	//todo check if reqInstance.Id==instanceId
-	reqInstance.Id = instanceId
-	instanceKeyStore := map[string]interface{}{}
-
-	instanceKeyStore = c.mapper.ToKeyValue(data.Instances, reqInstance)
-
-	err = c.repository.StoreData(instanceKeyStore)
-	if err != nil {
-		webutils.Respond500(rw, err)
-		return
-	}
-	webutils.WriteJson(rw, reqInstance, http.StatusOK)
-}
-
 func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 	instance, err := c.repository.GetData(data.Instances, c.buildInstanceKey(instanceId))
@@ -116,14 +92,14 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	instanceKeyStore, err := c.mapper.ToKeyValueByPatches(c.buildInstanceKey(instanceId), models.Instance{}, patches)
+	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildInstanceKey(instanceId), models.Instance{}, patches)
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
 
-	err = c.repository.StoreData(instanceKeyStore)
+	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

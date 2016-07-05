@@ -16,12 +16,14 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/gocraft/web"
 	"github.com/nu7hatch/gouuid"
+
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-catalog/webutils"
-	"net/http"
 )
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
@@ -73,27 +75,43 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, reqApplication, http.StatusCreated)
 }
 
-func (c *Context) UpdateApplication(rw web.ResponseWriter, req *web.Request) {
+func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
-	reqApplication := models.Application{}
-	reqApplication.Id = applicationId
-
-	err := webutils.ReadJson(req, &reqApplication)
+	application, err := c.repository.GetData(data.Applications, c.buildApplicationKey(applicationId))
 	if err != nil {
-		webutils.Respond400(rw, err)
-	}
-
-	applicationKeyStore := map[string]interface{}{}
-
-	applicationKeyStore = c.mapper.ToKeyValue(data.Applications, reqApplication)
-
-	err = c.repository.StoreData(applicationKeyStore)
-	if err != nil {
+		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, reqApplication, http.StatusOK)
+	patches, err := webutils.ReadPatch(req)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildApplicationKey(applicationId), models.Application{}, patches)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	err = c.repository.ApplyPatchedValues(patchedValues)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	application, err = c.repository.GetData(data.Applications, c.buildApplicationKey(applicationId))
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, application, http.StatusOK)
 }
 
 func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {

@@ -83,28 +83,43 @@ func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, "", http.StatusNoContent)
 }
 
-func (c *Context) UpdateTemplate(rw web.ResponseWriter, req *web.Request) {
-	reqTemplate := models.Template{}
+func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
-
-	reqTemplate.Id = templateId
-
-	err := webutils.ReadJson(req, &reqTemplate)
+	template, err := c.repository.GetData(data.Templates, c.buildTemplateKey(templateId))
 	if err != nil {
-		webutils.Respond400(rw, err)
-		return
-	}
-
-	templateKeyStore := map[string]interface{}{}
-
-	templateKeyStore = c.mapper.ToKeyValue(data.Templates, reqTemplate)
-
-	err = c.repository.StoreData(templateKeyStore)
-	if err != nil {
+		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, reqTemplate, http.StatusOK)
+
+	patches, err := webutils.ReadPatch(req)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildTemplateKey(templateId), models.Template{}, patches)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	err = c.repository.ApplyPatchedValues(patchedValues)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	template, err = c.repository.GetData(data.Templates, c.buildTemplateKey(templateId))
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, template, http.StatusOK)
 }
 
 func (c *Context) buildTemplateKey(templateId string) string {

@@ -10,20 +10,52 @@ type RepositoryConnector struct {
 }
 
 func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
-	////TODO for updates  add another methods with SetOptions.PrevValue options. In order to
 	var err error
 	for k, v := range keyStore {
-		err = t.etcdClient.Set(k, v)
+		err = t.etcdClient.Set(k, v, 0)
 		//TODO push at once all values from map
 		//TODO add transactions
 		//TODO add error handling
 
 	}
+	return err
+}
 
+func (t *RepositoryConnector) UpdateData(keyStore map[string]interface{}) error {
+	var err error
+	for k, v := range keyStore {
+		node, err := t.etcdClient.GetKeyNodes(k)
+		if err != nil {
+			logger.Error("UpdateData in etcd error! Can't get key: ", k, err)
+			return err
+		}
+
+		err = t.etcdClient.Set(k, v, node.ModifiedIndex)
+		if err != nil {
+			logger.Error("UpdateData in etcd error! key: ", k, err)
+			return err
+		}
+	}
+	return err
+}
+
+func (t *RepositoryConnector) ApplyPatchedValues(patchedKeyValues PatchedKeyValues) error {
+	err := t.StoreData(patchedKeyValues.Add)
 	if err != nil {
 		return err
 	}
 
+	err = t.UpdateData(patchedKeyValues.Update)
+	if err != nil {
+		return err
+	}
+
+	for k, _ := range patchedKeyValues.Delete {
+		err = t.DeleteData(k)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

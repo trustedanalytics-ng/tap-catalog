@@ -69,7 +69,7 @@ func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
 	return *resp.Node, nil
 }
 
-func (c *EtcdConnector) Set(key string, value interface{}) error {
+func (c *EtcdConnector) Set(key string, value interface{}, prevIndex uint64) error {
 	logger.Debug("Setting value of key:", key)
 
 	valueByte, err := json.Marshal(value)
@@ -84,7 +84,7 @@ func (c *EtcdConnector) Set(key string, value interface{}) error {
 		return err
 	}
 
-	_, err = kapi.Set(context.Background(), key, string(valueByte), nil)
+	_, err = kapi.Set(context.Background(), key, string(valueByte), &client.SetOptions{PrevIndex: prevIndex})
 	if err != nil {
 		log.Println("Setting key value error", err)
 		return err
@@ -114,8 +114,8 @@ func (c *EtcdConnector) Update(key string, value interface{}) error {
 	return nil
 }
 
-func (c *EtcdConnector) Delete(key string) error {
-	options := client.DeleteOptions{Recursive: true}
+func (c *EtcdConnector) Delete(key string, prevIndex uint64) error {
+	options := client.DeleteOptions{Recursive: true, PrevIndex: prevIndex}
 	return c.delete(key, &options)
 }
 

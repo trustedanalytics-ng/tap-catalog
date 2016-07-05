@@ -11,8 +11,16 @@ func RegisterType(name string, t reflect.Type) {
 	Registry[name] = t
 }
 
+type PatchOperation string
+
+const (
+	OperationAdd    PatchOperation = "Add"
+	OperationUpdate PatchOperation = "Update"
+	OperationDelete PatchOperation = "Delete"
+)
+
 type Patch struct {
-	Operation string          `json:"op"`
+	Operation PatchOperation  `json:"op"`
 	Field     string          `json:"field"`
 	Value     json.RawMessage `json:"value"`
 }

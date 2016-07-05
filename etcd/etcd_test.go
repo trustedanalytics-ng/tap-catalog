@@ -11,7 +11,7 @@ func TestEtcdKVStore(t *testing.T) {
 	client := EtcdConnector{}
 	Convey("Test EtcdKVStore", t, func() {
 		Convey("Should update properly", func() {
-			err := client.Set("test", "testValue")
+			err := client.Set("test", "testValue", 0)
 			So(err, ShouldBeNil)
 		})
 
@@ -29,7 +29,7 @@ func TestEtcdKVStore(t *testing.T) {
 		})
 
 		Convey("Should delete KV properly", func() {
-			err := client.Delete("test")
+			err := client.Delete("test", 0)
 			So(err, ShouldBeNil)
 		})
 	})

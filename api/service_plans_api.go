@@ -81,30 +81,45 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, reqPlan, http.StatusCreated)
 }
 
-func (c *Context) UpdatePlan(rw web.ResponseWriter, req *web.Request) {
+func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
 
-	reqPlan := models.ServicePlan{}
-	err := webutils.ReadJson(req, &reqPlan)
+	plan, err := c.repository.GetData(data.Plans, c.buildPlanKey(serviceId, planId))
 	if err != nil {
+		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
 
-	reqPlan.Id = planId
-
-	planKeyStore := map[string]interface{}{}
-
-	planKeyStore = c.mapper.ToKeyValue(buildHomeDir(serviceId), reqPlan)
-
-	err = c.repository.StoreData(planKeyStore)
+	patches, err := webutils.ReadPatch(req)
 	if err != nil {
+		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, reqPlan, http.StatusOK)
+	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildPlanKey(serviceId, planId), models.ServicePlan{}, patches)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	err = c.repository.ApplyPatchedValues(patchedValues)
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+
+	plan, err = c.repository.GetData(data.Plans, c.buildPlanKey(serviceId, planId))
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, plan, http.StatusOK)
 }
 
 func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {

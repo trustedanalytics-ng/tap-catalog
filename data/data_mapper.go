@@ -22,20 +22,29 @@ func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}) map[stri
 	if isCollection(structInputValues) {
 		for i := 0; i < structInputValues.Len(); i++ {
 			ele := structInputValues.Index(i)
-			objectAsMap := t.structToMap(dirKey, ele)
+			objectAsMap, _ := t.structToMap(dirKey, ele)
 			result = MergeMap(result, objectAsMap)
 		}
 	} else {
-		structAsMap := t.structToMap(dirKey, structInputValues)
+		structAsMap, _ := t.structToMap(dirKey, structInputValues)
 		result = MergeMap(result, structAsMap)
 	}
 	return result
 }
 
-func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct interface{}, patches []models.Patch) (map[string]interface{}, error) {
-	result := map[string]interface{}{}
+type PatchedKeyValues struct {
+	Add    map[string]interface{}
+	Update map[string]interface{}
+	Delete map[string]interface{}
+}
+
+func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct interface{}, patches []models.Patch) (PatchedKeyValues, error) {
+	result := PatchedKeyValues{
+		Delete: make(map[string]interface{}),
+	}
 
 	for _, patch := range patches {
+		singlePatchmap := map[string]interface{}{}
 		originalField := reflect.ValueOf(inputStruct).FieldByName(patch.Field)
 		if originalField.IsValid() {
 			newValue, err := UnmarshalJSON(patch.Value, patch.Field, originalField.Type())
@@ -43,14 +52,25 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 				return result, err
 			}
 
+			var objectAsMap map[string]interface{}
+			structId := ""
 			receivedElement := reflect.ValueOf(newValue).Elem()
-			//todo check operation type!
+
 			if t.isObject(originalField) {
-				objectAsMap := t.structToMap(mainStructDirKey+"/"+patch.Field, receivedElement)
-				result = MergeMap(result, objectAsMap)
+				objectAsMap, structId = t.structToMap(mainStructDirKey+"/"+patch.Field, receivedElement)
 			} else {
-				objectAsMap := t.SingleFieldToMap(mainStructDirKey+"/"+patch.Field, receivedElement)
-				result = MergeMap(result, objectAsMap)
+				objectAsMap = t.SingleFieldToMap(mainStructDirKey+"/"+patch.Field, receivedElement)
+			}
+			singlePatchmap = MergeMap(singlePatchmap, objectAsMap)
+
+			if patch.Operation == models.OperationAdd {
+				result.Add = MergeMap(result.Add, singlePatchmap)
+			} else if patch.Operation == models.OperationUpdate {
+				result.Update = MergeMap(result.Update, singlePatchmap)
+			} else if patch.Operation == models.OperationDelete {
+				result.Delete[mainStructDirKey+"/"+patch.Field+"/"+structId] = nil
+			} else {
+				return result, errors.New("Patch operation type unknown: " + string(patch.Operation))
 			}
 		} else {
 			return result, errors.New("Original field not found: " + patch.Field)
@@ -75,7 +95,7 @@ func (t *DataMapper) ToKey(prefix string, key string) string {
 	return prefix + "/" + key
 }
 
-func (t *DataMapper) structToMap(dirKey string, structObject reflect.Value) map[string]interface{} {
+func (t *DataMapper) structToMap(dirKey string, structObject reflect.Value) (map[string]interface{}, string) {
 	result := map[string]interface{}{}
 	structObject = unwrapPointer(structObject)
 	structId := getStructId(structObject)
@@ -85,7 +105,7 @@ func (t *DataMapper) structToMap(dirKey string, structObject reflect.Value) map[
 		result = MergeMap(result, objectAsMap)
 	}
 
-	return result
+	return result, structId
 }
 
 func (t *DataMapper) SingleFieldToMap(key string, fieldValue reflect.Value) map[string]interface{} {

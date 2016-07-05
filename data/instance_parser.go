@@ -27,8 +27,8 @@ func (t *InstanceParser) ToInstance(rootKey string, dataNode client.Node) (model
 			dataParser.parseToStruct(models.Instance{}, reflectResultValues)
 		} else {
 			for _, childNode := range node.Nodes {
-				logger.Debug("Service childNode Key: ", childNode.Key)
-				logger.Debug("Service childNode Value: ", childNode.Value)
+				logger.Debug("Instance childNode Key: ", childNode.Key)
+				logger.Debug("Instance childNode Value: ", childNode.Value)
 				if isBinding(*childNode) {
 					binding := models.InstanceBindings{}
 					toStruct(childNode.Key, *childNode, reflect.ValueOf(&binding).Elem(), models.InstanceBindings{})
@@ -44,7 +44,6 @@ func (t *InstanceParser) ToInstance(rootKey string, dataNode client.Node) (model
 			}
 		}
 	}
-
 	return result, nil
 }
 
