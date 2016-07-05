@@ -19,6 +19,8 @@ type TapCatalogApi interface {
 	UpdatePlan(serviceId, planId string, patches []models.Patch) (models.ServicePlan, error)
 	GetApplication(applicationId string) (models.Application, error)
 	UpdateApplication(applicationId string, patches []models.Patch) (models.Application, error)
+	AddTemplate(template models.Template) (models.Template, error)
+	AddService(service models.Service) (models.Service, error)
 }
 
 type TapCatalogApiConnector struct {
@@ -200,6 +202,56 @@ func (c *TapCatalogApiConnector) UpdateApplication(applicationId string, patches
 
 	if status != http.StatusOK {
 		return result, errors.New("Bad response status: " + strconv.Itoa(status) + ". Body: " + string(body))
+	}
+	return result, nil
+}
+
+func (c *TapCatalogApiConnector) AddTemplate(template models.Template) (models.Template, error) {
+
+	result := models.Template{}
+
+	url := fmt.Sprintf("%s/v1/templates", c.Address)
+	b, err := json.Marshal(&template)
+	if err != nil {
+		return result, err
+	}
+	status, body, err := brokerHttp.RestPOST(url, string(b), &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
+	if err != nil {
+		return result, err
+	}
+
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return result, err
+	}
+
+	if status != http.StatusCreated {
+		return result, errors.New("Bad response status: " + strconv.Itoa(status))
+	}
+	return result, nil
+}
+
+func (c *TapCatalogApiConnector) AddService(service models.Service) (models.Service, error) {
+
+	result := models.Service{}
+
+	url := fmt.Sprintf("%s/v1/services", c.Address)
+	b, err := json.Marshal(&service)
+	if err != nil {
+		return result, err
+	}
+	status, body, err := brokerHttp.RestPOST(url, string(b), &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
+	if err != nil {
+		return result, err
+	}
+
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return result, err
+	}
+
+	if status != http.StatusCreated {
+		return result, errors.New("Bad response status: " + strconv.Itoa(status))
 	}
 	return result, nil
 }
