@@ -13,12 +13,12 @@ import (
 
 type TapCatalogApi interface {
 	GetInstance(instanceId string) (models.Instance, error)
-	UpdateInstance(instanceId string, instance models.Instance) (models.Instance, error)
+	UpdateInstance(instanceId string, patches []models.Patch) (models.Instance, error)
 	GetService(serviceId string) (models.Service, error)
-	UpdateService(serviceId string, instance models.Service) (models.Service, error)
-	UpdatePlan(serviceId, planId string, instance models.ServicePlan) (models.ServicePlan, error)
+	UpdateService(serviceId string, patches []models.Patch) (models.Service, error)
+	UpdatePlan(serviceId, planId string, patches []models.Patch) (models.ServicePlan, error)
 	GetApplication(applicationId string) (models.Application, error)
-	UpdateApplication(applicationId string, instance models.Application) (models.Application, error)
+	UpdateApplication(applicationId string, patches []models.Patch) (models.Application, error)
 }
 
 type TapCatalogApiConnector struct {
@@ -64,10 +64,10 @@ func (c *TapCatalogApiConnector) GetInstance(instanceId string) (models.Instance
 	return result, nil
 }
 
-func (c *TapCatalogApiConnector) UpdateInstance(instanceId string, instance models.Instance) (models.Instance, error) {
+func (c *TapCatalogApiConnector) UpdateInstance(instanceId string, patches []models.Patch) (models.Instance, error) {
 	result := models.Instance{}
 
-	reqBody, err := json.Marshal(instance)
+	reqBody, err := json.Marshal(patches)
 	if err != nil {
 		return result, err
 	}
@@ -109,10 +109,10 @@ func (c *TapCatalogApiConnector) GetService(serviceId string) (models.Service, e
 	return result, nil
 }
 
-func (c *TapCatalogApiConnector) UpdateService(serviceId string, instance models.Service) (models.Service, error) {
+func (c *TapCatalogApiConnector) UpdateService(serviceId string, patches []models.Patch) (models.Service, error) {
 	result := models.Service{}
 
-	reqBody, err := json.Marshal(instance)
+	reqBody, err := json.Marshal(patches)
 	if err != nil {
 		return result, err
 	}
@@ -134,10 +134,10 @@ func (c *TapCatalogApiConnector) UpdateService(serviceId string, instance models
 	return result, nil
 }
 
-func (c *TapCatalogApiConnector) UpdatePlan(serviceId, planId string, instance models.ServicePlan) (models.ServicePlan, error) {
+func (c *TapCatalogApiConnector) UpdatePlan(serviceId, planId string, patches []models.Patch) (models.ServicePlan, error) {
 	result := models.ServicePlan{}
 
-	reqBody, err := json.Marshal(instance)
+	reqBody, err := json.Marshal(patches)
 	if err != nil {
 		return result, err
 	}
@@ -179,10 +179,10 @@ func (c *TapCatalogApiConnector) GetApplication(applicationId string) (models.Ap
 	return result, nil
 }
 
-func (c *TapCatalogApiConnector) UpdateApplication(applicationId string, instance models.Application) (models.Application, error) {
+func (c *TapCatalogApiConnector) UpdateApplication(applicationId string, patches []models.Patch) (models.Application, error) {
 	result := models.Application{}
 
-	reqBody, err := json.Marshal(instance)
+	reqBody, err := json.Marshal(patches)
 	if err != nil {
 		return result, err
 	}
