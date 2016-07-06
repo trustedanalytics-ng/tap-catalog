@@ -23,6 +23,7 @@ type TapCatalogApi interface {
 	AddService(service models.Service) (models.Service, error)
 	GetImage(imageId string) (models.Image, error)
 	UpdateImage(imageId string, patches []models.Patch) (models.Image, error)
+	GetServices() ([]models.Service, error)
 }
 
 type TapCatalogApiConnector struct {
@@ -92,6 +93,28 @@ func (c *TapCatalogApiConnector) UpdateInstance(instanceId string, patches []mod
 	}
 	return result, nil
 }
+
+
+func (c *TapCatalogApiConnector) GetServices() ([]models.Service, error) {
+	result := []models.Service{}
+
+	url := fmt.Sprintf("%s/v1/services", c.Address)
+	status, body, err := brokerHttp.RestGET(url, &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
+	if err != nil {
+		return result, err
+	}
+	if status != http.StatusOK {
+		return result, errors.New("Bad response status: " + strconv.Itoa(status) + ". Body: " + string(body))
+	}
+
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
 
 func (c *TapCatalogApiConnector) GetService(serviceId string) (models.Service, error) {
 	result := models.Service{}
