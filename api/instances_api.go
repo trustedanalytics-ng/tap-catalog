@@ -27,7 +27,7 @@ import (
 )
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Instances, data.Instances)
+	result, err := c.repository.GetListOfData(data.Instances, &models.Instance{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -38,7 +38,7 @@ func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 
-	result, err := c.repository.GetData(data.Instances, c.buildInstanceKey(instanceId))
+	result, err := c.repository.GetData(c.buildInstanceKey(instanceId), &models.Instance{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -52,33 +52,39 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 
 	instanceId, err := uuid.NewV4()
 	if err != nil {
+		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
-	err = webutils.ReadJson(req, &reqInstance)
 
+	err = webutils.ReadJson(req, &reqInstance)
 	if err != nil {
+		logger.Error(err)
 		webutils.Respond400(rw, err)
 		return
 	}
 
 	reqInstance.Id = instanceId.String()
 
-	instanceKeyStore := map[string]interface{}{}
-
-	instanceKeyStore = c.mapper.ToKeyValue(data.Instances, reqInstance)
-
-	err = c.repository.StoreData(instanceKeyStore)
+	err = c.repository.StoreData(c.mapper.ToKeyValue(data.Instances, reqInstance))
 	if err != nil {
+		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, reqInstance, http.StatusCreated)
+
+	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId.String()), &models.Instance{})
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, instance, http.StatusCreated)
 }
 
 func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
-	instance, err := c.repository.GetData(data.Instances, c.buildInstanceKey(instanceId))
+	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId), &models.Instance{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -106,7 +112,7 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	instance, err = c.repository.GetData(data.Instances, c.buildInstanceKey(instanceId))
+	instance, err = c.repository.GetData(c.buildInstanceKey(instanceId), &models.Instance{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

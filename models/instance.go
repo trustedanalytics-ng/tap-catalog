@@ -3,8 +3,8 @@ package models
 import "reflect"
 
 func init() {
-	RegisterType("Metadata", reflect.TypeOf(&InstanceMetadata{}))
-	RegisterType("Bindings", reflect.TypeOf(&InstanceBindings{}))
+	RegisterType("Metadata", reflect.TypeOf(InstanceMetadata{}))
+	RegisterType("Bindings", reflect.TypeOf(InstanceBindings{}))
 }
 
 type Instance struct {
@@ -12,9 +12,9 @@ type Instance struct {
 	Type       InstanceType       `json:"type"`
 	ClassId    string             `json:"classId"`
 	Bindings   []InstanceBindings `json:"bindings"`
-	Metadata   []InstanceMetadata `json:"meta"`
+	Metadata   []InstanceMetadata `json:"metadata"`
 	State      InstanceState      `json:"state"`
-	AuditTrail AuditTrail         `json:"-"`
+	AuditTrail AuditTrail         `json:"auditTrail"`
 }
 
 type InstanceState string

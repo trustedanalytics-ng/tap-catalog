@@ -13,10 +13,9 @@ func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
 	var err error
 	for k, v := range keyStore {
 		err = t.etcdClient.Set(k, v, 0)
-		//TODO push at once all values from map
-		//TODO add transactions
-		//TODO add error handling
-
+		if err != nil {
+			return err
+		}
 	}
 	return err
 }
@@ -63,17 +62,15 @@ func (t *RepositoryConnector) DeleteData(key string) error {
 	return t.etcdClient.DeleteDir(key)
 }
 
-func (t *RepositoryConnector) GetData(dataType string, key string) (interface{}, error) {
+func (t *RepositoryConnector) GetData(key string, model interface{}) (interface{}, error) {
 	node, err := t.etcdClient.GetKeyNodes(key)
-
 	if err != nil {
 		return "", err
 	}
-
-	return t.mapper.FromKeyValue(dataType, key, node)
+	return t.mapper.ToModelInstance(key, node, model)
 }
 
-func (t *RepositoryConnector) GetListOfData(dataType string, key string) ([]interface{}, error) {
+func (t *RepositoryConnector) GetListOfData(key string, model interface{}) ([]interface{}, error) {
 	node, err := t.etcdClient.GetKeyNodes(key)
 
 	var result []interface{}
@@ -83,12 +80,11 @@ func (t *RepositoryConnector) GetListOfData(dataType string, key string) ([]inte
 	}
 
 	for _, childNode := range node.Nodes {
-		elem, err := t.mapper.FromKeyValue(dataType, childNode.Key, *childNode)
+		elem, err := t.mapper.ToModelInstance(childNode.Key, *childNode, model)
 		if err != nil {
 			return result, err
 		}
 		result = append(result, elem)
 	}
-
 	return result, nil
 }

@@ -29,7 +29,7 @@ import (
 var logger = logger_wrapper.InitLogger("templates_api")
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Templates, data.Templates)
+	result, err := c.repository.GetListOfData(data.Templates, &models.Template{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -40,7 +40,7 @@ func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 
-	result, err := c.repository.GetData(data.Templates, c.buildTemplateKey(templateId))
+	result, err := c.repository.GetData(c.buildTemplateKey(templateId), &models.Template{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -85,7 +85,7 @@ func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
-	template, err := c.repository.GetData(data.Templates, c.buildTemplateKey(templateId))
+	template, err := c.repository.GetData(c.buildTemplateKey(templateId), &models.Template{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -99,7 +99,7 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildTemplateKey(templateId), models.Template{}, patches)
+	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildTemplateKey(templateId), &models.Template{}, patches)
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -113,7 +113,7 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	template, err = c.repository.GetData(data.Templates, c.buildTemplateKey(templateId))
+	template, err = c.repository.GetData(c.buildTemplateKey(templateId), &models.Template{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

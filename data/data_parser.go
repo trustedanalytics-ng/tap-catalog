@@ -2,10 +2,9 @@ package data
 
 import (
 	"errors"
-	"github.com/coreos/etcd/client"
 	"reflect"
-	"strconv"
-	"strings"
+
+	"github.com/coreos/etcd/client"
 )
 
 type DataParser struct {
@@ -13,79 +12,91 @@ type DataParser struct {
 	dataDirKey string
 }
 
-func (d *DataParser) parseToStruct(outputTemplate interface{}, output reflect.Value) error {
-	outputStructValues := reflect.ValueOf(outputTemplate)
+func (t *DataMapper) ToModelInstance(rootKey string, dataNode client.Node, model interface{}) (interface{}, error) {
+	reflectResultValues := reflect.ValueOf(model).Elem()
+	dataParser := DataParser{dataDirKey: rootKey}
 
-	if !isCollection(outputStructValues) {
-		for i := 0; i < outputStructValues.NumField(); i++ {
-			if d.isMatchingEtcdKey(outputStructValues.Type().Field(i)) {
-				field := output.FieldByName(outputStructValues.Type().Field(i).Name)
-				err := setValue(field, d.dataNode.Value)
-				if err != nil {
+	for _, node := range dataNode.Nodes {
+		err := dataParser.proccesNode(node, reflectResultValues)
+		if err != nil {
+			logger.Error(err)
+			return model, err
+		}
+	}
+	return model, nil
+}
+
+func (d *DataParser) proccesNode(node *client.Node, output reflect.Value) error {
+	d.dataNode = node
+	if !node.Dir {
+		logger.Debug("Instance Key: ", node.Key)
+		logger.Debug("Instance Value: ", node.Value)
+
+		err := d.parseToStruct(output)
+		if err != nil {
+			return err
+		}
+	} else {
+		fieldName, fieldType, err := d.getFieldNameAndTypeIfKeyExistInEtcd(output)
+		if err != nil {
+			logger.Error(err)
+		}
+		logger.Debug("Dir node - collection field type, fieldName:", fieldName)
+
+		sliceElement := getNewInstance(fieldName, fieldType).Elem()
+		slice := reflect.MakeSlice(reflect.SliceOf(sliceElement.Type()), len(node.Nodes), len(node.Nodes))
+
+		for i, objectNode := range node.Nodes {
+			objectId := getNodeName(objectNode.Key)
+			childDataParser := DataParser{dataDirKey: d.dataDirKey + "/" + fieldName + "/" + objectId}
+			sliceElement := slice.Index(i)
+			for _, fieldNode := range objectNode.Nodes {
+				if err := childDataParser.proccesNode(fieldNode, sliceElement); err != nil {
 					return err
 				}
 			}
 		}
-	} else {
-		//TODO add collection handling
+		output.FieldByName(fieldName).Set(slice)
 	}
-
 	return nil
 }
 
-func (d *DataParser) isMatchingEtcdKey(field reflect.StructField) bool {
-	key := d.mapToEtcdKey(field)
-	return key == d.dataNode.Key
+func (d *DataParser) parseToStruct(output reflect.Value) error {
+	fieldName, _, err := d.getFieldNameAndTypeIfKeyExistInEtcd(output)
+	if err != nil {
+		return err
+	}
+
+	field := output.FieldByName(fieldName)
+	return setValue(field, d.dataNode.Value, fieldName)
+}
+
+func (d *DataParser) getFieldNameAndTypeIfKeyExistInEtcd(structValue reflect.Value) (string, reflect.Type, error) {
+	for i := 0; i < structValue.NumField(); i++ {
+		key := d.mapToEtcdKey(structValue.Type().Field(i))
+		if key == d.dataNode.Key {
+			return structValue.Type().Field(i).Name, structValue.Type().Field(i).Type, nil
+		}
+	}
+	return "", nil, errors.New("Cant't find any matching field in ETCD for key: " + d.dataNode.Key)
 }
 
 func (d *DataParser) mapToEtcdKey(field reflect.StructField) string {
 	return d.dataDirKey + "/" + field.Name
 }
 
-func setValue(field reflect.Value, value string) error {
+func setValue(field reflect.Value, value, fieldName string) error {
 	if field.CanSet() {
-		if field.Kind() == reflect.String {
-			value = strings.Replace(value, "\"", "", -1)
-			field.SetString(value)
+		value, err := unmarshalJSON([]byte(value), fieldName, field.Type())
+		if err != nil {
+			return err
+		} else {
+			v := reflect.ValueOf(value)
+			v = unwrapPointer(v)
+			field.Set(v)
 		}
-		if field.Kind() == reflect.Bool {
-			boolValue, err := strconv.ParseBool(value)
-			if err != nil {
-				return err
-			}
-			field.SetBool(boolValue)
-		}
-		if field.Kind() == reflect.Int {
-			intValue, err := strconv.ParseInt(value, 10, 64)
-			if err != nil {
-				return err
-			}
-			field.SetInt(intValue)
-		}
+	} else {
+		logger.Error("Field can not be set! Field type:", field.Type())
 	}
 	return nil
-}
-
-func (t *DataMapper) FromKeyValue(dataType string, rootKey string, dataNode client.Node) (interface{}, error) {
-
-	switch dataType {
-	case Templates:
-		template_parser := TemplateParser{}
-		return template_parser.ToTemplate(rootKey, dataNode)
-	case Services:
-		service_parser := ServiceParser{}
-		return service_parser.ToService(rootKey, dataNode)
-	case Instances:
-		instance_parser := InstanceParser{}
-		return instance_parser.ToInstance(rootKey, dataNode)
-	case Applications:
-		application_parser := ApplicationParser{}
-		return application_parser.ToApplication(rootKey, dataNode)
-	case Plans:
-		service_parser := ServiceParser{}
-		return service_parser.ToPlan(rootKey, dataNode)
-
-	}
-
-	return nil, errors.New("Unrecognize dataType - " + dataType)
 }

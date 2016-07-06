@@ -1,7 +1,6 @@
 package data
 
 import (
-	"encoding/json"
 	"errors"
 	"reflect"
 
@@ -47,7 +46,7 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 		singlePatchmap := map[string]interface{}{}
 		originalField := reflect.ValueOf(inputStruct).FieldByName(patch.Field)
 		if originalField.IsValid() {
-			newValue, err := UnmarshalJSON(patch.Value, patch.Field, originalField.Type())
+			newValue, err := unmarshalJSON(patch.Value, patch.Field, originalField.Type())
 			if err != nil {
 				return result, err
 			}
@@ -56,7 +55,7 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 			structId := ""
 			receivedElement := reflect.ValueOf(newValue).Elem()
 
-			if t.isObject(originalField) {
+			if isObject(originalField) {
 				objectAsMap, structId = t.structToMap(mainStructDirKey+"/"+patch.Field, receivedElement)
 			} else {
 				objectAsMap = t.SingleFieldToMap(mainStructDirKey+"/"+patch.Field, receivedElement)
@@ -79,18 +78,6 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 	return result, nil
 }
 
-func UnmarshalJSON(value json.RawMessage, entityType string, structType reflect.Type) (interface{}, error) {
-	if t, ok := models.Registry[entityType]; ok {
-		v := reflect.New(t).Interface()
-		err := json.Unmarshal(value, &v)
-		return v, err
-	} else {
-		v := reflect.New(structType).Interface()
-		err := json.Unmarshal(value, &v)
-		return v, err
-	}
-}
-
 func (t *DataMapper) ToKey(prefix string, key string) string {
 	return prefix + "/" + key
 }
@@ -110,7 +97,7 @@ func (t *DataMapper) structToMap(dirKey string, structObject reflect.Value) (map
 
 func (t *DataMapper) SingleFieldToMap(key string, fieldValue reflect.Value) map[string]interface{} {
 	result := map[string]interface{}{}
-	if t.isObject(fieldValue) {
+	if isObject(fieldValue) {
 		objectAsMap := t.ToKeyValue(key, fieldValue.Interface())
 		result = MergeMap(result, objectAsMap)
 	} else {

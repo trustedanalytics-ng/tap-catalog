@@ -1,7 +1,8 @@
 package models
 
 type AuditTrail struct {
-	CreatedOn     int
-	CreatedBy     string
-	LastUpdatedOn int
+	//todo change int to time
+	CreatedOn     int    `json:"createdOn"`
+	CreatedBy     string `json:"createdBy"`
+	LastUpdatedOn int    `json:"lastUpdatedOn"`
 }
