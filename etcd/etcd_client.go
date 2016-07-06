@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 
 	"encoding/json"
-	"github.com/trustedanalytics/tap-go-common/logger"
+	"github.com/trustedanalytics/tapng-go-common/logger"
 )
 
 type EtcdKVStore interface {

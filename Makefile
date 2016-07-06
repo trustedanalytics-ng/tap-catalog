@@ -6,19 +6,19 @@ build:
 	go fmt $(APDIR)
 
 run: build
-	${GOPATH}/bin/tap-catalog
+	${GOPATH}/bin/tapng-catalog
 
 run-local: build
-	CATALOG_PORT=8083 CATALOG_USER=admin CATALOG_PASS=password ${GOPATH}/bin/tap-catalog
+	CATALOG_PORT=8083 CATALOG_USER=admin CATALOG_PASS=password ${GOPATH}/bin/tapng-catalog
 
 docker_build: build
 	rm -Rf application && mkdir application
-	cp -Rf $(GOBIN)/tap-catalog application/
-	docker build -t tap-catalog .
+	cp -Rf $(GOBIN)/tapng-catalog application/
+	docker build -t tapng-catalog .
 
 push_docker: docker_build
-	docker tag tap-catalog $(REPOSITORY_URL)/tap-catalog:latest
-	docker push $(REPOSITORY_URL)/tap-catalog:latest
+	docker tag tapng-catalog $(REPOSITORY_URL)/tapng-catalog:latest
+	docker push $(REPOSITORY_URL)/tapng-catalog:latest
 
 kubernetes_deploy:
 	kubectl create -f configmap.yaml
@@ -53,13 +53,13 @@ tests: verify_gopath
 	go test --cover $(APP_DIR_LIST)
 	
 prepare_dirs:
-	mkdir -p ./temp/src/github.com/trustedanalytics/tap-catalog
+	mkdir -p ./temp/src/github.com/trustedanalytics/tapng-catalog
 	$(eval REPOFILES=$(shell pwd)/*)
-	ln -sf $(REPOFILES) temp/src/github.com/trustedanalytics/tap-catalog
+	ln -sf $(REPOFILES) temp/src/github.com/trustedanalytics/tapng-catalog
 
 build_anywhere: prepare_dirs
 	$(eval GOPATH=$(shell cd ./temp; pwd))
-	$(eval APP_DIR_LIST=$(shell GOPATH=$(GOPATH) go list ./temp/src/github.com/trustedanalytics/tap-catalog/... | grep -v /vendor/))
+	$(eval APP_DIR_LIST=$(shell GOPATH=$(GOPATH) go list ./temp/src/github.com/trustedanalytics/tapng-catalog/... | grep -v /vendor/))
 	GOPATH=$(GOPATH) CGO_ENABLED=0 go install -tags netgo $(APP_DIR_LIST)
 	rm -Rf application && mkdir application
-	cp $(GOPATH)/bin/tap-catalog ./application/tap-catalog	
+	cp $(GOPATH)/bin/tapng-catalog ./application/tapng-catalog

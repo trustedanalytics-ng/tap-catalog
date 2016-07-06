@@ -21,9 +21,9 @@ import (
 	"github.com/gocraft/web"
 	"github.com/nu7hatch/gouuid"
 
-	"github.com/trustedanalytics/tap-catalog/data"
-	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-catalog/webutils"
+	"github.com/trustedanalytics/tapng-catalog/data"
+	"github.com/trustedanalytics/tapng-catalog/models"
+	"github.com/trustedanalytics/tapng-catalog/webutils"
 )
 
 func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {

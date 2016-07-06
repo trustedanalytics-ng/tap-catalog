@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tapng-catalog/models"
 )
 
 func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[string]interface{} {

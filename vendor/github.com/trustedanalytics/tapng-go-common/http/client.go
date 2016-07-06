@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/trustedanalytics/tap-go-common/logger"
+	"github.com/trustedanalytics/tapng-go-common/logger"
 )
 
 const MaxIdleconnetionPerHost int = 20
@@ -122,7 +122,11 @@ func GetHttpClientWithBasicAuth() (*http.Client, *http.Transport, error) {
 }
 
 func IsInsecureSkipVerifyEnabled() bool {
-	insecureSkipVerify, err := strconv.ParseBool(os.Getenv("INSECURE_SKIP_VERIFY"))
+	valueToParse := os.Getenv("INSECURE_SKIP_VERIFY")
+	if valueToParse == "" {
+		return false
+	}
+	insecureSkipVerify, err := strconv.ParseBool(valueToParse)
 	if err != nil {
 		logger.Panic("Can't read INSECURE_SKIP_VERIFY env!", err)
 	}

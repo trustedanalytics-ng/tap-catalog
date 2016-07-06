@@ -25,7 +25,7 @@ import (
 
 	"github.com/gocraft/web"
 
-	"github.com/trustedanalytics/tap-catalog/api"
+	"github.com/trustedanalytics/tapng-catalog/api"
 )
 
 type appHandler func(web.ResponseWriter, *web.Request) error

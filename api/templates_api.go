@@ -20,10 +20,10 @@ import (
 
 	"github.com/gocraft/web"
 
-	"github.com/trustedanalytics/tap-catalog/data"
-	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-catalog/webutils"
-	"github.com/trustedanalytics/tap-go-common/logger"
+	"github.com/trustedanalytics/tapng-catalog/data"
+	"github.com/trustedanalytics/tapng-catalog/models"
+	"github.com/trustedanalytics/tapng-catalog/webutils"
+	"github.com/trustedanalytics/tapng-go-common/logger"
 )
 
 var logger = logger_wrapper.InitLogger("templates_api")

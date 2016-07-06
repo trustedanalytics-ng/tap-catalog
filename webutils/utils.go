@@ -25,7 +25,7 @@ import (
 
 	"github.com/gocraft/web"
 
-	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tapng-catalog/models"
 )
 
 type TapJWTToken struct {

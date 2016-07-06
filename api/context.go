@@ -21,8 +21,8 @@ import (
 
 	"github.com/gocraft/web"
 
-	"github.com/trustedanalytics/tap-catalog/data"
-	"github.com/trustedanalytics/tap-catalog/webutils"
+	"github.com/trustedanalytics/tapng-catalog/data"
+	"github.com/trustedanalytics/tapng-catalog/webutils"
 )
 
 type Context struct {
