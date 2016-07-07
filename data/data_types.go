@@ -8,4 +8,5 @@ const (
 	Plans        = "/Plans"
 	Bindings     = "/Bindings"
 	Metadata     = "/Metadata"
+	Images       = "/Images"
 )

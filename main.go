@@ -71,6 +71,12 @@ func main() {
 	basicAuthRouter.Patch("/applications/:applicationId/instances/:instanceId", (*api.Context).PatchInstance)
 	basicAuthRouter.Delete("/applications/:applicationId/instances/:instanceId", (*api.Context).DeleteInstance)
 
+	basicAuthRouter.Get("/images", (*api.Context).Images)
+	basicAuthRouter.Get("/images/:imageId", (*api.Context).GetImage)
+	basicAuthRouter.Post("/images", (*api.Context).AddImage)
+	basicAuthRouter.Patch("/images/:imageId", (*api.Context).PatchImage)
+	basicAuthRouter.Delete("/images/:imageId", (*api.Context).DeleteImage)
+
 	basicAuthRouter.Get("/instances", (*api.Context).Instances)
 	basicAuthRouter.Get("/instances/:instanceId", (*api.Context).GetInstance)
 	basicAuthRouter.Delete("/instances/:instanceId", (*api.Context).DeleteInstance)

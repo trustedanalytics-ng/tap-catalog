@@ -74,16 +74,20 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		}
 	}
 
-	serviceKeyStore := map[string]interface{}{}
-
-	serviceKeyStore = c.mapper.ToKeyValue(data.Services, reqService)
-
+	serviceKeyStore := c.mapper.ToKeyValue(data.Services, reqService)
 	err = c.repository.StoreData(serviceKeyStore)
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, reqService, http.StatusCreated)
+
+	service, err := c.repository.GetData(c.buildInstanceKey(serviceId.String()), &models.Service{})
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, service, http.StatusCreated)
 }
 
 func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
@@ -102,7 +106,7 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildServiceKey(serviceId), &models.Service{}, patches)
+	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildServiceKey(serviceId), models.Service{}, patches)
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

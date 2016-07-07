@@ -19,6 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
+	"github.com/nu7hatch/gouuid"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
@@ -58,17 +59,27 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	templateKeyStore := map[string]interface{}{}
+	templateId, err := uuid.NewV4()
+	if err != nil {
+		webutils.Respond500(rw, err)
+		return
+	}
 
-	templateKeyStore = c.mapper.ToKeyValue(data.Templates, reqTemplate)
-
+	reqTemplate.Id = templateId.String()
+	templateKeyStore := c.mapper.ToKeyValue(data.Templates, reqTemplate)
 	err = c.repository.StoreData(templateKeyStore)
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, reqTemplate, http.StatusCreated)
+	template, err := c.repository.GetData(c.buildInstanceKey(templateId.String()), &models.Template{})
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, template, http.StatusCreated)
 }
 
 func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
@@ -99,7 +110,7 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildTemplateKey(templateId), &models.Template{}, patches)
+	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildTemplateKey(templateId), models.Template{}, patches)
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

@@ -26,8 +26,8 @@ import (
 	"github.com/trustedanalytics/tapng-catalog/webutils"
 )
 
-func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Applications, &models.Application{})
+func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
+	result, err := c.repository.GetListOfData(data.Images, &models.Image{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -35,10 +35,10 @@ func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
-func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
-	applicationId := req.PathParams["applicationId"]
+func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
+	imageId := req.PathParams["imageId"]
 
-	result, err := c.repository.GetData(c.buildApplicationKey(applicationId), &models.Application{})
+	result, err := c.repository.GetData(c.buildImagesKey(imageId), &models.Image{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -46,42 +46,41 @@ func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, result, http.StatusOK)
 }
 
-func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
-	reqApplication := models.Application{}
+func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
+	reqImage := models.Image{}
 
-	err := webutils.ReadJson(req, &reqApplication)
+	err := webutils.ReadJson(req, &reqImage)
 	if err != nil {
 		webutils.Respond400(rw, err)
 		return
 	}
 
-	applicationId, err := uuid.NewV4()
+	imageId, err := uuid.NewV4()
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
 	}
 
-	reqApplication.Id = applicationId.String()
-	applicationKeyStore := c.mapper.ToKeyValue(data.Applications, reqApplication)
-
-	err = c.repository.StoreData(applicationKeyStore)
+	reqImage.Id = imageId.String()
+	imageKeyStore := c.mapper.ToKeyValue(data.Images, reqImage)
+	err = c.repository.StoreData(imageKeyStore)
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
 	}
 
-	application, err := c.repository.GetData(c.buildInstanceKey(applicationId.String()), &models.Application{})
+	image, err := c.repository.GetData(c.buildImagesKey(imageId.String()), &models.Image{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, application, http.StatusCreated)
+	webutils.WriteJson(rw, image, http.StatusCreated)
 }
 
-func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
-	applicationId := req.PathParams["applicationId"]
-	application, err := c.repository.GetData(c.buildApplicationKey(applicationId), &models.Application{})
+func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
+	imageId := req.PathParams["imageId"]
+	image, err := c.repository.GetData(c.buildImagesKey(imageId), &models.Image{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -95,7 +94,7 @@ func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildApplicationKey(applicationId), models.Application{}, patches)
+	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildImagesKey(imageId), models.Image{}, patches)
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -109,18 +108,18 @@ func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	application, err = c.repository.GetData(c.buildApplicationKey(applicationId), &models.Application{})
+	image, err = c.repository.GetData(c.buildImagesKey(imageId), &models.Image{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, application, http.StatusOK)
+	webutils.WriteJson(rw, image, http.StatusOK)
 }
 
-func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
-	applicationId := req.PathParams["applicationId"]
-	err := c.repository.DeleteData(c.buildApplicationKey(applicationId))
+func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
+	imageId := req.PathParams["imageId"]
+	err := c.repository.DeleteData(c.buildImagesKey(imageId))
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -128,6 +127,6 @@ func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
 	webutils.WriteJson(rw, "", http.StatusNoContent)
 }
 
-func (c *Context) buildApplicationKey(applicationId string) string {
-	return c.mapper.ToKey(data.Applications, applicationId)
+func (c *Context) buildImagesKey(imageId string) string {
+	return c.mapper.ToKey(data.Images, imageId)
 }

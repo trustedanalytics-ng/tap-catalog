@@ -67,10 +67,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqPlan.Id = planId.String()
-
-	planKeyStore := map[string]interface{}{}
-
-	planKeyStore = c.mapper.ToKeyValue(buildHomeDir(serviceId), reqPlan)
+	planKeyStore := c.mapper.ToKeyValue(buildHomeDir(serviceId), reqPlan)
 
 	err = c.repository.StoreData(planKeyStore)
 	if err != nil {
@@ -78,7 +75,13 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	webutils.WriteJson(rw, reqPlan, http.StatusCreated)
+	plan, err := c.repository.GetData(c.buildInstanceKey(reqPlan.Id), &models.ServicePlan{})
+	if err != nil {
+		logger.Error(err)
+		webutils.Respond500(rw, err)
+		return
+	}
+	webutils.WriteJson(rw, plan, http.StatusCreated)
 }
 
 func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
