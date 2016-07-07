@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 
 	"github.com/coreos/etcd/client"
@@ -17,7 +18,7 @@ func (t *DataMapper) ToModelInstance(rootKey string, dataNode client.Node, model
 	dataParser := DataParser{dataDirKey: rootKey}
 
 	for _, node := range dataNode.Nodes {
-		err := dataParser.proccesNode(node, reflectResultValues)
+		err := dataParser.processNode(node, reflectResultValues)
 		if err != nil {
 			logger.Error(err)
 			return model, err
@@ -26,7 +27,7 @@ func (t *DataMapper) ToModelInstance(rootKey string, dataNode client.Node, model
 	return model, nil
 }
 
-func (d *DataParser) proccesNode(node *client.Node, output reflect.Value) error {
+func (d *DataParser) processNode(node *client.Node, output reflect.Value) error {
 	d.dataNode = node
 	if !node.Dir {
 		logger.Debug("Instance Key: ", node.Key)
@@ -37,48 +38,59 @@ func (d *DataParser) proccesNode(node *client.Node, output reflect.Value) error 
 			return err
 		}
 	} else {
-		fieldName, fieldType, err := d.getFieldNameAndTypeIfKeyExistInEtcd(output)
+		structField, err := d.getStructFieldIfKeyExistInEtcd(output)
 		if err != nil {
 			logger.Error(err)
 		}
-		logger.Debug("Dir node - collection field type, fieldName:", fieldName)
+		logger.Debug("Dir node case - collection or struct field type. FieldName:", structField.Name)
 
-		sliceElement := getNewInstance(fieldName, fieldType).Elem()
+		sliceElement := getNewInstance(structField.Name, structField.Type).Elem()
 		slice := reflect.MakeSlice(reflect.SliceOf(sliceElement.Type()), len(node.Nodes), len(node.Nodes))
 
 		for i, objectNode := range node.Nodes {
 			objectId := getNodeName(objectNode.Key)
-			childDataParser := DataParser{dataDirKey: d.dataDirKey + "/" + fieldName + "/" + objectId}
+			childDataParser := DataParser{dataDirKey: d.dataDirKey + "/" + structField.Name + "/" + objectId}
 			sliceElement := slice.Index(i)
 			for _, fieldNode := range objectNode.Nodes {
-				if err := childDataParser.proccesNode(fieldNode, sliceElement); err != nil {
+				if err := childDataParser.processNode(fieldNode, sliceElement); err != nil {
 					return err
 				}
 			}
 		}
-		output.FieldByName(fieldName).Set(slice)
+
+		if isCollection(structField.Type.Kind()) {
+			output.FieldByName(structField.Name).Set(slice)
+		} else {
+			if slice.Len() == 1 {
+				output.FieldByName(structField.Name).Set(slice.Index(0))
+			} else {
+				err = errors.New(fmt.Sprintf("PARSING ERROR! Struct field: %s with type %v was parsed to %d elements instead od 1",
+					structField.Name, structField.Type, slice.Len()))
+				logger.Error(err)
+				return err
+			}
+		}
 	}
 	return nil
 }
 
 func (d *DataParser) parseToStruct(output reflect.Value) error {
-	fieldName, _, err := d.getFieldNameAndTypeIfKeyExistInEtcd(output)
+	structField, err := d.getStructFieldIfKeyExistInEtcd(output)
 	if err != nil {
 		return err
 	}
 
-	field := output.FieldByName(fieldName)
-	return setValue(field, d.dataNode.Value, fieldName)
+	field := output.FieldByName(structField.Name)
+	return setValue(field, d.dataNode.Value, structField.Name)
 }
 
-func (d *DataParser) getFieldNameAndTypeIfKeyExistInEtcd(structValue reflect.Value) (string, reflect.Type, error) {
+func (d *DataParser) getStructFieldIfKeyExistInEtcd(structValue reflect.Value) (reflect.StructField, error) {
 	for i := 0; i < structValue.NumField(); i++ {
-		key := d.mapToEtcdKey(structValue.Type().Field(i))
-		if key == d.dataNode.Key {
-			return structValue.Type().Field(i).Name, structValue.Type().Field(i).Type, nil
+		if d.mapToEtcdKey(structValue.Type().Field(i)) == d.dataNode.Key {
+			return structValue.Type().Field(i), nil
 		}
 	}
-	return "", nil, errors.New("Cant't find any matching field in ETCD for key: " + d.dataNode.Key)
+	return reflect.StructField{}, errors.New("Cant't find any matching field in ETCD for key: " + d.dataNode.Key)
 }
 
 func (d *DataParser) mapToEtcdKey(field reflect.StructField) string {

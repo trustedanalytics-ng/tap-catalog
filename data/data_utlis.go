@@ -5,8 +5,12 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/nu7hatch/gouuid"
+
 	"github.com/trustedanalytics/tapng-catalog/models"
 )
+
+const idFieldName = "Id"
 
 func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[string]interface{} {
 	result := map[string]interface{}{}
@@ -20,11 +24,23 @@ func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[stri
 }
 
 func getStructId(structObject reflect.Value) string {
-	idProperty := structObject.FieldByName("Id")
+	structObject = unwrapPointer(structObject)
+	idProperty := structObject.FieldByName(idFieldName)
 	if idProperty == (reflect.Value{}) {
 		return ""
+	} else {
+		return idProperty.Interface().(string)
 	}
-	return idProperty.Interface().(string)
+}
+
+func getOrCreateStructId(structObject reflect.Value) string {
+	structId := getStructId(structObject)
+	if structId == "" {
+		newId, _ := uuid.NewV4()
+		return newId.String()
+	} else {
+		return structId
+	}
 }
 
 func unwrapPointer(structObject reflect.Value) reflect.Value {
@@ -35,12 +51,12 @@ func unwrapPointer(structObject reflect.Value) reflect.Value {
 	}
 }
 
-func isCollection(property reflect.Value) bool {
-	return property.Kind() == reflect.Array || property.Kind() == reflect.Slice
+func isCollection(kind reflect.Kind) bool {
+	return kind == reflect.Array || kind == reflect.Slice
 }
 
 func isObject(property reflect.Value) bool {
-	return property.Kind() == reflect.Slice || isCollection(property)
+	return isCollection(property.Kind()) || property.Kind() == reflect.Struct
 }
 
 func buildEtcdKey(dirKey string, fieldName, id string) string {
