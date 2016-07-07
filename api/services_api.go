@@ -74,7 +74,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		}
 	}
 
-	serviceKeyStore := c.mapper.ToKeyValue(data.Services, reqService)
+	serviceKeyStore := c.mapper.ToKeyValue(data.Services, reqService, true)
 	err = c.repository.StoreData(serviceKeyStore)
 	if err != nil {
 		webutils.Respond500(rw, err)

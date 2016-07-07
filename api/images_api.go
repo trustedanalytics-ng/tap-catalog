@@ -62,7 +62,7 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqImage.Id = imageId.String()
-	imageKeyStore := c.mapper.ToKeyValue(data.Images, reqImage)
+	imageKeyStore := c.mapper.ToKeyValue(data.Images, reqImage, true)
 	err = c.repository.StoreData(imageKeyStore)
 	if err != nil {
 		webutils.Respond500(rw, err)

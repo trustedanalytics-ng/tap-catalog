@@ -15,7 +15,7 @@ type DataMapper struct {
 }
 
 //todo update AuditTrial
-func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}) map[string]interface{} {
+func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}, isRootElement bool) map[string]interface{} {
 	result := map[string]interface{}{}
 
 	structInputValues := reflect.ValueOf(inputStruct)
@@ -23,11 +23,11 @@ func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}) map[stri
 	if isCollection(structInputValues.Kind()) {
 		for i := 0; i < structInputValues.Len(); i++ {
 			ele := structInputValues.Index(i)
-			objectAsMap, _ := t.structToMap(dirKey, ele)
+			objectAsMap := t.structToMap(dirKey, ele, true)
 			result = MergeMap(result, objectAsMap)
 		}
 	} else {
-		structAsMap, _ := t.structToMap(dirKey, structInputValues)
+		structAsMap := t.structToMap(dirKey, structInputValues, isRootElement)
 		result = MergeMap(result, structAsMap)
 	}
 	return result
@@ -59,34 +59,25 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 			receivedElement := reflect.ValueOf(newValue).Elem()
 			if patch.Operation == models.OperationAdd {
 				if isCollection(originalField.Kind()) {
-					objectAsMap, _ := t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement)
-					result.Add = MergeMap(result.Add, objectAsMap)
+					result.Add = t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, true)
 				} else {
 					return result, errors.New("Add operation is allowed only for Collections!")
 				}
-				//todo we should make possibility to add new object, not only collection!
 			} else if patch.Operation == models.OperationUpdate {
-				//todo check if object already exist!
-				singlePatchMap := map[string]interface{}{}
-				objectAsMap := map[string]interface{}{}
-				structId := ""
 				if isObject(originalField) {
-					//todo here we should check if object with specific ID exist
-					objectAsMap, structId = t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement)
+					result.Update = t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, isCollection(originalField.Kind()))
 				} else {
 					if patchFieldName == idFieldName {
 						return result, errors.New("ID field can not be changed!")
 					}
-					objectAsMap = t.SingleFieldToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, patchFieldName, structId)
+					result.Update = t.SingleFieldToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, patchFieldName, "")
 				}
-				singlePatchMap = MergeMap(singlePatchMap, objectAsMap)
-				result.Update = MergeMap(result.Update, singlePatchMap)
 			} else if patch.Operation == models.OperationDelete {
 				if isCollection(originalField.Kind()) {
 					if structId := getStructId(receivedElement); structId != "" {
 						result.Delete[mainStructDirKey+"/"+patchFieldName+"/"+structId] = nil
 					} else {
-						return result, errors.New("Delete operation required not empty Id field!")
+						return result, errors.New("Delete operation required NOT EMPPTY ID field!")
 					}
 				} else {
 					return result, errors.New("Delete operation is allowed only for Collections!")
@@ -105,24 +96,23 @@ func (t *DataMapper) ToKey(prefix string, key string) string {
 	return prefix + "/" + key
 }
 
-func (t *DataMapper) structToMap(dirKey string, structObject reflect.Value) (map[string]interface{}, string) {
+func (t *DataMapper) structToMap(dirKey string, structObject reflect.Value, addIdToKey bool) map[string]interface{} {
 	result := map[string]interface{}{}
 	structObject = unwrapPointer(structObject)
 	structId := getOrCreateStructId(structObject)
 
 	for i := 0; i < structObject.NumField(); i++ {
 		fieldName := structObject.Type().Field(i).Name
-		objectAsMap := t.SingleFieldToMap(buildEtcdKey(dirKey, fieldName, structId), structObject.Field(i), fieldName, structId)
+		objectAsMap := t.SingleFieldToMap(buildEtcdKey(dirKey, fieldName, structId, addIdToKey), structObject.Field(i), fieldName, structId)
 		result = MergeMap(result, objectAsMap)
 	}
-
-	return result, structId
+	return result
 }
 
 func (t *DataMapper) SingleFieldToMap(key string, fieldValue reflect.Value, fieldName, structId string) map[string]interface{} {
 	result := map[string]interface{}{}
 	if isObject(fieldValue) {
-		objectAsMap := t.ToKeyValue(key, fieldValue.Interface())
+		objectAsMap := t.ToKeyValue(key, fieldValue.Interface(), false)
 		result = MergeMap(result, objectAsMap)
 	} else {
 		if fieldName == idFieldName {

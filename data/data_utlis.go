@@ -59,8 +59,12 @@ func isObject(property reflect.Value) bool {
 	return isCollection(property.Kind()) || property.Kind() == reflect.Struct
 }
 
-func buildEtcdKey(dirKey string, fieldName, id string) string {
-	return dirKey + "/" + id + "/" + fieldName
+func buildEtcdKey(dirKey string, fieldName, id string, addIdToKey bool) string {
+	if addIdToKey {
+		return dirKey + "/" + id + "/" + fieldName
+	} else {
+		return dirKey + "/" + fieldName
+	}
 }
 
 func unmarshalJSON(value []byte, entityType string, structType reflect.Type) (interface{}, error) {

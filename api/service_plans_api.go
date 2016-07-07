@@ -67,7 +67,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqPlan.Id = planId.String()
-	planKeyStore := c.mapper.ToKeyValue(buildHomeDir(serviceId), reqPlan)
+	planKeyStore := c.mapper.ToKeyValue(buildHomeDir(serviceId), reqPlan, true)
 
 	err = c.repository.StoreData(planKeyStore)
 	if err != nil {

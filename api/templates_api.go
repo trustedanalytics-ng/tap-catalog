@@ -66,7 +66,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqTemplate.Id = templateId.String()
-	templateKeyStore := c.mapper.ToKeyValue(data.Templates, reqTemplate)
+	templateKeyStore := c.mapper.ToKeyValue(data.Templates, reqTemplate, true)
 	err = c.repository.StoreData(templateKeyStore)
 	if err != nil {
 		webutils.Respond500(rw, err)

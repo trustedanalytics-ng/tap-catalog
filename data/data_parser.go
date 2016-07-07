@@ -2,7 +2,6 @@ package data
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 
 	"github.com/coreos/etcd/client"
@@ -44,31 +43,29 @@ func (d *DataParser) processNode(node *client.Node, output reflect.Value) error 
 		}
 		logger.Debug("Dir node case - collection or struct field type. FieldName:", structField.Name)
 
-		sliceElement := getNewInstance(structField.Name, structField.Type).Elem()
-		slice := reflect.MakeSlice(reflect.SliceOf(sliceElement.Type()), len(node.Nodes), len(node.Nodes))
-
-		for i, objectNode := range node.Nodes {
-			objectId := getNodeName(objectNode.Key)
-			childDataParser := DataParser{dataDirKey: d.dataDirKey + "/" + structField.Name + "/" + objectId}
-			sliceElement := slice.Index(i)
-			for _, fieldNode := range objectNode.Nodes {
-				if err := childDataParser.processNode(fieldNode, sliceElement); err != nil {
+		if isCollection(structField.Type.Kind()) {
+			sliceElementType := getNewInstance(structField.Name, structField.Type).Elem().Type()
+			slice := reflect.MakeSlice(reflect.SliceOf(sliceElementType), len(node.Nodes), len(node.Nodes))
+			for i, objectNode := range node.Nodes {
+				objectId := getNodeName(objectNode.Key)
+				childDataParser := DataParser{dataDirKey: d.dataDirKey + "/" + structField.Name + "/" + objectId}
+				sliceElement := slice.Index(i)
+				for _, fieldNode := range objectNode.Nodes {
+					if err := childDataParser.processNode(fieldNode, sliceElement); err != nil {
+						return err
+					}
+				}
+			}
+			output.FieldByName(structField.Name).Set(slice)
+		} else {
+			childDataParser := DataParser{dataDirKey: d.dataDirKey + "/" + structField.Name}
+			structElement := getNewInstance(structField.Name, structField.Type).Elem()
+			for _, fieldNode := range node.Nodes {
+				if err := childDataParser.processNode(fieldNode, structElement); err != nil {
 					return err
 				}
 			}
-		}
-
-		if isCollection(structField.Type.Kind()) {
-			output.FieldByName(structField.Name).Set(slice)
-		} else {
-			if slice.Len() == 1 {
-				output.FieldByName(structField.Name).Set(slice.Index(0))
-			} else {
-				err = errors.New(fmt.Sprintf("PARSING ERROR! Struct field: %s with type %v was parsed to %d elements instead od 1",
-					structField.Name, structField.Type, slice.Len()))
-				logger.Error(err)
-				return err
-			}
+			output.FieldByName(structField.Name).Set(structElement)
 		}
 	}
 	return nil

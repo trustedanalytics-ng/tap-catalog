@@ -66,7 +66,7 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 
 	reqInstance.Id = instanceId.String()
 
-	err = c.repository.StoreData(c.mapper.ToKeyValue(data.Instances, reqInstance))
+	err = c.repository.StoreData(c.mapper.ToKeyValue(data.Instances, reqInstance, true))
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

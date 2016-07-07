@@ -62,7 +62,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqApplication.Id = applicationId.String()
-	applicationKeyStore := c.mapper.ToKeyValue(data.Applications, reqApplication)
+	applicationKeyStore := c.mapper.ToKeyValue(data.Applications, reqApplication, true)
 
 	err = c.repository.StoreData(applicationKeyStore)
 	if err != nil {
