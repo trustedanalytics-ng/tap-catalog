@@ -21,6 +21,8 @@ type TapCatalogApi interface {
 	UpdateApplication(applicationId string, patches []models.Patch) (models.Application, error)
 	AddTemplate(template models.Template) (models.Template, error)
 	AddService(service models.Service) (models.Service, error)
+	GetImage(imageId string) (models.Image, error)
+	UpdateImage(imageId string, patches []models.Patch) (models.Image, error)
 }
 
 type TapCatalogApiConnector struct {
@@ -252,6 +254,51 @@ func (c *TapCatalogApiConnector) AddService(service models.Service) (models.Serv
 
 	if status != http.StatusCreated {
 		return result, errors.New("Bad response status: " + strconv.Itoa(status))
+	}
+	return result, nil
+}
+
+func (c *TapCatalogApiConnector) GetImage(imageId string) (models.Image, error) {
+	result := models.Image{}
+
+	url := fmt.Sprintf("%s/v1/images/%s", c.Address, imageId)
+	status, body, err := brokerHttp.RestGET(url, &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
+	if err != nil {
+		return result, err
+	}
+
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return result, err
+	}
+
+	if status != http.StatusOK {
+		return result, errors.New("Bad response status: " + strconv.Itoa(status) + ". Body: " + string(body))
+	}
+	return result, nil
+}
+
+func (c *TapCatalogApiConnector) UpdateImage(imageId string, patches []models.Patch) (models.Image, error) {
+	result := models.Image{}
+
+	reqBody, err := json.Marshal(patches)
+	if err != nil {
+		return result, err
+	}
+
+	url := fmt.Sprintf("%s/v1/images/%s", c.Address, imageId)
+	status, body, err := brokerHttp.RestPATCH(url, string(reqBody), &brokerHttp.BasicAuth{c.Username, c.Password}, c.Client)
+	if err != nil {
+		return result, err
+	}
+
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return result, err
+	}
+
+	if status != http.StatusOK {
+		return result, errors.New("Bad response status: " + strconv.Itoa(status) + ". Body: " + string(body))
 	}
 	return result, nil
 }
