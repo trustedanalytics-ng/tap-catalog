@@ -23,16 +23,16 @@ import (
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-catalog/webutils"
+	"github.com/trustedanalytics/tapng-go-common/util"
 )
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(data.Applications, models.Application{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
@@ -40,24 +40,24 @@ func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 	reqApplication := models.Application{}
 
-	err := webutils.ReadJson(req, &reqApplication)
+	err := util.ReadJson(req, &reqApplication)
 	if err != nil {
-		webutils.Respond400(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
 	applicationId, err := uuid.NewV4()
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
@@ -66,17 +66,17 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 
 	err = c.repository.StoreData(applicationKeyStore)
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	application, err := c.repository.GetData(c.buildApplicationKey(applicationId.String()), models.Application{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, application, http.StatusCreated)
+	util.WriteJson(rw, application, http.StatusCreated)
 }
 
 func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
@@ -84,48 +84,48 @@ func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 	application, err := c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	patches, err := webutils.ReadPatch(req)
+	patches := []models.Patch{}
+	err = util.ReadJson(req, &patches)
 	if err != nil {
-		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildApplicationKey(applicationId), models.Application{}, patches)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	application, err = c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, application, http.StatusOK)
+	util.WriteJson(rw, application, http.StatusOK)
 }
 
 func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 	err := c.repository.DeleteData(c.buildApplicationKey(applicationId))
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, "", http.StatusNoContent)
+	util.WriteJson(rw, "", http.StatusNoContent)
 }
 
 func (c *Context) buildApplicationKey(applicationId string) string {

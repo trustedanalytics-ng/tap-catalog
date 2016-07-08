@@ -23,16 +23,16 @@ import (
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-catalog/webutils"
+	"github.com/trustedanalytics/tapng-go-common/util"
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(data.Images, models.Image{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
@@ -40,24 +40,24 @@ func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 	reqImage := models.Image{}
 
-	err := webutils.ReadJson(req, &reqImage)
+	err := util.ReadJson(req, &reqImage)
 	if err != nil {
-		webutils.Respond400(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
 	imageId, err := uuid.NewV4()
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
@@ -65,17 +65,17 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 	imageKeyStore := c.mapper.ToKeyValue(data.Images, reqImage, true)
 	err = c.repository.StoreData(imageKeyStore)
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	image, err := c.repository.GetData(c.buildImagesKey(imageId.String()), models.Image{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, image, http.StatusCreated)
+	util.WriteJson(rw, image, http.StatusCreated)
 }
 
 func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
@@ -83,48 +83,48 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 	image, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	patches, err := webutils.ReadPatch(req)
+	patches := []models.Patch{}
+	err = util.ReadJson(req, &patches)
 	if err != nil {
-		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildImagesKey(imageId), models.Image{}, patches)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	image, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, image, http.StatusOK)
+	util.WriteJson(rw, image, http.StatusOK)
 }
 
 func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	err := c.repository.DeleteData(c.buildImagesKey(imageId))
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, "", http.StatusNoContent)
+	util.WriteJson(rw, "", http.StatusNoContent)
 }
 
 func (c *Context) buildImagesKey(imageId string) string {

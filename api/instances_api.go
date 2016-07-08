@@ -23,16 +23,16 @@ import (
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-catalog/webutils"
+	"github.com/trustedanalytics/tapng-go-common/util"
 )
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(data.Instances, models.Instance{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
@@ -40,11 +40,11 @@ func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
@@ -53,14 +53,14 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId, err := uuid.NewV4()
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	err = webutils.ReadJson(req, &reqInstance)
+	err = util.ReadJson(req, &reqInstance)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond400(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
@@ -69,17 +69,17 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 	err = c.repository.StoreData(c.mapper.ToKeyValue(data.Instances, reqInstance, true))
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId.String()), models.Instance{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, instance, http.StatusCreated)
+	util.WriteJson(rw, instance, http.StatusCreated)
 }
 
 func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
@@ -87,48 +87,48 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	patches, err := webutils.ReadPatch(req)
+	patches := []models.Patch{}
+	err = util.ReadJson(req, &patches)
 	if err != nil {
-		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildInstanceKey(instanceId), models.Instance{}, patches)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	instance, err = c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, instance, http.StatusOK)
+	util.WriteJson(rw, instance, http.StatusOK)
 }
 
 func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 	err := c.repository.DeleteData(c.buildInstanceKey(instanceId))
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, "", http.StatusNoContent)
+	util.WriteJson(rw, "", http.StatusNoContent)
 }
 
 func (c *Context) buildInstanceKey(instanceId string) string {
@@ -136,17 +136,17 @@ func (c *Context) buildInstanceKey(instanceId string) string {
 }
 
 func (c *Context) AddInstanceBinding(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Add Instance Binding", http.StatusCreated)
+	util.WriteJson(rw, "Add Instance Binding", http.StatusCreated)
 }
 
 func (c *Context) DeleteInstanceBinding(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Delete Instance Binding", http.StatusNoContent)
+	util.WriteJson(rw, "Delete Instance Binding", http.StatusNoContent)
 }
 
 func (c *Context) AddInstanceMetadata(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Add Instance Binding", http.StatusCreated)
+	util.WriteJson(rw, "Add Instance Binding", http.StatusCreated)
 }
 
 func (c *Context) DeleteInstanceMetadata(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "Delete Instance Binding", http.StatusNoContent)
+	util.WriteJson(rw, "Delete Instance Binding", http.StatusNoContent)
 }

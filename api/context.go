@@ -22,7 +22,7 @@ import (
 	"github.com/gocraft/web"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
-	"github.com/trustedanalytics/tapng-catalog/webutils"
+	"github.com/trustedanalytics/tapng-go-common/util"
 )
 
 type Context struct {
@@ -31,7 +31,7 @@ type Context struct {
 }
 
 func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {
-	webutils.WriteJson(rw, "I'm OK", http.StatusOK)
+	util.WriteJson(rw, "I'm OK", http.StatusOK)
 }
 
 func (c *Context) Error(rw web.ResponseWriter, r *web.Request, err interface{}) {

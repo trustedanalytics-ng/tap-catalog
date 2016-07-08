@@ -153,6 +153,12 @@
 			"revisionTime": "2016-07-06T13:46:50Z"
 		},
 		{
+			"checksumSHA1": "fawj08TMzaWRGmOOK/kQUqA+oLw=",
+			"path": "github.com/trustedanalytics/tapng-go-common/util",
+			"revision": "761d2f24c3c675c90ed2d7d169dc1ae0d239724b",
+			"revisionTime": "2016-07-06T13:46:50Z"
+		},
+		{
 			"checksumSHA1": "tHm2SMtuRfrwh6NnnymsuoJ6e0Q=",
 			"path": "github.com/ugorji/go/codec",
 			"revision": "a396ed22fc049df733440d90efe17475e3929ccb",

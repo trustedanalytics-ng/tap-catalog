@@ -23,16 +23,16 @@ import (
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-catalog/webutils"
+	"github.com/trustedanalytics/tapng-go-common/util"
 )
 
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(data.Services, models.Service{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
@@ -40,11 +40,11 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
@@ -52,13 +52,13 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 
 	serviceId, err := uuid.NewV4()
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	err = webutils.ReadJson(req, &reqService)
+	err = util.ReadJson(req, &reqService)
 
 	if err != nil {
-		webutils.Respond400(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		for i, plan := range reqService.Plans {
 			planId, err := uuid.NewV4()
 			if err != nil {
-				webutils.Respond500(rw, err)
+				util.Respond500(rw, err)
 			}
 			plan.Id = planId.String()
 			reqService.Plans[i] = plan
@@ -77,17 +77,17 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	serviceKeyStore := c.mapper.ToKeyValue(data.Services, reqService, true)
 	err = c.repository.StoreData(serviceKeyStore)
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	service, err := c.repository.GetData(c.buildServiceKey(serviceId.String()), models.Service{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, service, http.StatusCreated)
+	util.WriteJson(rw, service, http.StatusCreated)
 }
 
 func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
@@ -95,48 +95,48 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	service, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	patches, err := webutils.ReadPatch(req)
+	patches := []models.Patch{}
+	err = util.ReadJson(req, &patches)
 	if err != nil {
-		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildServiceKey(serviceId), models.Service{}, patches)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	service, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, service, http.StatusOK)
+	util.WriteJson(rw, service, http.StatusOK)
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	err := c.repository.DeleteData(c.buildServiceKey(serviceId))
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, serviceId, http.StatusNoContent)
+	util.WriteJson(rw, serviceId, http.StatusNoContent)
 }
 
 func (c *Context) buildServiceKey(serviceId string) string {

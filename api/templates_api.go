@@ -23,8 +23,8 @@ import (
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-catalog/webutils"
 	"github.com/trustedanalytics/tapng-go-common/logger"
+	"github.com/trustedanalytics/tapng-go-common/util"
 )
 
 var logger = logger_wrapper.InitLogger("templates_api")
@@ -32,10 +32,10 @@ var logger = logger_wrapper.InitLogger("templates_api")
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(data.Templates, models.Template{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
@@ -43,25 +43,25 @@ func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	reqTemplate := models.Template{}
 
-	err := webutils.ReadJson(req, &reqTemplate)
+	err := util.ReadJson(req, &reqTemplate)
 	if err != nil {
-		webutils.Respond400(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
 	templateId, err := uuid.NewV4()
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
@@ -69,17 +69,17 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateKeyStore := c.mapper.ToKeyValue(data.Templates, reqTemplate, true)
 	err = c.repository.StoreData(templateKeyStore)
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	template, err := c.repository.GetData(c.buildInstanceKey(templateId.String()), models.Template{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, template, http.StatusCreated)
+	util.WriteJson(rw, template, http.StatusCreated)
 }
 
 func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
@@ -87,11 +87,11 @@ func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	err := c.repository.DeleteData(c.buildTemplateKey(templateId))
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, "", http.StatusNoContent)
+	util.WriteJson(rw, "", http.StatusNoContent)
 }
 
 func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
@@ -99,38 +99,38 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	template, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	patches, err := webutils.ReadPatch(req)
+	patches := []models.Patch{}
+	err = util.ReadJson(req, &patches)
 	if err != nil {
-		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildTemplateKey(templateId), models.Template{}, patches)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	template, err = c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, template, http.StatusOK)
+	util.WriteJson(rw, template, http.StatusOK)
 }
 
 func (c *Context) buildTemplateKey(templateId string) string {

@@ -23,17 +23,17 @@ import (
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-catalog/webutils"
+	"github.com/trustedanalytics/tapng-go-common/util"
 )
 
 func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	result, err := c.repository.GetListOfData(buildHomeDir(serviceId), models.ServicePlan{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
@@ -44,25 +44,25 @@ func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(key, models.ServicePlan{})
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId, err := uuid.NewV4()
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	reqPlan := models.ServicePlan{}
-	err = webutils.ReadJson(req, &reqPlan)
+	err = util.ReadJson(req, &reqPlan)
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
@@ -71,17 +71,17 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 
 	err = c.repository.StoreData(planKeyStore)
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, reqPlan.Id), models.ServicePlan{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, plan, http.StatusCreated)
+	util.WriteJson(rw, plan, http.StatusCreated)
 }
 
 func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
@@ -91,38 +91,38 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	patches, err := webutils.ReadPatch(req)
+	patches := []models.Patch{}
+	err = util.ReadJson(req, &patches)
 	if err != nil {
-		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildPlanKey(serviceId, planId), models.ServicePlan{}, patches)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
 	plan, err = c.repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
 	if err != nil {
 		logger.Error(err)
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
-	webutils.WriteJson(rw, plan, http.StatusOK)
+	util.WriteJson(rw, plan, http.StatusOK)
 }
 
 func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
@@ -130,11 +130,11 @@ func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
 	planId := req.PathParams["planId"]
 	err := c.repository.DeleteData(c.buildPlanKey(serviceId, planId))
 	if err != nil {
-		webutils.Respond500(rw, err)
+		util.Respond500(rw, err)
 		return
 	}
 
-	webutils.WriteJson(rw, "", http.StatusNoContent)
+	util.WriteJson(rw, "", http.StatusNoContent)
 }
 
 func (c *Context) buildPlanKey(serviceId, planId string) string {

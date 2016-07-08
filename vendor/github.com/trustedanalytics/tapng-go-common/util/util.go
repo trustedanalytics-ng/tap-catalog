@@ -14,92 +14,65 @@
  * limitations under the License.
  */
 
-package webutils
+package util
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/gocraft/web"
 
-	"github.com/trustedanalytics/tapng-catalog/models"
+	"github.com/trustedanalytics/tapng-go-common/logger"
 )
 
-type TapJWTToken struct {
-	Jti       string   `json:"jti"`
-	Sub       string   `json:"sub"`
-	Scope     []string `json:"scope"`
-	ClientId  string   `json:"client_id"`
-	Cid       string   `json:"cid"`
-	Azp       string   `json:"azp"`
-	GrantType string   `json:"grant_type"`
-	UserId    string   `json:"user_id"`
-	Username  string   `json:"user_name"`
-	Email     string   `json:"email"`
-	RevSig    string   `json:"rev_sig"`
-	Iat       int64    `json:"iat"`
-	Exp       int64    `json:"exp"`
-	Iss       string   `json:"iss"`
-	Zid       string   `json:"zid"`
-	Aud       []string `json:"aud"`
-}
+var logger = logger_wrapper.InitLogger("api")
 
 func ReadJson(req *web.Request, retstruct interface{}) error {
 	var err error
 	body, err := ioutil.ReadAll(req.Body)
-	log.Println("Request body:", string(body))
 	if err != nil {
-		log.Println("Error reading request body:", err)
+		logger.Error("Error reading request body:", err)
 		return err
 	}
 	b := []byte(body)
 	err = json.Unmarshal(b, &retstruct)
 	if err != nil {
-		log.Println("Error parsing request body json:", err)
+		logger.Error("Error parsing request body json:", err)
 		return err
 	}
-	log.Println("Request JSON parsed as: ", retstruct)
+	logger.Debug("Request JSON parsed as: ", retstruct)
 	return nil
 }
 
 func WriteJson(rw web.ResponseWriter, response interface{}, status_code int) error {
 	b, err := json.Marshal(&response)
 	if err != nil {
-		log.Println("Error marshalling response:", err)
+		logger.Error("Error marshalling response:", err)
 		return err
 	}
 	rw.Header().Set("Content-Type", "application/json")
-	log.Println("Responding with status", status_code, " and JSON:", string(b))
+	logger.Debug("Responding with status", status_code, " and JSON:", string(b))
 	rw.WriteHeader(status_code)
 	fmt.Fprintf(rw, "%s", string(b))
 	return nil
 }
 
-func Respond400(rw web.ResponseWriter, err error) {
-	rw.WriteHeader(http.StatusBadRequest)
-	fmt.Fprintf(rw, "%s", err.Error())
-}
-
 func Respond500(rw web.ResponseWriter, err error) {
+	logger.Error("Respond500: reason: error ", err)
 	rw.WriteHeader(http.StatusInternalServerError)
 	fmt.Fprintf(rw, "%s", err.Error())
 }
 
 func Respond404(rw web.ResponseWriter, err error) {
+	logger.Error("Respond404: reason: error ", err)
 	rw.WriteHeader(http.StatusNotFound)
 	fmt.Fprintf(rw, "%s", err.Error())
 }
 
-func ReadPatch(req *web.Request) ([]models.Patch, error) {
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	patches := []models.Patch{}
-	err = json.Unmarshal(body, &patches)
-	return patches, err
+func Respond400(rw web.ResponseWriter, err error) {
+	logger.Error("Respond400: reason: error ", err)
+	rw.WriteHeader(http.StatusBadRequest)
+	fmt.Fprintf(rw, "%s", err.Error())
 }
