@@ -95,7 +95,6 @@ func (c *TapCatalogApiConnector) UpdateInstance(instanceId string, patches []mod
 	return result, nil
 }
 
-
 func (c *TapCatalogApiConnector) GetServices() ([]models.Service, error) {
 	result := []models.Service{}
 
@@ -115,7 +114,6 @@ func (c *TapCatalogApiConnector) GetServices() ([]models.Service, error) {
 
 	return result, nil
 }
-
 
 func (c *TapCatalogApiConnector) GetService(serviceId string) (models.Service, error) {
 	result := models.Service{}

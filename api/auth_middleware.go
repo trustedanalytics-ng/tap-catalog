@@ -59,6 +59,7 @@ func (c *Context) BasicAuthorizeMiddleware(rw web.ResponseWriter, req *web.Reque
 		fmt.Fprintf(rw, "%s", `{"error":"invalid basic auth credentials"}`)
 		return
 	}
+	c.mapper.Username = username
 	next(rw, req)
 }
 

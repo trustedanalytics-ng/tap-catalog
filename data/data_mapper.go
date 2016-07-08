@@ -4,6 +4,7 @@ import (
 	"errors"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/trustedanalytics/tapng-catalog/models"
 	"github.com/trustedanalytics/tapng-go-common/logger"
@@ -12,12 +13,11 @@ import (
 var logger = logger_wrapper.InitLogger("template_wrapper")
 
 type DataMapper struct {
+	Username string
 }
 
-//todo update AuditTrial
 func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}, isRootElement bool) map[string]interface{} {
 	result := map[string]interface{}{}
-
 	structInputValues := reflect.ValueOf(inputStruct)
 
 	if isCollection(structInputValues.Kind()) {
@@ -27,8 +27,30 @@ func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}, isRootEl
 			result = MergeMap(result, objectAsMap)
 		}
 	} else {
-		structAsMap := t.structToMap(dirKey, structInputValues, isRootElement)
-		result = MergeMap(result, structAsMap)
+		if structInputValues.Type() == reflect.TypeOf(models.AuditTrail{}) {
+			result = MergeMap(result, t.updateAuditTrail(dirKey, false))
+		} else {
+			structAsMap := t.structToMap(dirKey, structInputValues, isRootElement)
+			result = MergeMap(result, structAsMap)
+		}
+	}
+	return result
+}
+
+func (t *DataMapper) updateAuditTrail(mainStructDirKey string, isUpdateAction bool) map[string]interface{} {
+	result := map[string]interface{}{}
+	auditTrail := models.AuditTrail{
+		CreatedBy:     t.Username,
+		CreatedOn:     time.Now().Unix(),
+		LastUpdatedOn: time.Now().Unix(),
+	}
+	valueOfAuditTrial := reflect.ValueOf(auditTrail)
+	for i := 0; i < valueOfAuditTrial.NumField(); i++ {
+		fieldName := valueOfAuditTrial.Type().Field(i).Name
+		if !(fieldName == "LastUpdatedOn" && isUpdateAction) {
+			objectAsMap := t.SingleFieldToMap(buildEtcdKey(mainStructDirKey, fieldName, "", false), valueOfAuditTrial.Field(i), fieldName, "")
+			result = MergeMap(result, objectAsMap)
+		}
 	}
 	return result
 }
@@ -39,7 +61,6 @@ type PatchedKeyValues struct {
 	Delete map[string]interface{}
 }
 
-//todo update AuditTrial
 func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct interface{}, patches []models.Patch) (PatchedKeyValues, error) {
 	result := PatchedKeyValues{
 		Delete: make(map[string]interface{}),
@@ -59,18 +80,18 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 			receivedElement := reflect.ValueOf(newValue).Elem()
 			if patch.Operation == models.OperationAdd {
 				if isCollection(originalField.Kind()) {
-					result.Add = t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, true)
+					result.Add = MergeMap(result.Add, t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, true))
 				} else {
 					return result, errors.New("Add operation is allowed only for Collections!")
 				}
 			} else if patch.Operation == models.OperationUpdate {
 				if isObject(originalField) {
-					result.Update = t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, isCollection(originalField.Kind()))
+					result.Update = MergeMap(result.Update, t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, isCollection(originalField.Kind())))
 				} else {
 					if patchFieldName == idFieldName {
 						return result, errors.New("ID field can not be changed!")
 					}
-					result.Update = t.SingleFieldToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, patchFieldName, "")
+					result.Update = MergeMap(result.Update, t.SingleFieldToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, patchFieldName, ""))
 				}
 			} else if patch.Operation == models.OperationDelete {
 				if isCollection(originalField.Kind()) {
@@ -89,6 +110,8 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 			return result, errors.New("Original field not found: " + patchFieldName)
 		}
 	}
+
+	result.Update = MergeMap(result.Update, t.updateAuditTrail(mainStructDirKey+"/AuditTrail", true))
 	return result, nil
 }
 
