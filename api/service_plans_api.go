@@ -75,7 +75,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	plan, err := c.repository.GetData(c.buildInstanceKey(reqPlan.Id), &models.ServicePlan{})
+	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, reqPlan.Id), &models.ServicePlan{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

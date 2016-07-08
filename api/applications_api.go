@@ -70,7 +70,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	application, err := c.repository.GetData(c.buildInstanceKey(applicationId.String()), &models.Application{})
+	application, err := c.repository.GetData(c.buildApplicationKey(applicationId.String()), &models.Application{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

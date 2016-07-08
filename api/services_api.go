@@ -81,7 +81,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	service, err := c.repository.GetData(c.buildInstanceKey(serviceId.String()), &models.Service{})
+	service, err := c.repository.GetData(c.buildServiceKey(serviceId.String()), &models.Service{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
