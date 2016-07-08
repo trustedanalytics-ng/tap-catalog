@@ -28,7 +28,7 @@ import (
 
 func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	result, err := c.repository.GetListOfData(buildHomeDir(serviceId), &models.ServicePlan{})
+	result, err := c.repository.GetListOfData(buildHomeDir(serviceId), models.ServicePlan{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -42,7 +42,7 @@ func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 
 	key := c.mapper.ToKey(buildHomeDir(serviceId), planId)
 
-	result, err := c.repository.GetData(key, &models.ServicePlan{})
+	result, err := c.repository.GetData(key, models.ServicePlan{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -75,7 +75,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, reqPlan.Id), &models.ServicePlan{})
+	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, reqPlan.Id), models.ServicePlan{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -88,7 +88,7 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
 
-	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, planId), &models.ServicePlan{})
+	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -116,7 +116,7 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	plan, err = c.repository.GetData(c.buildPlanKey(serviceId, planId), &models.ServicePlan{})
+	plan, err = c.repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

@@ -27,7 +27,7 @@ import (
 )
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Instances, &models.Instance{})
+	result, err := c.repository.GetListOfData(data.Instances, models.Instance{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -38,7 +38,7 @@ func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 
-	result, err := c.repository.GetData(c.buildInstanceKey(instanceId), &models.Instance{})
+	result, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -73,7 +73,7 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId.String()), &models.Instance{})
+	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId.String()), models.Instance{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -84,7 +84,7 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
-	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId), &models.Instance{})
+	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -112,7 +112,7 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	instance, err = c.repository.GetData(c.buildInstanceKey(instanceId), &models.Instance{})
+	instance, err = c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

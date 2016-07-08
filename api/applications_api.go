@@ -27,7 +27,7 @@ import (
 )
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Applications, &models.Application{})
+	result, err := c.repository.GetListOfData(data.Applications, models.Application{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -38,7 +38,7 @@ func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 
-	result, err := c.repository.GetData(c.buildApplicationKey(applicationId), &models.Application{})
+	result, err := c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -70,7 +70,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	application, err := c.repository.GetData(c.buildApplicationKey(applicationId.String()), &models.Application{})
+	application, err := c.repository.GetData(c.buildApplicationKey(applicationId.String()), models.Application{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -81,7 +81,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
-	application, err := c.repository.GetData(c.buildApplicationKey(applicationId), &models.Application{})
+	application, err := c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -109,7 +109,7 @@ func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	application, err = c.repository.GetData(c.buildApplicationKey(applicationId), &models.Application{})
+	application, err = c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

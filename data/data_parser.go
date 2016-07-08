@@ -13,7 +13,9 @@ type DataParser struct {
 }
 
 func (t *DataMapper) ToModelInstance(rootKey string, dataNode client.Node, model interface{}) (interface{}, error) {
-	reflectResultValues := reflect.ValueOf(model).Elem()
+	reflectResultValues := getNewInstance("", reflect.ValueOf(model).Type())
+	reflectResultValues = unwrapPointer(reflectResultValues)
+
 	dataParser := DataParser{dataDirKey: rootKey}
 
 	for _, node := range dataNode.Nodes {
@@ -23,7 +25,7 @@ func (t *DataMapper) ToModelInstance(rootKey string, dataNode client.Node, model
 			return model, err
 		}
 	}
-	return model, nil
+	return reflectResultValues.Interface(), nil
 }
 
 func (d *DataParser) processNode(node *client.Node, output reflect.Value) error {

@@ -30,7 +30,7 @@ import (
 var logger = logger_wrapper.InitLogger("templates_api")
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Templates, &models.Template{})
+	result, err := c.repository.GetListOfData(data.Templates, models.Template{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -41,7 +41,7 @@ func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 
-	result, err := c.repository.GetData(c.buildTemplateKey(templateId), &models.Template{})
+	result, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -73,7 +73,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	template, err := c.repository.GetData(c.buildInstanceKey(templateId.String()), &models.Template{})
+	template, err := c.repository.GetData(c.buildInstanceKey(templateId.String()), models.Template{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -96,7 +96,7 @@ func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
-	template, err := c.repository.GetData(c.buildTemplateKey(templateId), &models.Template{})
+	template, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -124,7 +124,7 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	template, err = c.repository.GetData(c.buildTemplateKey(templateId), &models.Template{})
+	template, err = c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

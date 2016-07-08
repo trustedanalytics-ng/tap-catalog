@@ -27,7 +27,7 @@ import (
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Images, &models.Image{})
+	result, err := c.repository.GetListOfData(data.Images, models.Image{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -38,7 +38,7 @@ func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 
-	result, err := c.repository.GetData(c.buildImagesKey(imageId), &models.Image{})
+	result, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -69,7 +69,7 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	image, err := c.repository.GetData(c.buildImagesKey(imageId.String()), &models.Image{})
+	image, err := c.repository.GetData(c.buildImagesKey(imageId.String()), models.Image{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -80,7 +80,7 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
-	image, err := c.repository.GetData(c.buildImagesKey(imageId), &models.Image{})
+	image, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -108,7 +108,7 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	image, err = c.repository.GetData(c.buildImagesKey(imageId), &models.Image{})
+	image, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)

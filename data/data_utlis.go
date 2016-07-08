@@ -67,16 +67,10 @@ func buildEtcdKey(dirKey string, fieldName, id string, addIdToKey bool) string {
 	}
 }
 
-func unmarshalJSON(value []byte, entityType string, structType reflect.Type) (interface{}, error) {
-	if t, ok := models.Registry[entityType]; ok {
-		v := reflect.New(t).Interface()
-		err := json.Unmarshal(value, &v)
-		return v, err
-	} else {
-		v := reflect.New(structType).Interface()
-		err := json.Unmarshal(value, &v)
-		return v, err
-	}
+func unmarshalJSON(value []byte, fieldName string, structType reflect.Type) (interface{}, error) {
+	entity := getNewInstance(fieldName, structType).Interface()
+	err := json.Unmarshal(value, &entity)
+	return entity, err
 }
 
 func getNodeName(key string) string {
@@ -85,8 +79,8 @@ func getNodeName(key string) string {
 }
 
 func getNewInstance(fieldName string, structType reflect.Type) reflect.Value {
-	if t, ok := models.Registry[fieldName]; ok {
-		v := reflect.New(t)
+	if reflectType, ok := models.Registry[fieldName]; ok {
+		v := reflect.New(reflectType)
 		return v
 	} else {
 		v := reflect.New(structType)

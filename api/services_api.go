@@ -27,7 +27,7 @@ import (
 )
 
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Services, &models.Service{})
+	result, err := c.repository.GetListOfData(data.Services, models.Service{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -38,7 +38,7 @@ func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
-	result, err := c.repository.GetData(c.buildServiceKey(serviceId), &models.Service{})
+	result, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		webutils.Respond500(rw, err)
 		return
@@ -81,7 +81,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	service, err := c.repository.GetData(c.buildServiceKey(serviceId.String()), &models.Service{})
+	service, err := c.repository.GetData(c.buildServiceKey(serviceId.String()), models.Service{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -92,7 +92,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	service, err := c.repository.GetData(c.buildServiceKey(serviceId), &models.Service{})
+	service, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
@@ -120,7 +120,7 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	service, err = c.repository.GetData(c.buildServiceKey(serviceId), &models.Service{})
+	service, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		logger.Error(err)
 		webutils.Respond500(rw, err)
