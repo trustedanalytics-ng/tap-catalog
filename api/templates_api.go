@@ -23,11 +23,8 @@ import (
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-go-common/logger"
 	"github.com/trustedanalytics/tapng-go-common/util"
 )
-
-var logger = logger_wrapper.InitLogger("templates_api")
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(data.Templates, models.Template{})
@@ -75,7 +72,6 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	template, err := c.repository.GetData(c.buildInstanceKey(templateId.String()), models.Template{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -98,7 +94,6 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 	template, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -112,21 +107,18 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildTemplateKey(templateId), models.Template{}, patches)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	template, err = c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}

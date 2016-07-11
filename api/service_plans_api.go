@@ -77,7 +77,6 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 
 	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, reqPlan.Id), models.ServicePlan{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -90,7 +89,6 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 
 	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -104,21 +102,18 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildPlanKey(serviceId, planId), models.ServicePlan{}, patches)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	plan, err = c.repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}

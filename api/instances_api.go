@@ -52,14 +52,12 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 
 	instanceId, err := uuid.NewV4()
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	err = util.ReadJson(req, &reqInstance)
 	if err != nil {
-		logger.Error(err)
 		util.Respond400(rw, err)
 		return
 	}
@@ -68,14 +66,12 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 
 	err = c.repository.StoreData(c.mapper.ToKeyValue(data.Instances, reqInstance, true))
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId.String()), models.Instance{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -86,7 +82,6 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -100,21 +95,18 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildInstanceKey(instanceId), models.Instance{}, patches)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	instance, err = c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}

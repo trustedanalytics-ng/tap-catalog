@@ -83,7 +83,6 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 
 	service, err := c.repository.GetData(c.buildServiceKey(serviceId.String()), models.Service{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -94,7 +93,6 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	service, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -108,21 +106,18 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildServiceKey(serviceId), models.Service{}, patches)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	service, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}

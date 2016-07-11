@@ -16,14 +16,16 @@
 package api
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gocraft/web"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
+	"github.com/trustedanalytics/tapng-go-common/logger"
 	"github.com/trustedanalytics/tapng-go-common/util"
 )
+
+var logger = logger_wrapper.InitLogger("api")
 
 type Context struct {
 	mapper     data.DataMapper
@@ -35,6 +37,6 @@ func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) Error(rw web.ResponseWriter, r *web.Request, err interface{}) {
-	log.Println("Respond500: reason: error ", err)
+	logger.Error("Respond500: reason: error ", err)
 	rw.WriteHeader(http.StatusInternalServerError)
 }

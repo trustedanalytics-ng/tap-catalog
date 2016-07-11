@@ -71,7 +71,6 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 
 	image, err := c.repository.GetData(c.buildImagesKey(imageId.String()), models.Image{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -82,7 +81,6 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	image, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -96,21 +94,18 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildImagesKey(imageId), models.Image{}, patches)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	image, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}

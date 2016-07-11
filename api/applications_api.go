@@ -72,7 +72,6 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 
 	application, err := c.repository.GetData(c.buildApplicationKey(applicationId.String()), models.Application{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -83,7 +82,6 @@ func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 	application, err := c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
@@ -97,21 +95,18 @@ func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildApplicationKey(applicationId), models.Application{}, patches)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
 
 	application, err = c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
-		logger.Error(err)
 		util.Respond500(rw, err)
 		return
 	}
