@@ -123,14 +123,14 @@ func (c *TapCatalogApiConnector) UpdateApplication(applicationId string, patches
 func (c *TapCatalogApiConnector) AddTemplate(template models.Template) (models.Template, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s", c.Address, templates))
 	result := &models.Template{}
-	err := brokerHttp.PatchModel(connector, template, http.StatusCreated, result)
+	err := brokerHttp.AddModel(connector, template, http.StatusCreated, result)
 	return *result, err
 }
 
 func (c *TapCatalogApiConnector) AddService(service models.Service) (models.Service, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s", c.Address, services))
 	result := &models.Service{}
-	err := brokerHttp.PatchModel(connector, service, http.StatusCreated, result)
+	err := brokerHttp.AddModel(connector, service, http.StatusCreated, result)
 	return *result, err
 }
 
@@ -151,6 +151,6 @@ func (c *TapCatalogApiConnector) UpdateImage(imageId string, patches []models.Pa
 func (c *TapCatalogApiConnector) AddServiceInstance(serviceId string, instance models.Instance) (models.Instance, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s/instances", c.Address, services, serviceId))
 	result := &models.Instance{}
-	err := brokerHttp.PatchModel(connector, instance, http.StatusCreated, result)
+	err := brokerHttp.AddModel(connector, instance, http.StatusCreated, result)
 	return *result, err
 }
