@@ -19,7 +19,6 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-	"github.com/nu7hatch/gouuid"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
@@ -47,21 +46,20 @@ func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
-	reqImage := models.Image{}
+	reqImage := &models.Image{}
 
-	err := util.ReadJson(req, &reqImage)
+	err := util.ReadJson(req, reqImage)
 	if err != nil {
 		util.Respond400(rw, err)
 		return
 	}
 
-	imageId, err := uuid.NewV4()
+	err = data.CheckIfIdFieldIsEmpty(reqImage)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
-	reqImage.Id = imageId.String()
 	imageKeyStore := c.mapper.ToKeyValue(data.Images, reqImage, true)
 	err = c.repository.StoreData(imageKeyStore)
 	if err != nil {
@@ -69,7 +67,7 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	image, err := c.repository.GetData(c.buildImagesKey(imageId.String()), models.Image{})
+	image, err := c.repository.GetData(c.buildImagesKey(reqImage.Id), models.Image{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return

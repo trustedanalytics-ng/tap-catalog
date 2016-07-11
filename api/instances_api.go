@@ -19,7 +19,6 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-	"github.com/nu7hatch/gouuid"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
@@ -48,21 +47,19 @@ func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
-	reqInstance := models.Instance{}
+	reqInstance := &models.Instance{}
 
-	instanceId, err := uuid.NewV4()
-	if err != nil {
-		util.Respond500(rw, err)
-		return
-	}
-
-	err = util.ReadJson(req, &reqInstance)
+	err := util.ReadJson(req, reqInstance)
 	if err != nil {
 		util.Respond400(rw, err)
 		return
 	}
 
-	reqInstance.Id = instanceId.String()
+	err = data.CheckIfIdFieldIsEmpty(reqInstance)
+	if err != nil {
+		util.Respond400(rw, err)
+		return
+	}
 
 	err = c.repository.StoreData(c.mapper.ToKeyValue(data.Instances, reqInstance, true))
 	if err != nil {
@@ -70,7 +67,7 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId.String()), models.Instance{})
+	instance, err := c.repository.GetData(c.buildInstanceKey(reqInstance.Id), models.Instance{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return

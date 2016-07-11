@@ -19,7 +19,6 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-	"github.com/nu7hatch/gouuid"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
@@ -48,21 +47,20 @@ func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
-	reqTemplate := models.Template{}
+	reqTemplate := &models.Template{}
 
-	err := util.ReadJson(req, &reqTemplate)
+	err := util.ReadJson(req, reqTemplate)
 	if err != nil {
 		util.Respond400(rw, err)
 		return
 	}
 
-	templateId, err := uuid.NewV4()
+	err = data.CheckIfIdFieldIsEmpty(reqTemplate)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
-	reqTemplate.Id = templateId.String()
 	templateKeyStore := c.mapper.ToKeyValue(data.Templates, reqTemplate, true)
 	err = c.repository.StoreData(templateKeyStore)
 	if err != nil {
@@ -70,7 +68,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	template, err := c.repository.GetData(c.buildInstanceKey(templateId.String()), models.Template{})
+	template, err := c.repository.GetData(c.buildInstanceKey(reqTemplate.Id), models.Template{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return

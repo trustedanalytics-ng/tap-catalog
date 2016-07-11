@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 	"strings"
 
@@ -23,6 +24,15 @@ func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[stri
 	return result
 }
 
+func CheckIfIdFieldIsEmpty(entity interface{}) error {
+	idPropertyValue := getStructId(reflect.ValueOf(entity))
+	if idPropertyValue != "" {
+		return errors.New("Id field has to be empty!")
+	} else {
+		return nil
+	}
+}
+
 func getStructId(structObject reflect.Value) string {
 	structObject = unwrapPointer(structObject)
 	idProperty := structObject.FieldByName(idFieldName)
@@ -37,6 +47,8 @@ func getOrCreateStructId(structObject reflect.Value) string {
 	structId := getStructId(structObject)
 	if structId == "" {
 		newId, _ := uuid.NewV4()
+		idProperty := structObject.FieldByName(idFieldName)
+		idProperty.SetString(newId.String())
 		return newId.String()
 	} else {
 		return structId

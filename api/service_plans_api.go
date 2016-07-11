@@ -19,7 +19,6 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-	"github.com/nu7hatch/gouuid"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
@@ -53,22 +52,21 @@ func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	planId, err := uuid.NewV4()
+
+	reqPlan := &models.ServicePlan{}
+	err := util.ReadJson(req, reqPlan)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	reqPlan := models.ServicePlan{}
-	err = util.ReadJson(req, &reqPlan)
+	err = data.CheckIfIdFieldIsEmpty(reqPlan)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
-	reqPlan.Id = planId.String()
 	planKeyStore := c.mapper.ToKeyValue(buildHomeDir(serviceId), reqPlan, true)
-
 	err = c.repository.StoreData(planKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)

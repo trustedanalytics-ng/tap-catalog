@@ -47,7 +47,7 @@ func (t *DataMapper) updateAuditTrail(mainStructDirKey string, isUpdateAction bo
 	valueOfAuditTrial := reflect.ValueOf(auditTrail)
 	for i := 0; i < valueOfAuditTrial.NumField(); i++ {
 		fieldName := valueOfAuditTrial.Type().Field(i).Name
-		if !(fieldName == "LastUpdatedOn" && isUpdateAction) {
+		if fieldName != "CreatedOn" && isUpdateAction {
 			objectAsMap := t.SingleFieldToMap(buildEtcdKey(mainStructDirKey, fieldName, "", false), valueOfAuditTrial.Field(i), fieldName, "")
 			result = MergeMap(result, objectAsMap)
 		}

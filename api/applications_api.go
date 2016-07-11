@@ -19,7 +19,6 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-	"github.com/nu7hatch/gouuid"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
@@ -30,7 +29,6 @@ func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(data.Applications, models.Application{})
 	if err != nil {
 		util.Respond500(rw, err)
-		return
 	}
 	util.WriteJson(rw, result, http.StatusOK)
 }
@@ -47,30 +45,28 @@ func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
-	reqApplication := models.Application{}
+	reqApplication := &models.Application{}
 
-	err := util.ReadJson(req, &reqApplication)
+	err := util.ReadJson(req, reqApplication)
 	if err != nil {
 		util.Respond400(rw, err)
 		return
 	}
 
-	applicationId, err := uuid.NewV4()
+	err = data.CheckIfIdFieldIsEmpty(reqApplication)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
-	reqApplication.Id = applicationId.String()
 	applicationKeyStore := c.mapper.ToKeyValue(data.Applications, reqApplication, true)
-
 	err = c.repository.StoreData(applicationKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	application, err := c.repository.GetData(c.buildApplicationKey(applicationId.String()), models.Application{})
+	application, err := c.repository.GetData(c.buildApplicationKey(reqApplication.Id), models.Application{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return

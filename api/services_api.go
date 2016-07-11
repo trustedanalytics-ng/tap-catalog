@@ -19,7 +19,6 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-	"github.com/nu7hatch/gouuid"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
@@ -48,30 +47,18 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
-	reqService := models.Service{}
+	reqService := &models.Service{}
 
-	serviceId, err := uuid.NewV4()
-	if err != nil {
-		util.Respond500(rw, err)
-		return
-	}
-	err = util.ReadJson(req, &reqService)
-
+	err := util.ReadJson(req, reqService)
 	if err != nil {
 		util.Respond400(rw, err)
 		return
 	}
 
-	reqService.Id = serviceId.String()
-	if reqService.Plans != nil {
-		for i, plan := range reqService.Plans {
-			planId, err := uuid.NewV4()
-			if err != nil {
-				util.Respond500(rw, err)
-			}
-			plan.Id = planId.String()
-			reqService.Plans[i] = plan
-		}
+	err = data.CheckIfIdFieldIsEmpty(reqService)
+	if err != nil {
+		util.Respond400(rw, err)
+		return
 	}
 
 	serviceKeyStore := c.mapper.ToKeyValue(data.Services, reqService, true)
@@ -81,7 +68,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	service, err := c.repository.GetData(c.buildServiceKey(serviceId.String()), models.Service{})
+	service, err := c.repository.GetData(c.buildServiceKey(reqService.Id), models.Service{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
