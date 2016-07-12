@@ -29,7 +29,6 @@ func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}, isRootEl
 	} else {
 		logger.Warning(structInputValues.Type(), structInputValues.Kind())
 		if structInputValues.Type() == reflect.TypeOf(models.AuditTrail{}) {
-			logger.Warning("updateAuditTrail")
 			result = MergeMap(result, t.updateAuditTrail(dirKey, false))
 		} else {
 			structAsMap := t.structToMap(dirKey, structInputValues, isRootElement)
@@ -49,14 +48,11 @@ func (t *DataMapper) updateAuditTrail(mainStructDirKey string, isUpdateAction bo
 	valueOfAuditTrial := reflect.ValueOf(auditTrail)
 	for i := 0; i < valueOfAuditTrial.NumField(); i++ {
 		fieldName := valueOfAuditTrial.Type().Field(i).Name
-
 		if !(fieldName == "CreatedOn" && isUpdateAction) {
-			logger.Warning("Update:", fieldName)
 			objectAsMap := t.SingleFieldToMap(buildEtcdKey(mainStructDirKey, fieldName, "", false), valueOfAuditTrial.Field(i), fieldName, "")
 			result = MergeMap(result, objectAsMap)
 		}
 	}
-	logger.Warning("result:", result)
 	return result
 }
 
