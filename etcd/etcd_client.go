@@ -1,8 +1,8 @@
 package etcd
 
 import (
-	"time"
 	"encoding/json"
+	"time"
 
 	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
