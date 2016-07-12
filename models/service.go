@@ -13,7 +13,7 @@ type Service struct {
 	Description string        `json:"description"`
 	Bindable    bool          `json:"bindable"`
 	TemplateId  string        `json:"templateId"`
-	State       State	  `json:"state"`
+	State       ServiceState  `json:"state"`
 	Plans       []ServicePlan `json:"plans"`
 	AuditTrail  AuditTrail    `json:"auditTrail"`
 }
@@ -31,10 +31,10 @@ type ServicePlanCost struct {
 	//TODO DPNG-8533 define other attributes of cost
 }
 
-type State string
+type ServiceState string
 
 const (
-	ServiceStateDeploying	State = "DEPLOYING"
-	ServiceStateReady	State = "READY"
-	ServiceStateOffline	State = "OFFLINE"
+	ServiceStateDeploying	ServiceState = "DEPLOYING"
+	ServiceStateReady	ServiceState = "READY"
+	ServiceStateOffline	ServiceState = "OFFLINE"
 )
