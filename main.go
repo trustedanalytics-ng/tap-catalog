@@ -36,62 +36,14 @@ func main() {
 	r := web.New(api.Context{})
 	r.Middleware(web.LoggerMiddleware)
 	basicAuthRouter := r.Subrouter(api.Context{}, "/v1")
-	basicAuthRouter.Middleware((*api.Context).BasicAuthorizeMiddleware)
+	route(basicAuthRouter)
+
+	// for testing purpose, where v1 is current version
+	v1AliasRouter := r.Subrouter(api.Context{}, "/v1.0")
+	route(v1AliasRouter)
 
 	r.Get("/", (*api.Context).Index)
-
 	r.Error((*api.Context).Error)
-	basicAuthRouter.Get("/services", (*api.Context).Services)
-	basicAuthRouter.Get("/services/:serviceId", (*api.Context).GetService)
-	basicAuthRouter.Post("/services", (*api.Context).AddService)
-	basicAuthRouter.Patch("/services/:serviceId", (*api.Context).PatchService)
-	basicAuthRouter.Delete("/services/:serviceId", (*api.Context).DeleteService)
-
-	basicAuthRouter.Get("/services/:serviceId/plans", (*api.Context).Plans)
-	basicAuthRouter.Get("/services/:serviceId/plans/:planId", (*api.Context).GetPlan)
-	basicAuthRouter.Post("/services/:serviceId/plans", (*api.Context).AddPlan)
-	basicAuthRouter.Patch("/services/:serviceId/plans/:planId", (*api.Context).PatchPlan)
-	basicAuthRouter.Delete("/services/:serviceId/plans/:planId", (*api.Context).DeletePlan)
-
-	basicAuthRouter.Get("/services/:serviceId/instances", (*api.Context).Instances)
-	basicAuthRouter.Get("/services/:serviceId/instances/:instanceId", (*api.Context).GetInstance)
-	basicAuthRouter.Post("/services/:serviceId/instances", (*api.Context).AddInstance)
-	basicAuthRouter.Patch("/services/:serviceId/instances/:instanceId", (*api.Context).PatchInstance)
-	basicAuthRouter.Delete("/services/:serviceId/instances/:instanceId", (*api.Context).DeleteInstance)
-
-	basicAuthRouter.Get("/applications", (*api.Context).Applications)
-	basicAuthRouter.Get("/applications/:applicationId", (*api.Context).GetApplication)
-	basicAuthRouter.Post("/applications", (*api.Context).AddApplication)
-	basicAuthRouter.Patch("/applications/:applicationId", (*api.Context).PatchApplication)
-	basicAuthRouter.Delete("/applications/:applicationId", (*api.Context).DeleteApplication)
-
-	basicAuthRouter.Get("/applications/:applicationId/instances", (*api.Context).Instances)
-	basicAuthRouter.Get("/applications/:applicationId/instances/:instanceId", (*api.Context).GetInstance)
-	basicAuthRouter.Post("/applications/:applicationId/instances", (*api.Context).AddInstance)
-	basicAuthRouter.Patch("/applications/:applicationId/instances/:instanceId", (*api.Context).PatchInstance)
-	basicAuthRouter.Delete("/applications/:applicationId/instances/:instanceId", (*api.Context).DeleteInstance)
-
-	basicAuthRouter.Get("/images", (*api.Context).Images)
-	basicAuthRouter.Get("/images/:imageId", (*api.Context).GetImage)
-	basicAuthRouter.Post("/images", (*api.Context).AddImage)
-	basicAuthRouter.Patch("/images/:imageId", (*api.Context).PatchImage)
-	basicAuthRouter.Delete("/images/:imageId", (*api.Context).DeleteImage)
-
-	basicAuthRouter.Get("/instances", (*api.Context).Instances)
-	basicAuthRouter.Get("/instances/:instanceId", (*api.Context).GetInstance)
-	basicAuthRouter.Delete("/instances/:instanceId", (*api.Context).DeleteInstance)
-	basicAuthRouter.Patch("/instances/:instanceId", (*api.Context).PatchInstance)
-
-	basicAuthRouter.Post("/instances/:instanceId/bindings", (*api.Context).AddInstanceBinding)
-	basicAuthRouter.Delete("/instances/:instanceId/bindings/:bindingId", (*api.Context).DeleteInstanceBinding)
-	basicAuthRouter.Post("/instances/:instanceId/meta", (*api.Context).AddInstanceMetadata)
-	basicAuthRouter.Delete("/instances/:instanceId/meta/:key", (*api.Context).DeleteInstanceMetadata)
-
-	basicAuthRouter.Get("/templates", (*api.Context).Templates)
-	basicAuthRouter.Post("/templates", (*api.Context).AddTemplate)
-	basicAuthRouter.Get("/templates/:templateId", (*api.Context).GetTemplate)
-	basicAuthRouter.Delete("/templates/:templateId", (*api.Context).DeleteTemplate)
-	basicAuthRouter.Patch("/templates/:templateId", (*api.Context).PatchTemplate)
 
 	port := os.Getenv("CATALOG_PORT")
 	log.Println("Will listen on:", port)
@@ -107,4 +59,60 @@ func main() {
 	if err != nil {
 		log.Panicln("Couldn't serve app on port:", port, " Error:", err)
 	}
+}
+
+func route(router *web.Router) {
+	router.Middleware((*api.Context).BasicAuthorizeMiddleware)
+
+	router.Get("/services", (*api.Context).Services)
+	router.Get("/services/:serviceId", (*api.Context).GetService)
+	router.Post("/services", (*api.Context).AddService)
+	router.Patch("/services/:serviceId", (*api.Context).PatchService)
+	router.Delete("/services/:serviceId", (*api.Context).DeleteService)
+
+	router.Get("/services/:serviceId/plans", (*api.Context).Plans)
+	router.Get("/services/:serviceId/plans/:planId", (*api.Context).GetPlan)
+	router.Post("/services/:serviceId/plans", (*api.Context).AddPlan)
+	router.Patch("/services/:serviceId/plans/:planId", (*api.Context).PatchPlan)
+	router.Delete("/services/:serviceId/plans/:planId", (*api.Context).DeletePlan)
+
+	router.Get("/services/:serviceId/instances", (*api.Context).Instances)
+	router.Get("/services/:serviceId/instances/:instanceId", (*api.Context).GetInstance)
+	router.Post("/services/:serviceId/instances", (*api.Context).AddInstance)
+	router.Patch("/services/:serviceId/instances/:instanceId", (*api.Context).PatchInstance)
+	router.Delete("/services/:serviceId/instances/:instanceId", (*api.Context).DeleteInstance)
+
+	router.Get("/applications", (*api.Context).Applications)
+	router.Get("/applications/:applicationId", (*api.Context).GetApplication)
+	router.Post("/applications", (*api.Context).AddApplication)
+	router.Patch("/applications/:applicationId", (*api.Context).PatchApplication)
+	router.Delete("/applications/:applicationId", (*api.Context).DeleteApplication)
+
+	router.Get("/applications/:applicationId/instances", (*api.Context).Instances)
+	router.Get("/applications/:applicationId/instances/:instanceId", (*api.Context).GetInstance)
+	router.Post("/applications/:applicationId/instances", (*api.Context).AddInstance)
+	router.Patch("/applications/:applicationId/instances/:instanceId", (*api.Context).PatchInstance)
+	router.Delete("/applications/:applicationId/instances/:instanceId", (*api.Context).DeleteInstance)
+
+	router.Get("/images", (*api.Context).Images)
+	router.Get("/images/:imageId", (*api.Context).GetImage)
+	router.Post("/images", (*api.Context).AddImage)
+	router.Patch("/images/:imageId", (*api.Context).PatchImage)
+	router.Delete("/images/:imageId", (*api.Context).DeleteImage)
+
+	router.Get("/instances", (*api.Context).Instances)
+	router.Get("/instances/:instanceId", (*api.Context).GetInstance)
+	router.Delete("/instances/:instanceId", (*api.Context).DeleteInstance)
+	router.Patch("/instances/:instanceId", (*api.Context).PatchInstance)
+
+	router.Post("/instances/:instanceId/bindings", (*api.Context).AddInstanceBinding)
+	router.Delete("/instances/:instanceId/bindings/:bindingId", (*api.Context).DeleteInstanceBinding)
+	router.Post("/instances/:instanceId/meta", (*api.Context).AddInstanceMetadata)
+	router.Delete("/instances/:instanceId/meta/:key", (*api.Context).DeleteInstanceMetadata)
+
+	router.Get("/templates", (*api.Context).Templates)
+	router.Post("/templates", (*api.Context).AddTemplate)
+	router.Get("/templates/:templateId", (*api.Context).GetTemplate)
+	router.Delete("/templates/:templateId", (*api.Context).DeleteTemplate)
+	router.Patch("/templates/:templateId", (*api.Context).PatchTemplate)
 }
