@@ -27,7 +27,6 @@ func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}, isRootEl
 			result = MergeMap(result, objectAsMap)
 		}
 	} else {
-		logger.Warning(structInputValues.Type(), structInputValues.Kind())
 		if structInputValues.Type() == reflect.TypeOf(models.AuditTrail{}) {
 			result = MergeMap(result, t.updateAuditTrail(dirKey, false))
 		} else {
@@ -43,17 +42,30 @@ func (t *DataMapper) updateAuditTrail(mainStructDirKey string, isUpdateAction bo
 	auditTrail := models.AuditTrail{
 		CreatedBy:     t.Username,
 		CreatedOn:     time.Now().Unix(),
+		LastUpdateBy:  t.Username,
 		LastUpdatedOn: time.Now().Unix(),
 	}
 	valueOfAuditTrial := reflect.ValueOf(auditTrail)
 	for i := 0; i < valueOfAuditTrial.NumField(); i++ {
 		fieldName := valueOfAuditTrial.Type().Field(i).Name
-		if !(fieldName == "CreatedOn" && isUpdateAction) {
+		if shouldUpdateAuditTrailField(fieldName, isUpdateAction) {
 			objectAsMap := t.SingleFieldToMap(buildEtcdKey(mainStructDirKey, fieldName, "", false), valueOfAuditTrial.Field(i), fieldName, "")
 			result = MergeMap(result, objectAsMap)
 		}
 	}
 	return result
+}
+
+func shouldUpdateAuditTrailField(fieldName string, isUpdateAction bool) bool {
+	if isUpdateAction {
+		if fieldName == "CreatedOn" || fieldName == "CreatedBy" {
+			return false
+		} else {
+			return true
+		}
+	} else {
+		return true
+	}
 }
 
 type PatchedKeyValues struct {

@@ -15,6 +15,7 @@ type Service struct {
 	State       ServiceState  `json:"state"`
 	Plans       []ServicePlan `json:"plans"`
 	AuditTrail  AuditTrail    `json:"auditTrail"`
+	Metadata    []Metadata    `json:"metadata"`
 }
 
 type ServicePlan struct {

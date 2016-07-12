@@ -123,6 +123,21 @@ func (c *EtcdConnector) DeleteDir(key string) error {
 	return c.delete(key, &options)
 }
 
+func (c *EtcdConnector) AddOrUpdateDir(key string) error {
+	kapi, err := getKVApiV2DefaultConnector()
+	if err != nil {
+		logger.Error("Can't connect with ETCD:", err)
+		return err
+	}
+
+	_, err = kapi.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevIgnore})
+	if err != nil {
+		logger.Error("Setting key value error", err)
+		return err
+	}
+	return nil
+}
+
 func (c *EtcdConnector) delete(key string, options *client.DeleteOptions) error {
 	logger.Debug("Deleting value of key:", key)
 	kapi, err := getKVApiV2DefaultConnector()

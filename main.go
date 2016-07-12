@@ -26,12 +26,18 @@ import (
 	"github.com/gocraft/web"
 
 	"github.com/trustedanalytics/tapng-catalog/api"
+	"github.com/trustedanalytics/tapng-catalog/data"
 )
 
 type appHandler func(web.ResponseWriter, *web.Request) error
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
+
+	err := (&data.RepositoryConnector{}).CreateDirs()
+	if err != nil {
+		log.Fatalln("Can't create directories oin ETCD!", err)
+	}
 
 	r := web.New(api.Context{})
 	r.Middleware(web.LoggerMiddleware)
@@ -48,7 +54,6 @@ func main() {
 	port := os.Getenv("CATALOG_PORT")
 	log.Println("Will listen on:", port)
 
-	var err error
 	if os.Getenv("CATALOG_SSL_CERT_FILE_LOCATION") != "" {
 		err = http.ListenAndServeTLS(":"+port, os.Getenv("CATALOG_SSL_CERT_FILE_LOCATION"),
 			os.Getenv("CATALOG_SSL_KEY_FILE_LOCATION"), r)
