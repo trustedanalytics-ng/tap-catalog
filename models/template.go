@@ -1,9 +1,15 @@
 package models
 
 type Template struct {
-	Id         string     `json:"templateId"`
-	State      string     `json:"state"`
-	AuditTrail AuditTrail `json:"auditTrail"`
+	Id         string        `json:"templateId"`
+	State      TemplateState `json:"state"`
+	AuditTrail AuditTrail    `json:"auditTrail"`
 }
 
-//todo add State type
+type TemplateState string
+
+const (
+	TemplateStateInProgress  TemplateState = "IN_PROGRESS"
+	TemplateStateReady       TemplateState = "READY"
+	TemplateStateUnavailable TemplateState = "UNAVAILABLE"
+)
