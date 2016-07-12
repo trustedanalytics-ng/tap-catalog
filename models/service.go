@@ -4,7 +4,6 @@ import "reflect"
 
 func init() {
 	RegisterType("Plans", reflect.TypeOf(ServicePlan{}))
-	RegisterType("Cost", reflect.TypeOf(ServicePlanCost{}))
 }
 
 type Service struct {
@@ -19,22 +18,17 @@ type Service struct {
 }
 
 type ServicePlan struct {
-	Id          string          `json:"id"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Cost        ServicePlanCost `json:"cost"`
-	AuditTrail  AuditTrail      `json:"auditTrail"`
-}
-
-type ServicePlanCost struct {
-	Currency string `json:"currency"`
-	//TODO DPNG-8533 define other attributes of cost
+	Id          string     `json:"id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Cost        string     `json:"cost"`
+	AuditTrail  AuditTrail `json:"auditTrail"`
 }
 
 type ServiceState string
 
 const (
-	ServiceStateDeploying	ServiceState = "DEPLOYING"
-	ServiceStateReady	ServiceState = "READY"
-	ServiceStateOffline	ServiceState = "OFFLINE"
+	ServiceStateDeploying ServiceState = "DEPLOYING"
+	ServiceStateReady     ServiceState = "READY"
+	ServiceStateOffline   ServiceState = "OFFLINE"
 )
