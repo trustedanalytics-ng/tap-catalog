@@ -22,6 +22,7 @@ type TapCatalogApi interface {
 	UpdateImage(imageId string, patches []models.Patch) (models.Image, error)
 	GetServices() ([]models.Service, error)
 	AddServiceInstance(serviceId string, instance models.Instance) (models.Instance, error)
+	UpdateTemplate(templateId string, patches []models.Patch) (models.Template, error)
 }
 
 type TapCatalogApiConnector struct {
@@ -152,5 +153,12 @@ func (c *TapCatalogApiConnector) AddServiceInstance(serviceId string, instance m
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s/instances", c.Address, services, serviceId))
 	result := &models.Instance{}
 	err := brokerHttp.AddModel(connector, instance, http.StatusCreated, result)
+	return *result, err
+}
+
+func (c *TapCatalogApiConnector) UpdateTemplate(templateId string, patches []models.Patch) (models.Template, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, templates, templateId))
+	result := &models.Template{}
+	err := brokerHttp.PatchModel(connector, patches, http.StatusOK, result)
 	return *result, err
 }
