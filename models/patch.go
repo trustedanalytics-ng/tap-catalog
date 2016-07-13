@@ -23,4 +23,5 @@ type Patch struct {
 	Operation PatchOperation  `json:"op"`
 	Field     string          `json:"field"`
 	Value     json.RawMessage `json:"value"`
+	PrevValue json.RawMessage `json:"prevValue,omitempty"`
 }

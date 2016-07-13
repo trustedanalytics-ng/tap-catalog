@@ -11,7 +11,7 @@ func TestEtcdKVStore(t *testing.T) {
 	client := EtcdConnector{}
 	Convey("Test EtcdKVStore", t, func() {
 		Convey("Should update properly", func() {
-			err := client.Set("test", "testValue", 0)
+			err := client.Set("test", "testValue", "", 0)
 			So(err, ShouldBeNil)
 		})
 

@@ -68,7 +68,7 @@ func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
 	return *resp.Node, nil
 }
 
-func (c *EtcdConnector) Set(key string, value interface{}, prevIndex uint64) error {
+func (c *EtcdConnector) Set(key string, value, prevValue interface{}, prevIndex uint64) error {
 	logger.Debug("Setting value of key:", key)
 
 	valueByte, err := json.Marshal(value)
@@ -83,12 +83,33 @@ func (c *EtcdConnector) Set(key string, value interface{}, prevIndex uint64) err
 		return err
 	}
 
-	_, err = kapi.Set(context.Background(), key, string(valueByte), &client.SetOptions{PrevIndex: prevIndex})
+	options := &client.SetOptions{PrevIndex: prevIndex}
+
+	if prevValue != nil {
+		prevValueByte, err := json.Marshal(prevValue)
+		if err != nil {
+			logger.Error("Can't marshall prevValue!:", err)
+			return err
+		}
+		prevValueString := string(prevValueByte)
+		if isNotEmptyValue(prevValueString) {
+			options.PrevValue = prevValueString
+		}
+	}
+
+	_, err = kapi.Set(context.Background(), key, string(valueByte), options)
 	if err != nil {
 		logger.Error("Setting key value error", err)
 		return err
 	}
 	return nil
+}
+
+func isNotEmptyValue(value string) bool {
+	if value != "" && value != `""` {
+		return true
+	}
+	return false
 }
 
 func (c *EtcdConnector) Update(key string, value interface{}) error {

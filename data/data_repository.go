@@ -12,7 +12,7 @@ type RepositoryConnector struct {
 func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
 	var err error
 	for k, v := range keyStore {
-		err = t.etcdClient.Set(k, v, 0)
+		err = t.etcdClient.Set(k, v, nil, 0)
 		if err != nil {
 			return err
 		}
@@ -20,18 +20,18 @@ func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
 	return err
 }
 
-func (t *RepositoryConnector) UpdateData(keyStore map[string]interface{}) error {
+func (t *RepositoryConnector) UpdateData(updates []PatchSingleUpdate) error {
 	var err error
-	for k, v := range keyStore {
-		node, err := t.etcdClient.GetKeyNodes(k)
+	for _, update := range updates {
+		node, err := t.etcdClient.GetKeyNodes(update.Key)
 		if err != nil {
-			logger.Error("UpdateData in etcd error! Can't get key: ", k, err)
+			logger.Error("UpdateData in etcd error! Can't get key: ", update.Key, err)
 			return err
 		}
 
-		err = t.etcdClient.Set(k, v, node.ModifiedIndex)
+		err = t.etcdClient.Set(update.Key, update.Value, update.PreviousValue, node.ModifiedIndex)
 		if err != nil {
-			logger.Error("UpdateData in etcd error! key: ", k, err)
+			logger.Error("UpdateData in etcd error! key: ", update.Key, err)
 			return err
 		}
 	}

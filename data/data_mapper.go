@@ -68,10 +68,28 @@ func shouldUpdateAuditTrailField(fieldName string, isUpdateAction bool) bool {
 	}
 }
 
+type PatchSingleUpdate struct {
+	Key           string
+	Value         interface{}
+	PreviousValue interface{}
+}
+
 type PatchedKeyValues struct {
 	Add    map[string]interface{}
-	Update map[string]interface{}
+	Update []PatchSingleUpdate
 	Delete map[string]interface{}
+}
+
+func mapToPatchSingleUpdates(input map[string]interface{}, prevValue interface{}) []PatchSingleUpdate {
+	result := []PatchSingleUpdate{}
+	for k, v := range input {
+		result = append(result, PatchSingleUpdate{
+			Key:           k,
+			Value:         v,
+			PreviousValue: prevValue,
+		})
+	}
+	return result
 }
 
 func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct interface{}, patches []models.Patch) (PatchedKeyValues, error) {
@@ -99,12 +117,21 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 				}
 			} else if patch.Operation == models.OperationUpdate {
 				if isObject(originalField) {
-					result.Update = MergeMap(result.Update, t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, isCollection(originalField.Kind())))
+					result.Update = append(result.Update, mapToPatchSingleUpdates(t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, isCollection(originalField.Kind())), nil)...)
 				} else {
+					var receivedPreviousValueInterface interface{}
+					if len(patch.PrevValue) > 0 {
+						previousValue, err := unmarshalJSON(patch.PrevValue, patchFieldName, originalField.Type())
+						receivedPreviousValueInterface = reflect.ValueOf(previousValue).Elem().Interface()
+						if err != nil {
+							return result, err
+						}
+					}
+
 					if patchFieldName == idFieldName {
 						return result, errors.New("ID field can not be changed!")
 					}
-					result.Update = MergeMap(result.Update, t.SingleFieldToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, patchFieldName, ""))
+					result.Update = append(result.Update, mapToPatchSingleUpdates(t.SingleFieldToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, patchFieldName, ""), receivedPreviousValueInterface)...)
 				}
 			} else if patch.Operation == models.OperationDelete {
 				if isCollection(originalField.Kind()) {
@@ -124,7 +151,7 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 		}
 	}
 
-	result.Update = MergeMap(result.Update, t.updateAuditTrail(mainStructDirKey+"/AuditTrail", true))
+	result.Update = append(result.Update, mapToPatchSingleUpdates(t.updateAuditTrail(mainStructDirKey+"/AuditTrail", true), nil)...)
 	return result, nil
 }
 
