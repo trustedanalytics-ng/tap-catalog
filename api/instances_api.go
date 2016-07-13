@@ -46,7 +46,15 @@ func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, result, http.StatusOK)
 }
 
-func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
+func (c *Context) AddApplicationInstance(rw web.ResponseWriter, req *web.Request) {
+	c.addInstance(rw, req, req.PathParams["applicationId"], models.InstanceTypeApplication)
+}
+
+func (c *Context) AddServiceInstance(rw web.ResponseWriter, req *web.Request) {
+	c.addInstance(rw, req, req.PathParams["serviceId"], models.InstanceTypeService)
+}
+
+func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId string, instanceType models.InstanceType) {
 	reqInstance := &models.Instance{}
 
 	err := util.ReadJson(req, reqInstance)
@@ -60,6 +68,9 @@ func (c *Context) AddInstance(rw web.ResponseWriter, req *web.Request) {
 		util.Respond400(rw, err)
 		return
 	}
+
+	reqInstance.ClassId = classId
+	reqInstance.Type = instanceType
 
 	err = c.repository.StoreData(c.mapper.ToKeyValue(data.Instances, reqInstance, true))
 	if err != nil {
@@ -122,20 +133,4 @@ func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) buildInstanceKey(instanceId string) string {
 	return c.mapper.ToKey(data.Instances, instanceId)
-}
-
-func (c *Context) AddInstanceBinding(rw web.ResponseWriter, req *web.Request) {
-	util.WriteJson(rw, "Add Instance Binding", http.StatusCreated)
-}
-
-func (c *Context) DeleteInstanceBinding(rw web.ResponseWriter, req *web.Request) {
-	util.WriteJson(rw, "Delete Instance Binding", http.StatusNoContent)
-}
-
-func (c *Context) AddInstanceMetadata(rw web.ResponseWriter, req *web.Request) {
-	util.WriteJson(rw, "Add Instance Binding", http.StatusCreated)
-}
-
-func (c *Context) DeleteInstanceMetadata(rw web.ResponseWriter, req *web.Request) {
-	util.WriteJson(rw, "Delete Instance Binding", http.StatusNoContent)
 }

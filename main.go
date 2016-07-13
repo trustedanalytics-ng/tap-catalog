@@ -83,7 +83,7 @@ func route(router *web.Router) {
 
 	router.Get("/services/:serviceId/instances", (*api.Context).Instances)
 	router.Get("/services/:serviceId/instances/:instanceId", (*api.Context).GetInstance)
-	router.Post("/services/:serviceId/instances", (*api.Context).AddInstance)
+	router.Post("/services/:serviceId/instances", (*api.Context).AddServiceInstance)
 	router.Patch("/services/:serviceId/instances/:instanceId", (*api.Context).PatchInstance)
 	router.Delete("/services/:serviceId/instances/:instanceId", (*api.Context).DeleteInstance)
 
@@ -95,7 +95,7 @@ func route(router *web.Router) {
 
 	router.Get("/applications/:applicationId/instances", (*api.Context).Instances)
 	router.Get("/applications/:applicationId/instances/:instanceId", (*api.Context).GetInstance)
-	router.Post("/applications/:applicationId/instances", (*api.Context).AddInstance)
+	router.Post("/applications/:applicationId/instances", (*api.Context).AddApplicationInstance)
 	router.Patch("/applications/:applicationId/instances/:instanceId", (*api.Context).PatchInstance)
 	router.Delete("/applications/:applicationId/instances/:instanceId", (*api.Context).DeleteInstance)
 
@@ -109,11 +109,6 @@ func route(router *web.Router) {
 	router.Get("/instances/:instanceId", (*api.Context).GetInstance)
 	router.Delete("/instances/:instanceId", (*api.Context).DeleteInstance)
 	router.Patch("/instances/:instanceId", (*api.Context).PatchInstance)
-
-	router.Post("/instances/:instanceId/bindings", (*api.Context).AddInstanceBinding)
-	router.Delete("/instances/:instanceId/bindings/:bindingId", (*api.Context).DeleteInstanceBinding)
-	router.Post("/instances/:instanceId/meta", (*api.Context).AddInstanceMetadata)
-	router.Delete("/instances/:instanceId/meta/:key", (*api.Context).DeleteInstanceMetadata)
 
 	router.Get("/templates", (*api.Context).Templates)
 	router.Post("/templates", (*api.Context).AddTemplate)

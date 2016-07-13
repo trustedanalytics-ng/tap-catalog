@@ -25,6 +25,10 @@ kubernetes_deploy:
 	kubectl create -f service.yaml
 	kubectl create -f deployment.yaml
 
+kubernetes_update: docker_build
+	kubectl delete -f deployment.yaml
+	kubectl create -f deployment.yaml
+
 deps_update: verify_gopath
 	$(GOBIN)/govendor remove +all
 	$(GOBIN)/govendor add +external
