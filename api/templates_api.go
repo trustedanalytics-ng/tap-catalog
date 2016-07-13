@@ -68,7 +68,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	template, err := c.repository.GetData(c.buildInstanceKey(reqTemplate.Id), models.Template{})
+	template, err := c.repository.GetData(c.buildTemplateKey(reqTemplate.Id), models.Template{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
