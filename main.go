@@ -39,13 +39,18 @@ func main() {
 		log.Fatalln("Can't create directories oin ETCD!", err)
 	}
 
-	r := web.New(api.Context{})
+	context := api.Context{}
+
+	r := web.New(context)
 	r.Middleware(web.LoggerMiddleware)
-	basicAuthRouter := r.Subrouter(api.Context{}, "/v1")
+
+	apiRouter := r.Subrouter(context, "/api")
+
+	basicAuthRouter := apiRouter.Subrouter(context, "/v1")
 	route(basicAuthRouter)
 
 	// for testing purpose, where v1 is current version
-	v1AliasRouter := r.Subrouter(api.Context{}, "/v1.0")
+	v1AliasRouter := apiRouter.Subrouter(context, "/v1.0")
 	route(v1AliasRouter)
 
 	r.Get("/", (*api.Context).Index)
