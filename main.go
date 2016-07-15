@@ -19,7 +19,6 @@ package main
 import (
 	"log"
 	"math/rand"
-	"net/http"
 	"os"
 	"time"
 
@@ -27,6 +26,7 @@ import (
 
 	"github.com/trustedanalytics/tapng-catalog/api"
 	"github.com/trustedanalytics/tapng-catalog/data"
+	httpGoCommon "github.com/trustedanalytics/tapng-go-common/http"
 )
 
 type appHandler func(web.ResponseWriter, *web.Request) error
@@ -56,19 +56,13 @@ func main() {
 	r.Get("/", (*api.Context).Index)
 	r.Error((*api.Context).Error)
 
-	port := os.Getenv("CATALOG_PORT")
-	log.Println("Will listen on:", port)
-
 	if os.Getenv("CATALOG_SSL_CERT_FILE_LOCATION") != "" {
-		err = http.ListenAndServeTLS(":"+port, os.Getenv("CATALOG_SSL_CERT_FILE_LOCATION"),
+		httpGoCommon.StartServerTLS(os.Getenv("CATALOG_SSL_CERT_FILE_LOCATION"),
 			os.Getenv("CATALOG_SSL_KEY_FILE_LOCATION"), r)
 	} else {
-		err = http.ListenAndServe(":"+port, r)
+		httpGoCommon.StartServer(r)
 	}
 
-	if err != nil {
-		log.Panicln("Couldn't serve app on port:", port, " Error:", err)
-	}
 }
 
 func route(router *web.Router) {

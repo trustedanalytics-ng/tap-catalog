@@ -23,8 +23,7 @@ RUN chmod +x /opt/app/tapng-catalog
 
 WORKDIR /opt/app/
 
-ENV CATALOG_PORT "8083"
-EXPOSE 8083
+EXPOSE 80
 
 ENTRYPOINT ["/opt/app/tapng-catalog"]
 CMD [""]
