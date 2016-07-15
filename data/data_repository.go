@@ -73,7 +73,7 @@ func (t *RepositoryConnector) GetData(key string, model interface{}) (interface{
 func (t *RepositoryConnector) GetListOfData(key string, model interface{}) ([]interface{}, error) {
 	node, err := t.etcdClient.GetKeyNodes(key)
 
-	var result []interface{}
+	result := []interface{}{}
 
 	if err != nil {
 		return result, err
