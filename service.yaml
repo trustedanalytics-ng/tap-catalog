@@ -11,6 +11,6 @@
       id: "catalog"
     ports:
       -
-        port: 8083
+        port: 80
         protocol: "TCP"
         name: "rest"

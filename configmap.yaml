@@ -6,7 +6,7 @@
     labels: 
       id: "catalog-credentials"
   data: 
-    catalog-port: "8083"
+    catalog-port: "80"
     catalog-user: "admin"
     catalog-pass: "password"
     catalog-ssl-cert-file-location: ""

@@ -27,7 +27,7 @@
             image: "tapng-catalog"
             ports:
               - 
-                containerPort: 8083
+                containerPort: 80
                 protocol: "TCP"
             env: 
               - 
