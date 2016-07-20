@@ -1,20 +1,15 @@
 swagger: '2.0'
 info:
   title: Catalog API
-  version: "0.0.1"
-# the domain of the service
-host: catalog.example.com
-# array of all schemes that your API supports
+  version: "1"
 schemes:
   - https
-# will be prefixed to all paths
-basePath: /v1
 produces:
   - application/json
 consumes:
-   - application/json
+  - application/json
 paths:
-  /services:
+  /api/v1/services:
     get:
       summary: Services List
       responses:
@@ -24,6 +19,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Service'
+        500:
+          description: unexpected error
     post:
       summary: Create Service
       parameters:
@@ -36,8 +33,14 @@ paths:
         201:
           description: Created service
           schema:
-              $ref: '#/definitions/Service'
-  /services/{serviceId}:
+            $ref: '#/definitions/Service'
+        400:
+          description: Bad request. Provided wrong body.
+          schema:
+            type: string
+        500:
+          description: unexpected error
+  /api/v1/services/{serviceId}:
     get:
       summary: Service details
       parameters:
@@ -50,23 +53,8 @@ paths:
           description: Service object
           schema:
               $ref: '#/definitions/Service'
-    put:
-      summary: Update Service
-      parameters:
-        - name: serviceId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-              $ref: "#/definitions/UpdateService"
-      responses:
-        200:
-          description: Service Updated
-          schema:
-              $ref: '#/definitions/Service'
+        500:
+          description: unexpected error
     patch:
       summary: Update Service
       parameters:
@@ -78,12 +66,16 @@ paths:
           in: body
           required: true
           schema:
-              $ref: "#/definitions/PatchService"
+              $ref: "#/definitions/Patch"
       responses:
         200:
           description: Service Updated
           schema:
               $ref: '#/definitions/Service'
+        400:
+          description: provided wrong patch
+        500:
+          description: unexpected error
     delete:
       summary: Delete Service
       parameters:
@@ -93,8 +85,10 @@ paths:
           type: string
       responses:
         204:
-         description: Service deleted
-  /services/{serviceId}/plans:
+          description: Service deleted
+        500:
+          description: unexpected error
+  /api/v1/services/{serviceId}/plans:
     get:
       summary: Service Plan List
       parameters:
@@ -109,6 +103,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Plan'
+        500:
+          description: unexpected error
     post:
       summary: Create Plan
       parameters:
@@ -126,7 +122,11 @@ paths:
           description: Created service
           schema:
               $ref: '#/definitions/Plan'
-  /services/{serviceId}/plans/{planId}:
+        400:
+          description: bad body or provided id field
+        500:
+          description: unexpected error
+  /api/v1/services/{serviceId}/plans/{planId}:
     get:
       summary: Service Plan
       parameters:
@@ -143,27 +143,8 @@ paths:
           description: Plan object
           schema:
               $ref: '#/definitions/Plan'
-    put:
-      summary: Update Plan
-      parameters:
-        - name: serviceId
-          in: path
-          required: true
-          type: string
-        - name: planId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-              $ref: "#/definitions/UpdatePlan"
-      responses:
-        200:
-          description: Plan object
-          schema:
-              $ref: '#/definitions/Plan'
+        500:
+          description: unexpected error
     patch:
       summary: Update Plan
       parameters:
@@ -179,12 +160,16 @@ paths:
           in: body
           required: true
           schema:
-              $ref: "#/definitions/PatchPlan"
+              $ref: "#/definitions/Patch"
       responses:
         200:
           description: Plan object
           schema:
               $ref: '#/definitions/Plan'
+        400:
+          description: bad patch defined
+        500:
+          description: unexpected error
     delete:
       summary: Delete Plan
       parameters:
@@ -199,7 +184,9 @@ paths:
       responses:
         204:
           description: Plan deleted
-  /services/{serviceId}/instances:
+        500:
+          description: unexpected error
+  /api/v1/services/{serviceId}/instances:
     get:
       summary: Service Instance List
       parameters:
@@ -214,6 +201,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Instance'
+        500:
+          description: unexpected response
     post:
       summary: Create Service Instance
       parameters:
@@ -231,7 +220,11 @@ paths:
           description: Created instance
           schema:
               $ref: '#/definitions/Instance'
-  /services/{serviceId}/instances/{instanceId}:
+        400:
+          description: bad body or id provided
+        500:
+          description: unexpected error
+  /api/v1/services/{serviceId}/instances/{instanceId}:
     get:
       summary: Service Instance object
       parameters:
@@ -248,27 +241,8 @@ paths:
           description: Instance object
           schema:
               $ref: '#/definitions/Instance'
-    put:
-      summary: Update Service Instance
-      parameters:
-        - name: serviceId
-          in: path
-          required: true
-          type: string
-        - name: instanceId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-              $ref: "#/definitions/UpdateInstance"
-      responses:
-        200:
-          description: Instance updated
-          schema:
-              $ref: '#/definitions/Instance'
+        500:
+          description: unexpected error
     patch:
       summary: Update Service Instance
       parameters:
@@ -284,12 +258,16 @@ paths:
           in: body
           required: true
           schema:
-              $ref: "#/definitions/PatchInstance"
+              $ref: "#/definitions/Patch"
       responses:
         200:
           description: Instance updated
           schema:
               $ref: '#/definitions/Instance'
+        400:
+          description: bad patch
+        500:
+          description: unexpected error
     delete:
       summary: Delete Service Instance
       parameters:
@@ -304,7 +282,9 @@ paths:
       responses:
         204:
           description: Instance deleted
-  /applications:
+        500:
+          description: unexpected error
+  /api/v1/applications:
     get:
       summary: List Applications
       responses:
@@ -314,6 +294,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Application'
+        500:
+          description: unexpected error
     post:
       summary: Add Application
       parameters:
@@ -327,7 +309,11 @@ paths:
           description: Application created
           schema:
               $ref: '#/definitions/Application'
-  /applications/{applicationId}:
+        400:
+          description: bad body or id provided
+        500:
+          description: unexpected error
+  /api/v1/applications/{applicationId}:
     get:
       summary: Get Application object
       parameters:
@@ -337,26 +323,11 @@ paths:
           type: string
       responses:
         200:
-          description: Instance object
+          description: Application object
           schema:
               $ref: '#/definitions/Application'
-    put:
-      summary: Update Application
-      parameters:
-        - name: applicationId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-              $ref: "#/definitions/UpdateApplication"
-      responses:
-        200:
-          description: Application updated
-          schema:
-              $ref: '#/definitions/Application'
+        500:
+          description: unexpected error
     patch:
       summary: Update Application
       parameters:
@@ -368,12 +339,16 @@ paths:
           in: body
           required: true
           schema:
-              $ref: "#/definitions/PatchApplication"
+              $ref: "#/definitions/Patch"
       responses:
         200:
           description: Application updated
           schema:
               $ref: '#/definitions/Application'
+        400:
+          description: bad patch
+        500:
+          description: unexpected error
     delete:
       summary: Delete Application
       parameters:
@@ -384,7 +359,9 @@ paths:
       responses:
         204:
           description: Application deleted
-  /applications/{applicationId}/instances:
+        500:
+          description: unexpected error
+  /api/v1/applications/{applicationId}/instances:
     get:
       summary: List Application Instances
       parameters:
@@ -399,6 +376,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Instance'
+        500:
+          description: unexpected error
     post:
       summary: Add Application Instance
       parameters:
@@ -416,7 +395,11 @@ paths:
           description: Instance created
           schema:
               $ref: '#/definitions/Instance'
-  /applications/{applicationId}/instances/{instanceId}:
+        400:
+          description: bad body or id present
+        500:
+          description: unexpected error
+  /api/v1/applications/{applicationId}/instances/{instanceId}:
     get:
       summary: Get Application Instance object
       parameters:
@@ -433,27 +416,8 @@ paths:
           description: Instance object
           schema:
               $ref: '#/definitions/Instance'
-    put:
-      summary: Update Application Instance
-      parameters:
-        - name: applicationId
-          in: path
-          required: true
-          type: string
-        - name: instanceId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-              $ref: "#/definitions/UpdateInstance"
-      responses:
-        200:
-          description: Instance updated
-          schema:
-              $ref: '#/definitions/Instance'
+        500:
+          description: unexpected error
     patch:
       summary: Update Application Instance
       parameters:
@@ -469,12 +433,16 @@ paths:
           in: body
           required: true
           schema:
-              $ref: "#/definitions/PatchInstance"
+              $ref: "#/definitions/Patch"
       responses:
         200:
           description: Instance updated
           schema:
               $ref: '#/definitions/Instance'
+        400:
+          description: bad patch defined
+        500:
+          description: unexpected error
     delete:
       summary: Delete Application Instance
       parameters:
@@ -489,7 +457,9 @@ paths:
       responses:
         204:
           description: Instance deleted
-  /instances:
+        500:
+          description: unexpected error
+  /api/v1/instances:
     get:
       summary: List all instances
       responses:
@@ -499,7 +469,9 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Instance'
-  /instances/{instanceId}:
+        500:
+          description: unexpected error
+  /api/v1/instances/{instanceId}:
     get:
       summary: Get instance object
       parameters:
@@ -512,9 +484,10 @@ paths:
           description: Instance object
           schema:
             $ref: '#/definitions/Instance'
-  /instances/{instanceId}/bindings:
-    post:
-      summary: Add another instance to current instance dependency list
+        500:
+          description: unexpected error
+    patch:
+      summary: Update instance object
       parameters:
         - name: instanceId
           in: path
@@ -524,63 +497,29 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Binding'
+              $ref: "#/definitions/Patch"
       responses:
         200:
-          description: List of instance dependencies
+          description: Instance object
           schema:
-            type: array
-            items:
-              type: string
-  /instances/{instanceId}/bindings/{bindingId}:
+            $ref: '#/definitions/Instance'
+        400:
+          description: bad patch
+        500:
+          description: unexpected error
     delete:
-      summary: Delete another instanse from instance dependency list
+      summary: Delete instance object
       parameters:
         - name: instanceId
-          in: path
-          required: true
-          type: string
-        - name: bindingId
           in: path
           required: true
           type: string
       responses:
         204:
-          description: Instance dependency deleted
-  /instances/{instanceId}/meta:
-    post:
-      summary: Add meta parameter for instance
-      parameters:
-        - name: instanceId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: "#/definitions/Meta"
-      responses:
-        201:
-          description: Meta parameter
-          schema:
-              $ref: '#/definitions/Meta'
-  /instances/{instanceId}/meta/{key}:
-    delete:
-      summary: Delete instance meta parameter
-      parameters:
-        - name: instanceId
-          in: path
-          required: true
-          type: string
-        - name: key
-          in: path
-          required: true
-          type: string
-      responses:
-        204:
-          description: Instance parameter deleted
-  /templates:
+          description: Instance deleted
+        500:
+          description: unexpected error
+  /api/v1/templates:
     get:
       summary: List templates
       responses:
@@ -590,6 +529,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Template'
+        500:
+          description: unexpected error
     post:
       summary: Add template
       parameters:
@@ -597,13 +538,52 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Template'
+            $ref: '#/definitions/AddTemplate'
       responses:
         201:
           description: Template added
           schema:
             $ref: '#/definitions/Template'
-  /templates/{templateId}:
+        400:
+          description: wrong body or id present
+        500:
+          description: unexpected error
+  /api/v1/templates/{templateId}:
+    get:
+      summary: Get specific template
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Template object
+          schema:
+            $ref: '#/definitions/Template'
+        500:
+          description: unexpected error
+    patch:
+      summary: Update specific template
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Patch"
+      responses:
+        200:
+          description: Template updated
+          schema:
+            $ref: '#/definitions/Template'
+        400:
+          description: wrong patch body
+        500:
+          description: unexpected error
     delete:
       summary: Delete template
       parameters:
@@ -614,10 +594,57 @@ paths:
       responses:
         204:
           description: Template deleted
-    put:
-      summary: Update template
+        500: 
+          description: unexpected error
+          
+  /api/v1/images:
+    get:
+      summary: List images
+      responses:
+        200:
+          description: List of images
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Image'
+        500:
+          description: unexpected error
+    post:
+      summary: Add image
       parameters:
-        - name: templateId
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: "#/definitions/AddImage"
+      responses:
+        201:
+          description: Image created
+          schema:
+            $ref: '#/definitions/Image'
+        400:
+          description: bad body or id provided
+        500:
+          description: unexpected error
+  /api/v1/images/{imageId}:
+    get:
+      summary: Get image by ID
+      parameters:
+        - name: imageId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Image object
+          schema:
+              $ref: '#/definitions/Image'
+        500:
+          description: unexpected error
+    patch:
+      summary: Update Image
+      parameters:
+        - name: imageId
           in: path
           required: true
           type: string
@@ -625,11 +652,70 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/UpdateTemplate'
+              $ref: "#/definitions/Patch"
       responses:
         200:
-          description: Template state updated
+          description: Image updated
+          schema:
+              $ref: '#/definitions/Image'
+        400:
+          description: bad patch defined
+        500:
+          description: unexpected error
+    delete:
+      summary: Delete Image
+      parameters:
+        - name: imageId
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Image deleted
+        500:
+          description: unexpected error
 definitions:
+  Image:
+    type: object
+    properties:
+      id:
+        type: string
+      type:
+        type: string
+        enum: ["JAVA","GO","NODEJS"]
+      state:
+        type: string
+        enum: ["PENDING","BUILDING","ERROR","READY"]
+      auditTrail:
+        $ref: '#/definitions/AuditTrail'
+  AddImage:
+    type: object
+    required:
+      - type
+      - state
+    properties:
+      type:
+        type: string
+        enum: ["JAVA","GO","NODEJS"]
+      state:
+        type: string
+        enum: ["PENDING","BUILDING","ERROR","READY"]
+  Patch:
+    type: object
+    required:
+      - op
+      - field
+      - value
+    properties:
+      op:
+        type: string
+        enum: ["Add","Update","Delete"]
+      field:
+        type: string
+      value:
+        type: object
+      prevValue:
+        type: object
   Service:
     type: object
     required:
@@ -653,12 +739,12 @@ definitions:
         type: boolean
       state:
         type: string
-        enum: ["deploying", "ready", "offline"]
+        enum: ["DEPLOYING", "READY", "OFFLINE"]
       plans:
         type:
           array
         items:
-          $ref: '#/definitions/AddPlan'
+          $ref: '#/definitions/Plan'
   AddService:
     type: object
     required:
@@ -678,51 +764,7 @@ definitions:
         type: boolean
       state:
         type: string
-        enum: ["deploying", "ready", "offline"]
-      plans:
-        type:
-          array
-        items:
-          $ref: '#/definitions/AddPlan'
-  UpdateService:
-    type: object
-    required:
-      - name
-      - description
-      - templateId
-      - bindable
-      - state
-    properties:
-      name:
-        type: string
-      description:
-        type: string
-      templateId:
-        type: string
-      bindable:
-        type: boolean
-      state:
-        type: string
-        enum: ["deploying", "ready", "offline"]
-      plans:
-        type:
-          array
-        items:
-          $ref: '#/definitions/AddPlan'
-  PatchService:
-    type: object
-    properties:
-      name:
-        type: string
-      description:
-        type: string
-      templateId:
-        type: string
-      bindable:
-        type: boolean
-      state:
-        type: string
-        enum: ["deploying", "ready", "offline"]
+        enum: ["DEPLOYING", "READY", "OFFLINE"]
       plans:
         type:
           array
@@ -757,28 +799,6 @@ definitions:
         type: string
       cost:
         type: string
-  UpdatePlan:
-    type: object
-    required:
-      - name
-      - description
-      - cost
-    properties:
-      name:
-        type: string
-      description:
-        type: string
-      cost:
-        type: string
-  PatchPlan:
-    type: object
-    properties:
-      name:
-        type: string
-      description:
-        type: string
-      cost:
-        type: string
   Instance:
     type: object
     required:
@@ -791,15 +811,16 @@ definitions:
         type: string
       type:
         type: string
+        enum: ["APPLICATION","SERVICE","SERVICE_BROKER"]
       classId:
         type: string
       state:
         type: string
-        enum: ["requested", "deploying", "stopped", "running", "to_be_destroyed", "destroying", "unavailable"]
-      meta:
+        enum: ["REQUESTED","DEPLOYING","FAILURE","STOPPED","START_REQ","STARTING","RUNNING","STOP_REQ","STOPPING","DESTROY_REQ","DESTROYING","UNAVAILABLE"]
+      metadata:
         type: array
         items:
-          $ref: '#/definitions/Meta'
+          $ref: '#/definitions/Metadata'
       bindings:
         type: array
         items:
@@ -813,55 +834,16 @@ definitions:
     properties:
       type:
         type: string
+        enum: ["APPLICATION","SERVICE","SERVICE_BROKER"]
       classId:
         type: string
       state:
         type: string
-        enum: ["requested", "deploying", "stopped", "running", "to_be_destroyed", "destroying", "unavailable"]
-      meta:
+        enum: ["REQUESTED","DEPLOYING","FAILURE","STOPPED","START_REQ","STARTING","RUNNING","STOP_REQ","STOPPING","DESTROY_REQ","DESTROYING","UNAVAILABLE"]
+      metadata:
         type: array
         items:
-           $ref: '#/definitions/Meta'
-      bindings:
-        type: array
-        items:
-          $ref: '#/definitions/Binding'
-  UpdateInstance:
-    type: object
-    required:
-      - type
-      - classId
-      - state
-    properties:
-      type:
-        type: string
-      classId:
-        type: string
-      state:
-        type: string
-        enum: ["requested", "deploying", "stopped", "running", "to_be_destroyed", "destroying", "unavailable"]
-      meta:
-        type: array
-        items:
-          $ref: '#/definitions/Meta'
-      bindings:
-        type: array
-        items:
-          $ref: '#/definitions/Binding'
-  PatchInstance:
-    type: object
-    properties:
-      type:
-        type: string
-      classId:
-        type: string
-      state:
-        type: string
-        enum: ["requested", "deploying", "stopped", "running", "to_be_destroyed", "destroying", "unavailable"]
-      meta:
-        type: array
-        items:
-          $ref: '#/definitions/Meta'
+          $ref: '#/definitions/Metadata'
       bindings:
         type: array
         items:
@@ -869,85 +851,35 @@ definitions:
   Application:
     type: object
     required:
-      - type
-      - image
+      - imageId
       - replication
       - templateId
-      - state
       - id
     properties:
       id:
         type: string
       templateId:
         type: string
-      image:
+      imageId:
         type: string
       replication:
         type: integer
-      type:
-        type: string
-        enum: ["java", "go", "nodejs"]
-      state:
-        type: string
-        enum: ["requested", "building", "ready"]
+      auditTrail:
+        $ref: '#/definitions/AuditTrail'
   AddApplication:
     type: object
     required:
-      - type
-      - image
+      - imageId
       - replication
       - templateId
-      - state
     properties:
       templateId:
         type: string
-      image:
+      imageId:
         type: string
       replication:
         type: integer
-      type:
-        type: string
-        enum: ["java", "go", "nodejs"]
-      state:
-        type: string
-        enum: ["requested", "building", "ready"]
-  UpdateApplication:
-    type: object
-    required:
-      - type
-      - image
-      - replication
-      - templateId
-      - state
-    properties:
-      templateId:
-        type: string
-      image:
-        type: string
-      replication:
-        type: integer
-      type:
-        type: string
-        enum: ["java", "go", "nodejs"]
-      state:
-        type: string
-        enum: ["requested", "building", "ready"]
-  PatchApplication:
-    type: object
-    properties:
-      templateId:
-        type: string
-      image:
-        type: string
-      replication:
-        type: integer
-      type:
-        type: string
-        enum: ["java", "go", "nodejs"]
-      state:
-        type: string
-        enum: ["requested", "building", "ready"]
-  Meta:
+  Metadata:
     type: object
     required:
       - key
@@ -967,17 +899,32 @@ definitions:
         type: string
       state:
         type: string
-  UpdateTemplate:
+        enum: ["IN_PROGRESS","READY","UNAVAILABLE"]
+      auditTrail:
+        $ref: '#/definitions/AuditTrail'
+  AddTemplate:
     type: object
-    required:
-      - state
     properties:
       state:
         type: string
+        enum: ["IN_PROGRESS","READY","UNAVAILABLE"]
   Binding:
     type: object
     required:
       - id
     properties:
       id:
+        type: string
+  AuditTrail:
+    type: object
+    properties:
+      createdOn:
+        type: integer
+        format: int64
+      createdBy:
+        type: string
+      lastUpdatedOn:
+        type: integer
+        format: int64
+      lastUpdateBy:
         type: string
