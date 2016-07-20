@@ -75,6 +75,11 @@ func makeRequest(reqType, url, body, contentType string, basicAuth *BasicAuth, c
 		return -1, nil, err
 	}
 
-	logger.Info("CODE:", ret_code, "BODY:", string(data))
+	if resp.Header.Get("Content-Type") == "application/octet-stream" {
+		logger.Info("CODE:", ret_code, "BODY: [ Binary Data ]")
+	} else {
+		logger.Info("CODE:", ret_code, "BODY:", string(data))
+	}
+
 	return ret_code, data, nil
 }
