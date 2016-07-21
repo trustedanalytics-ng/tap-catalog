@@ -19,6 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
+	"github.com/looplab/fsm"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-go-common/logger"
@@ -39,4 +40,8 @@ func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) Error(rw web.ResponseWriter, r *web.Request, err interface{}) {
 	logger.Error("Respond500: reason: error ", err)
 	rw.WriteHeader(http.StatusInternalServerError)
+}
+
+func (c *Context) enterState(e *fsm.Event) {
+	logger.Debugf("State changed from %s to %s", e.Src, e.Dst)
 }

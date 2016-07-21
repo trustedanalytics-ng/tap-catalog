@@ -20,9 +20,12 @@ import (
 
 	"github.com/gocraft/web"
 
+	"errors"
+	"github.com/looplab/fsm"
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
 	"github.com/trustedanalytics/tapng-go-common/util"
+	"strings"
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
@@ -60,7 +63,9 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
+	reqImage.State = "PENDING"
 	imageKeyStore := c.mapper.ToKeyValue(data.Images, reqImage, true)
+
 	err = c.repository.StoreData(imageKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
@@ -77,17 +82,37 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
-	image, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
+	imageInt, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
+
+	image, ok := imageInt.(models.Image)
+	if !ok {
+		util.Respond500(rw, errors.New("Image retrieved is in wrong format"))
+		return
+	}
+
+	stateMachine := c.getImagesFSM(image.State)
 
 	patches := []models.Patch{}
 	err = util.ReadJson(req, &patches)
 	if err != nil {
 		util.Respond400(rw, err)
 		return
+	}
+
+	for _, patch := range patches {
+		if strings.EqualFold(patch.Field, "state") {
+			value := c.removeQuotes(string(patch.Value))
+
+			err = stateMachine.Event(value)
+			if err != nil {
+				util.Respond500(rw, err)
+				return
+			}
+		}
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildImagesKey(imageId), models.Image{}, patches)
@@ -102,12 +127,12 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	image, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
+	imageInt, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
-	util.WriteJson(rw, image, http.StatusOK)
+	util.WriteJson(rw, imageInt, http.StatusOK)
 }
 
 func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
@@ -122,4 +147,24 @@ func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) buildImagesKey(imageId string) string {
 	return c.mapper.ToKey(data.Images, imageId)
+}
+
+func (c *Context) getImagesFSM(initialState models.ImageState) *fsm.FSM {
+	state := string(initialState)
+	return fsm.NewFSM(state,
+		fsm.Events{
+			{Name: "BUILDING", Src: []string{"PENDING"}, Dst: "BUILDING"},
+			{Name: "ERROR", Src: []string{"BUILDING"}, Dst: "ERROR"},
+			{Name: "READY", Src: []string{"BUILDING"}, Dst: "READY"},
+		},
+		fsm.Callbacks{
+			"enter_state": func(e *fsm.Event) {
+				c.enterState(e)
+			},
+		},
+	)
+}
+
+func (c *Context) removeQuotes(value string) string {
+	return value[1 : len(value)-1]
 }
