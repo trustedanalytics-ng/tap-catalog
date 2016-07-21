@@ -16,12 +16,12 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gocraft/web"
-
-	"errors"
 	"github.com/looplab/fsm"
+
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
 	"github.com/trustedanalytics/tapng-go-common/util"
@@ -101,7 +101,7 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	template, ok := templateInt.(models.Template)
 	if !ok {
-		util.Respond500(rw, errors.New("Image retrieved is in wrong format"))
+		util.Respond500(rw, errors.New("Template retrieved is in wrong format"))
 		return
 	}
 

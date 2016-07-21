@@ -19,7 +19,9 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
+	"github.com/looplab/fsm"
 
+	"errors"
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
 	"github.com/trustedanalytics/tapng-go-common/util"
@@ -61,6 +63,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
+	reqService.State = "DEPLOYING"
 	serviceKeyStore := c.mapper.ToKeyValue(data.Services, reqService, true)
 	err = c.repository.StoreData(serviceKeyStore)
 	if err != nil {
@@ -78,9 +81,15 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	service, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
+	serviceInt, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		util.Respond500(rw, err)
+		return
+	}
+
+	service, ok := serviceInt.(models.Service)
+	if !ok {
+		util.Respond500(rw, errors.New("Service retrieved is in wrong format"))
 		return
 	}
 
@@ -88,6 +97,12 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	err = util.ReadJson(req, &patches)
 	if err != nil {
 		util.Respond400(rw, err)
+		return
+	}
+
+	err = c.allowStateChange(patches, c.getServicesFSM(service.State))
+	if err != nil {
+		util.Respond500(rw, err)
 		return
 	}
 
@@ -103,12 +118,12 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	service, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
+	serviceInt, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
-	util.WriteJson(rw, service, http.StatusOK)
+	util.WriteJson(rw, serviceInt, http.StatusOK)
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
@@ -123,4 +138,18 @@ func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) buildServiceKey(serviceId string) string {
 	return c.mapper.ToKey(data.Services, serviceId)
+}
+
+func (c *Context) getServicesFSM(initialState models.ServiceState) *fsm.FSM {
+	return fsm.NewFSM(string(initialState),
+		fsm.Events{
+			{Name: "READY", Src: []string{"DEPLOYING"}, Dst: "READY"},
+			{Name: "OFFLINE", Src: []string{"DEPLOYING"}, Dst: "OFFLINE"},
+		},
+		fsm.Callbacks{
+			"enter_state": func(e *fsm.Event) {
+				c.enterState(e)
+			},
+		},
+	)
 }
