@@ -25,7 +25,6 @@ import (
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
 	"github.com/trustedanalytics/tapng-go-common/util"
-	"strings"
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
@@ -94,8 +93,6 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	stateMachine := c.getImagesFSM(image.State)
-
 	patches := []models.Patch{}
 	err = util.ReadJson(req, &patches)
 	if err != nil {
@@ -103,16 +100,10 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	for _, patch := range patches {
-		if strings.EqualFold(patch.Field, "state") {
-			value := c.removeQuotes(string(patch.Value))
-
-			err = stateMachine.Event(value)
-			if err != nil {
-				util.Respond500(rw, err)
-				return
-			}
-		}
+	err = c.allowStateChange(patches, c.getImagesFSM(image.State))
+	if err != nil {
+		util.Respond500(rw, err)
+		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildImagesKey(imageId), models.Image{}, patches)
@@ -150,8 +141,7 @@ func (c *Context) buildImagesKey(imageId string) string {
 }
 
 func (c *Context) getImagesFSM(initialState models.ImageState) *fsm.FSM {
-	state := string(initialState)
-	return fsm.NewFSM(state,
+	return fsm.NewFSM(string(initialState),
 		fsm.Events{
 			{Name: "BUILDING", Src: []string{"PENDING"}, Dst: "BUILDING"},
 			{Name: "ERROR", Src: []string{"BUILDING"}, Dst: "ERROR"},
@@ -163,8 +153,4 @@ func (c *Context) getImagesFSM(initialState models.ImageState) *fsm.FSM {
 			},
 		},
 	)
-}
-
-func (c *Context) removeQuotes(value string) string {
-	return value[1 : len(value)-1]
 }

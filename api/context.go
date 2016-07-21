@@ -22,8 +22,10 @@ import (
 	"github.com/looplab/fsm"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
+	"github.com/trustedanalytics/tapng-catalog/models"
 	"github.com/trustedanalytics/tapng-go-common/logger"
 	"github.com/trustedanalytics/tapng-go-common/util"
+	"strings"
 )
 
 var logger = logger_wrapper.InitLogger("api")
@@ -44,4 +46,18 @@ func (c *Context) Error(rw web.ResponseWriter, r *web.Request, err interface{}) 
 
 func (c *Context) enterState(e *fsm.Event) {
 	logger.Debugf("State changed from %s to %s", e.Src, e.Dst)
+}
+
+func (c *Context) allowStateChange(patches []models.Patch, stateMachine *fsm.FSM) error {
+	for _, patch := range patches {
+		if strings.EqualFold(patch.Field, "state") {
+			value := c.removeQuotes(string(patch.Value))
+			return stateMachine.Event(value)
+		}
+	}
+	return nil
+}
+
+func (c *Context) removeQuotes(value string) string {
+	return value[1 : len(value)-1]
 }
