@@ -63,7 +63,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	reqTemplate.State = "IN_PROGRESS"
+	reqTemplate.State = models.TemplateStateInProgress
 	templateKeyStore := c.mapper.ToKeyValue(data.Templates, reqTemplate, true)
 	err = c.repository.StoreData(templateKeyStore)
 	if err != nil {

@@ -63,7 +63,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	reqService.State = "DEPLOYING"
+	reqService.State = models.ServiceStateDeploying
 	serviceKeyStore := c.mapper.ToKeyValue(data.Services, reqService, true)
 	err = c.repository.StoreData(serviceKeyStore)
 	if err != nil {

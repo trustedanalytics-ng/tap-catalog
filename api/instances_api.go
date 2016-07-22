@@ -18,8 +18,9 @@ package api
 import (
 	"net/http"
 
+	"errors"
 	"github.com/gocraft/web"
-
+	"github.com/looplab/fsm"
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
 	"github.com/trustedanalytics/tapng-go-common/util"
@@ -71,6 +72,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 
 	reqInstance.ClassId = classId
 	reqInstance.Type = instanceType
+	reqInstance.State = models.InstanceStateRequested
 
 	err = c.repository.StoreData(c.mapper.ToKeyValue(data.Instances, reqInstance, true))
 	if err != nil {
@@ -88,9 +90,15 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 
 func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
-	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
+	instanceInt, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		util.Respond500(rw, err)
+		return
+	}
+
+	instance, ok := instanceInt.(models.Instance)
+	if !ok {
+		util.Respond500(rw, errors.New("Instance retrieved is in wrong format"))
 		return
 	}
 
@@ -98,6 +106,12 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	err = util.ReadJson(req, &patches)
 	if err != nil {
 		util.Respond400(rw, err)
+		return
+	}
+
+	err = c.allowStateChange(patches, c.getInstancesFSM(instance.State))
+	if err != nil {
+		util.Respond500(rw, err)
 		return
 	}
 
@@ -113,12 +127,12 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	instance, err = c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
+	instanceInt, err = c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
-	util.WriteJson(rw, instance, http.StatusOK)
+	util.WriteJson(rw, instanceInt, http.StatusOK)
 }
 
 func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
@@ -133,4 +147,27 @@ func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) buildInstanceKey(instanceId string) string {
 	return c.mapper.ToKey(data.Instances, instanceId)
+}
+
+func (c *Context) getInstancesFSM(initialState models.InstanceState) *fsm.FSM {
+	return fsm.NewFSM(string(initialState),
+		fsm.Events{
+			{Name: "DEPLOYING", Src: []string{"REQUESTED"}, Dst: "DEPLOYING"},
+			{Name: "FAILURE", Src: []string{"DEPLOYING"}, Dst: "FAILURE"},
+			{Name: "STOPPED", Src: []string{"DEPLOYING", "STOPPING", "UNAVAILABLE"}, Dst: "STOPPED"},
+			{Name: "START_REQ", Src: []string{"STOPPED"}, Dst: "START_REQ"},
+			{Name: "STARTING", Src: []string{"START_REQ"}, Dst: "STARTING"},
+			{Name: "RUNNING", Src: []string{"STARTING"}, Dst: "RUNNING"},
+			{Name: "STOP_REQ", Src: []string{"RUNNING"}, Dst: "STOP_REQ"},
+			{Name: "STOPPING", Src: []string{"STOP_REQ"}, Dst: "STOPPING"},
+			{Name: "DESTROY_REQ", Src: []string{"STOPPED", "FAILURE", "UNAVAILABLE"}, Dst: "DESTROY_REQ"},
+			{Name: "DESTROYING", Src: []string{"DESTROY_REQ"}, Dst: "DESTROYING"},
+			{Name: "UNAVAILABLE", Src: []string{"STOPPED"}, Dst: "UNAVAILABLE"},
+		},
+		fsm.Callbacks{
+			"enter_state": func(e *fsm.Event) {
+				c.enterState(e)
+			},
+		},
+	)
 }
