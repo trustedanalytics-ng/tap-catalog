@@ -13,6 +13,7 @@ type TapCatalogApi interface {
 	GetService(serviceId string) (models.Service, error)
 	UpdateService(serviceId string, patches []models.Patch) (models.Service, error)
 	UpdatePlan(serviceId, planId string, patches []models.Patch) (models.ServicePlan, error)
+	AddApplication(application models.Application) (models.Application, error)
 	GetApplication(applicationId string) (models.Application, error)
 	UpdateApplication(applicationId string, patches []models.Patch) (models.Application, error)
 	AddTemplate(template models.Template) (models.Template, error)
