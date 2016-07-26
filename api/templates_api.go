@@ -16,9 +16,11 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gocraft/web"
+	"github.com/looplab/fsm"
 
 	"github.com/trustedanalytics/tapng-catalog/data"
 	"github.com/trustedanalytics/tapng-catalog/models"
@@ -61,6 +63,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
+	reqTemplate.State = models.TemplateStateInProgress
 	templateKeyStore := c.mapper.ToKeyValue(data.Templates, reqTemplate, true)
 	err = c.repository.StoreData(templateKeyStore)
 	if err != nil {
@@ -90,9 +93,15 @@ func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
-	template, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
+	templateInt, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
 		util.Respond500(rw, err)
+		return
+	}
+
+	template, ok := templateInt.(models.Template)
+	if !ok {
+		util.Respond500(rw, errors.New("Template retrieved is in wrong format"))
 		return
 	}
 
@@ -100,6 +109,12 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	err = util.ReadJson(req, &patches)
 	if err != nil {
 		util.Respond400(rw, err)
+		return
+	}
+
+	err = c.allowStateChange(patches, c.getTemplatesFSM(template.State))
+	if err != nil {
+		util.Respond500(rw, err)
 		return
 	}
 
@@ -115,14 +130,28 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	template, err = c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
+	templateInt, err = c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
-	util.WriteJson(rw, template, http.StatusOK)
+	util.WriteJson(rw, templateInt, http.StatusOK)
 }
 
 func (c *Context) buildTemplateKey(templateId string) string {
 	return c.mapper.ToKey(data.Templates, templateId)
+}
+
+func (c *Context) getTemplatesFSM(initialState models.TemplateState) *fsm.FSM {
+	return fsm.NewFSM(string(initialState),
+		fsm.Events{
+			{Name: "READY", Src: []string{"IN_PROGRESS"}, Dst: "READY"},
+			{Name: "UNAVAILABLE", Src: []string{"IN_PROGRESS"}, Dst: "UNAVAILABLE"},
+		},
+		fsm.Callbacks{
+			"enter_state": func(e *fsm.Event) {
+				c.enterState(e)
+			},
+		},
+	)
 }

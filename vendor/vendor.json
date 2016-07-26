@@ -93,6 +93,12 @@
 			"revisionTime": "2016-01-05T22:08:40Z"
 		},
 		{
+			"checksumSHA1": "XngwoAVBxqyX+wB+Rvl/dOzTC/E=",
+			"path": "github.com/looplab/fsm",
+			"revision": "c77ccaafd443c852ceb0b4b0b5258235286e85a0",
+			"revisionTime": "2015-11-09T07:25:19Z"
+		},
+		{
 			"checksumSHA1": "gcLub3oB+u4QrOJZcYmk/y2AP4k=",
 			"path": "github.com/nu7hatch/gouuid",
 			"revision": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3",
