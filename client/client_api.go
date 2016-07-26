@@ -22,6 +22,7 @@ type TapCatalogApi interface {
 	GetServices() ([]models.Service, error)
 	AddServiceInstance(serviceId string, instance models.Instance) (models.Instance, error)
 	UpdateTemplate(templateId string, patches []models.Patch) (models.Template, error)
+	DeleteInstance(instanceId string) error
 }
 
 type TapCatalogApiConnector struct {
