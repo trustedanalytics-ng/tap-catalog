@@ -31,6 +31,6 @@ func (c *TapCatalogApiConnector) AddServiceInstance(serviceId string, instance m
 
 func (c *TapCatalogApiConnector) DeleteInstance(instanceId string) error {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, instances, instanceId))
-	err := brokerHttp.DeleteModel(connector, http.StatusAccepted)
+	err := brokerHttp.DeleteModel(connector, http.StatusNoContent)
 	return err
 }
