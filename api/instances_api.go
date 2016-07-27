@@ -27,12 +27,82 @@ import (
 )
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
+
 	result, err := c.repository.GetListOfData(data.Instances, models.Instance{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 	util.WriteJson(rw, result, http.StatusOK)
+}
+
+func (c *Context) ServicesInstances(rw web.ResponseWriter, req *web.Request) {
+
+	instances, err := c.getFilteredInstances(models.InstanceTypeService, "")
+	if err != nil {
+		util.Respond500(rw, err)
+		return
+	}
+	util.WriteJson(rw, instances, http.StatusOK)
+}
+
+func (c *Context) ServiceInstances(rw web.ResponseWriter, req *web.Request) {
+
+	serviceId := req.PathParams["serviceId"]
+	instances, err := c.getFilteredInstances(models.InstanceTypeService, serviceId)
+	if err != nil {
+		util.Respond500(rw, err)
+		return
+	}
+	util.WriteJson(rw, instances, http.StatusOK)
+}
+
+func (c *Context) ApplicationsInstances(rw web.ResponseWriter, req *web.Request) {
+
+	instances, err := c.getFilteredInstances(models.InstanceTypeApplication, "")
+	if err != nil {
+		util.Respond500(rw, err)
+		return
+	}
+	util.WriteJson(rw, instances, http.StatusOK)
+}
+
+func (c *Context) ApplicationInstances(rw web.ResponseWriter, req *web.Request) {
+
+	appId := req.PathParams["applicationId"]
+	instances, err := c.getFilteredInstances(models.InstanceTypeApplication, appId)
+	if err != nil {
+		util.Respond500(rw, err)
+		return
+	}
+	util.WriteJson(rw, instances, http.StatusOK)
+}
+
+func (c *Context) getFilteredInstances(expectedInstanceType models.InstanceType, expectedClassId string) ([]models.Instance, error) {
+
+	filteredInstances := []models.Instance{}
+
+	result, err := c.repository.GetListOfData(data.Instances, models.Instance{})
+
+	if err != nil {
+		return filteredInstances, err
+	}
+
+	for _, el := range result {
+
+		instance, ok := el.(models.Instance)
+		if !ok {
+			return filteredInstances, errors.New("Instance retrieved is in wrong format")
+		}
+
+		if instance.Type == expectedInstanceType &&
+			(expectedClassId == "" || instance.ClassId == expectedClassId) {
+
+			filteredInstances = append(filteredInstances, instance)
+		}
+	}
+	return filteredInstances, nil
+
 }
 
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {

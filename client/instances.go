@@ -8,6 +8,20 @@ import (
 	brokerHttp "github.com/trustedanalytics/tapng-go-common/http"
 )
 
+func (c *TapCatalogApiConnector) ListApplicationsInstances() ([]models.Instance, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, applications, "instances"))
+	result := &[]models.Instance{}
+	err := brokerHttp.GetModel(connector, http.StatusOK, result)
+	return *result, err
+}
+
+func (c *TapCatalogApiConnector) ListServicesInstances() ([]models.Instance, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, services, "instances"))
+	result := &[]models.Instance{}
+	err := brokerHttp.GetModel(connector, http.StatusOK, result)
+	return *result, err
+}
+
 func (c *TapCatalogApiConnector) GetInstance(instanceId string) (models.Instance, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, instances, instanceId))
 	result := &models.Instance{}

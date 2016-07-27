@@ -80,7 +80,8 @@ func route(router *web.Router) {
 	router.Patch("/services/:serviceId/plans/:planId", (*api.Context).PatchPlan)
 	router.Delete("/services/:serviceId/plans/:planId", (*api.Context).DeletePlan)
 
-	router.Get("/services/:serviceId/instances", (*api.Context).Instances)
+	router.Get("/services/instances", (*api.Context).ServicesInstances)
+	router.Get("/services/:serviceId/instances", (*api.Context).ServiceInstances)
 	router.Get("/services/:serviceId/instances/:instanceId", (*api.Context).GetInstance)
 	router.Post("/services/:serviceId/instances", (*api.Context).AddServiceInstance)
 	router.Patch("/services/:serviceId/instances/:instanceId", (*api.Context).PatchInstance)
@@ -92,7 +93,8 @@ func route(router *web.Router) {
 	router.Patch("/applications/:applicationId", (*api.Context).PatchApplication)
 	router.Delete("/applications/:applicationId", (*api.Context).DeleteApplication)
 
-	router.Get("/applications/:applicationId/instances", (*api.Context).Instances)
+	router.Get("/applications/instances", (*api.Context).ApplicationsInstances)
+	router.Get("/applications/:applicationId/instances", (*api.Context).ApplicationInstances)
 	router.Get("/applications/:applicationId/instances/:instanceId", (*api.Context).GetInstance)
 	router.Post("/applications/:applicationId/instances", (*api.Context).AddApplicationInstance)
 	router.Patch("/applications/:applicationId/instances/:instanceId", (*api.Context).PatchInstance)
