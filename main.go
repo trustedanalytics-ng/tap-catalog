@@ -116,4 +116,6 @@ func route(router *web.Router) {
 	router.Get("/templates/:templateId", (*api.Context).GetTemplate)
 	router.Delete("/templates/:templateId", (*api.Context).DeleteTemplate)
 	router.Patch("/templates/:templateId", (*api.Context).PatchTemplate)
+
+	router.Get("/healthz", (*api.Context).GetCatalogHealth)
 }

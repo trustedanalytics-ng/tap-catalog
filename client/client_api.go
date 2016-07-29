@@ -29,6 +29,7 @@ type TapCatalogApi interface {
 	UpdatePlan(serviceId, planId string, patches []models.Patch) (models.ServicePlan, error)
 	UpdateService(serviceId string, patches []models.Patch) (models.Service, error)
 	UpdateTemplate(templateId string, patches []models.Patch) (models.Template, error)
+	GetCatalogHealth() error
 }
 
 type TapCatalogApiConnector struct {
@@ -46,6 +47,7 @@ const (
 	applications = apiPrefix + apiVersion + "/applications"
 	templates    = apiPrefix + apiVersion + "/templates"
 	images       = apiPrefix + apiVersion + "/images"
+	healthz      = apiPrefix + apiVersion + "/healthz"
 )
 
 func NewTapCatalogApiWithBasicAuth(address, username, password string) (*TapCatalogApiConnector, error) {
