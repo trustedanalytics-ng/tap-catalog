@@ -20,7 +20,7 @@ push_docker: docker_build
 	docker tag tapng-catalog $(REPOSITORY_URL)/tapng-catalog:latest
 	docker push $(REPOSITORY_URL)/tapng-catalog:latest
 
-kubernetes_deploy:
+kubernetes_deploy: docker_build
 	kubectl create -f configmap.yaml
 	kubectl create -f service.yaml
 	kubectl create -f deployment.yaml

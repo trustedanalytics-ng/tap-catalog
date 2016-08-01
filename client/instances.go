@@ -43,6 +43,13 @@ func (c *TapCatalogApiConnector) AddServiceInstance(serviceId string, instance m
 	return *result, err
 }
 
+func (c *TapCatalogApiConnector) AddApplicationInstance(applicationId string, instance models.Instance) (models.Instance, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s/instances", c.Address, applications, applicationId))
+	result := &models.Instance{}
+	err := brokerHttp.AddModel(connector, instance, http.StatusCreated, result)
+	return *result, err
+}
+
 func (c *TapCatalogApiConnector) DeleteInstance(instanceId string) error {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, instances, instanceId))
 	err := brokerHttp.DeleteModel(connector, http.StatusNoContent)
