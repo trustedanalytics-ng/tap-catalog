@@ -90,10 +90,7 @@ func (c *Context) getFilteredInstances(expectedInstanceType models.InstanceType,
 
 	for _, el := range result {
 
-		instance, ok := el.(models.Instance)
-		if !ok {
-			return filteredInstances, errors.New("Instance retrieved is in wrong format")
-		}
+		instance, _ := el.(models.Instance)
 
 		if instance.Type == expectedInstanceType &&
 			(expectedClassId == "" || instance.ClassId == expectedClassId) {
@@ -102,6 +99,26 @@ func (c *Context) getFilteredInstances(expectedInstanceType models.InstanceType,
 		}
 	}
 	return filteredInstances, nil
+
+}
+
+func (c *Context) isInstanceExistsWithSameName(expectedName string) (bool, error) {
+
+	result, err := c.repository.GetListOfData(data.Instances, models.Instance{})
+	if err != nil {
+		return false, err
+	}
+
+	for _, el := range result {
+
+		instance, _ := el.(models.Instance)
+
+		if instance.Name == expectedName {
+			return true, nil
+		}
+	}
+
+	return false, nil
 
 }
 
@@ -143,6 +160,16 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 	err = data.CheckIfDNSLabelCompatible(reqInstance.Name)
 	if err != nil {
 		util.Respond400(rw, err)
+		return
+	}
+
+	exists, err := c.isInstanceExistsWithSameName(reqInstance.Name)
+	if err != nil {
+		util.Respond500(rw, err)
+		return
+	}
+	if exists {
+		util.WriteJson(rw, "", http.StatusConflict)
 		return
 	}
 
