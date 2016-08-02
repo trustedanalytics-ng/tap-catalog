@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/nu7hatch/gouuid"
@@ -31,6 +32,19 @@ func CheckIfIdFieldIsEmpty(entity interface{}) error {
 	} else {
 		return nil
 	}
+}
+
+func CheckIfDNSLabelCompatible(content string) error {
+
+	const dnsLabelRegexp = "[A-Za-z_][A-Za-z0-9_]*"
+
+	ok, _ := regexp.MatchString(dnsLabelRegexp, content)
+
+	if !ok {
+		return errors.New(content + " doesn't match DNS label rule: " + dnsLabelRegexp)
+	}
+
+	return nil
 }
 
 func getStructId(structObject reflect.Value) string {

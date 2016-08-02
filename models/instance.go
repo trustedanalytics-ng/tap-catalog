@@ -9,6 +9,7 @@ func init() {
 
 type Instance struct {
 	Id         string             `json:"id"`
+	Name       string             `json:"name"`
 	Type       InstanceType       `json:"type"`
 	ClassId    string             `json:"classId"`
 	Bindings   []InstanceBindings `json:"bindings"`

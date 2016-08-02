@@ -140,6 +140,12 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
+	err = data.CheckIfDNSLabelCompatible(reqInstance.Name)
+	if err != nil {
+		util.Respond400(rw, err)
+		return
+	}
+
 	reqInstance.ClassId = classId
 	reqInstance.Type = instanceType
 	reqInstance.State = models.InstanceStateRequested
