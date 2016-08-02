@@ -48,6 +48,26 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, result, http.StatusOK)
 }
 
+func (c *Context) isServiceExistsWithSameName(expectedName string) (bool, error) {
+
+	result, err := c.repository.GetListOfData(data.Services, models.Service{})
+	if err != nil {
+		return false, err
+	}
+
+	for _, el := range result {
+
+		service, _ := el.(models.Service)
+
+		if service.Name == expectedName {
+			return true, nil
+		}
+	}
+
+	return false, nil
+
+}
+
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	reqService := &models.Service{}
 
@@ -60,6 +80,16 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	err = data.CheckIfIdFieldIsEmpty(reqService)
 	if err != nil {
 		util.Respond400(rw, err)
+		return
+	}
+
+	exists, err := c.isServiceExistsWithSameName(reqService.Name)
+	if err != nil {
+		util.Respond500(rw, err)
+		return
+	}
+	if exists {
+		util.WriteJson(rw, "", http.StatusConflict)
 		return
 	}
 
