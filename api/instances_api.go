@@ -226,7 +226,7 @@ func (c *Context) getInstancesFSM(initialState models.InstanceState) *fsm.FSM {
 			{Name: "FAILURE", Src: []string{"DEPLOYING"}, Dst: "FAILURE"},
 			{Name: "STOPPED", Src: []string{"DEPLOYING", "STOPPING", "UNAVAILABLE"}, Dst: "STOPPED"},
 			{Name: "START_REQ", Src: []string{"STOPPED"}, Dst: "START_REQ"},
-			{Name: "STARTING", Src: []string{"START_REQ"}, Dst: "STARTING"},
+			{Name: "STARTING", Src: []string{"START_REQ", "STOPPED"}, Dst: "STARTING"},
 			{Name: "RUNNING", Src: []string{"STARTING"}, Dst: "RUNNING"},
 			{Name: "STOP_REQ", Src: []string{"RUNNING"}, Dst: "STOP_REQ"},
 			{Name: "STOPPING", Src: []string{"STOP_REQ"}, Dst: "STOPPING"},
