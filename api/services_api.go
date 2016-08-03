@@ -48,26 +48,6 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, result, http.StatusOK)
 }
 
-func (c *Context) isServiceExistsWithSameName(expectedName string) (bool, error) {
-
-	result, err := c.repository.GetListOfData(data.Services, models.Service{})
-	if err != nil {
-		return false, err
-	}
-
-	for _, el := range result {
-
-		service, _ := el.(models.Service)
-
-		if service.Name == expectedName {
-			return true, nil
-		}
-	}
-
-	return false, nil
-
-}
-
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	reqService := &models.Service{}
 
