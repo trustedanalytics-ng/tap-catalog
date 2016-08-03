@@ -39,6 +39,6 @@ func (c *TapCatalogApiConnector) UpdatePlan(serviceId, planId string, patches []
 func (c *TapCatalogApiConnector) AddService(service models.Service) (models.Service, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s", c.Address, services))
 	result := &models.Service{}
-	err := brokerHttp.AddModel(connector, service, http.StatusCreated, result)
+	err := brokerHttp.PostModel(connector, service, http.StatusCreated, result)
 	return *result, err
 }

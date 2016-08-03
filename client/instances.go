@@ -46,14 +46,14 @@ func (c *TapCatalogApiConnector) UpdateInstance(instanceId string, patches []mod
 func (c *TapCatalogApiConnector) AddServiceInstance(serviceId string, instance models.Instance) (models.Instance, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s/instances", c.Address, services, serviceId))
 	result := &models.Instance{}
-	err := brokerHttp.AddModel(connector, instance, http.StatusCreated, result)
+	err := brokerHttp.PostModel(connector, instance, http.StatusCreated, result)
 	return *result, err
 }
 
 func (c *TapCatalogApiConnector) AddApplicationInstance(applicationId string, instance models.Instance) (models.Instance, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s/instances", c.Address, applications, applicationId))
 	result := &models.Instance{}
-	err := brokerHttp.AddModel(connector, instance, http.StatusCreated, result)
+	err := brokerHttp.PostModel(connector, instance, http.StatusCreated, result)
 	return *result, err
 }
 

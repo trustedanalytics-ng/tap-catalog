@@ -27,6 +27,10 @@ type BasicAuth struct {
 	Password string
 }
 
+func RestGETWithBody(url string, body string, basicAuth *BasicAuth, client *http.Client) (int, []byte, error) {
+	return makeRequest("GET", url, body, "application/json", basicAuth, client)
+}
+
 func RestGET(url string, basicAuth *BasicAuth, client *http.Client) (int, []byte, error) {
 	return makeRequest("GET", url, "", "application/json", basicAuth, client)
 }

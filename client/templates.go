@@ -11,7 +11,7 @@ import (
 func (c *TapCatalogApiConnector) AddTemplate(template models.Template) (models.Template, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s", c.Address, templates))
 	result := &models.Template{}
-	err := brokerHttp.AddModel(connector, template, http.StatusCreated, result)
+	err := brokerHttp.PostModel(connector, template, http.StatusCreated, result)
 	return *result, err
 }
 

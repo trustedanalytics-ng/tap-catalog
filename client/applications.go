@@ -11,7 +11,7 @@ import (
 func (c *TapCatalogApiConnector) AddApplication(application models.Application) (models.Application, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s", c.Address, applications))
 	result := &models.Application{}
-	err := brokerHttp.AddModel(connector, application, http.StatusCreated, result)
+	err := brokerHttp.PostModel(connector, application, http.StatusCreated, result)
 	return *result, err
 }
 

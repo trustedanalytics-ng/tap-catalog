@@ -11,7 +11,7 @@ import (
 func (c *TapCatalogApiConnector) AddImage(image models.Image) (models.Image, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s", c.Address, images))
 	result := &models.Image{}
-	err := brokerHttp.AddModel(connector, image, http.StatusCreated, result)
+	err := brokerHttp.PostModel(connector, image, http.StatusCreated, result)
 	return *result, err
 }
 
