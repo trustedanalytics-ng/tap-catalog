@@ -22,6 +22,13 @@ func (c *TapCatalogApiConnector) ListServicesInstances() ([]models.Instance, err
 	return *result, err
 }
 
+func (c *TapCatalogApiConnector) ListInstances() ([]models.Instance, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s", c.Address, instances))
+	result := &[]models.Instance{}
+	err := brokerHttp.GetModel(connector, http.StatusOK, result)
+	return *result, err
+}
+
 func (c *TapCatalogApiConnector) GetInstance(instanceId string) (models.Instance, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, instances, instanceId))
 	result := &models.Instance{}

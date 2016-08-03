@@ -16,12 +16,14 @@ type TapCatalogApi interface {
 	AddTemplate(template models.Template) (models.Template, error)
 	DeleteInstance(instanceId string) error
 	GetApplication(applicationId string) (models.Application, error)
+	GetCatalogHealth() error
 	GetImage(imageId string) (models.Image, error)
 	GetInstance(instanceId string) (models.Instance, error)
 	GetService(serviceId string) (models.Service, error)
 	GetServices() ([]models.Service, error)
 	ListApplications() ([]models.Application, error)
 	ListApplicationsInstances() ([]models.Instance, error)
+	ListInstances() ([]models.Instance, error)
 	ListServicesInstances() ([]models.Instance, error)
 	UpdateApplication(applicationId string, patches []models.Patch) (models.Application, error)
 	UpdateImage(imageId string, patches []models.Patch) (models.Image, error)
@@ -29,7 +31,6 @@ type TapCatalogApi interface {
 	UpdatePlan(serviceId, planId string, patches []models.Patch) (models.ServicePlan, error)
 	UpdateService(serviceId string, patches []models.Patch) (models.Service, error)
 	UpdateTemplate(templateId string, patches []models.Patch) (models.Template, error)
-	GetCatalogHealth() error
 }
 
 type TapCatalogApiConnector struct {
