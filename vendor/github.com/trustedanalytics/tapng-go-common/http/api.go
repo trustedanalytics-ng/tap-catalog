@@ -74,6 +74,28 @@ func AddModel(apiConnector ApiConnector, requestBody interface{}, expectedStatus
 	return nil
 }
 
+func PutModel(apiConnector ApiConnector, requestBody interface{}, expectedStatus int, result interface{}) error {
+	requestBodyByte, err := json.Marshal(requestBody)
+	if err != nil {
+		return err
+	}
+
+	status, body, err := RestPUT(apiConnector.Url, string(requestBodyByte), apiConnector.BasicAuth, apiConnector.Client)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(body, result)
+	if err != nil {
+		return err
+	}
+
+	if status != expectedStatus {
+		return getWrongStatusError(status, expectedStatus, string(body))
+	}
+	return nil
+}
+
 func DeleteModel(apiConnector ApiConnector, expectedStatus int) error {
 	status, body, err := RestDELETE(apiConnector.Url, "", apiConnector.BasicAuth, apiConnector.Client)
 	if err != nil {

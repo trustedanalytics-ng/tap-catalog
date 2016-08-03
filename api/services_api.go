@@ -89,7 +89,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 	if exists {
-		util.WriteJson(rw, "", http.StatusConflict)
+		util.Respond409(rw, err)
 		return
 	}
 

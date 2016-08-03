@@ -49,6 +49,6 @@ func InitLogger(module string) *logging.Logger {
 	backend1Leveled.SetLevel(logLevel, module)
 
 	// Set the backends to be used.
-	logging.SetBackend(backend1Leveled)
+	logger.SetBackend(backend1Leveled)
 	return logger
 }

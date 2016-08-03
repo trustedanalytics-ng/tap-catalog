@@ -169,7 +169,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 	if exists {
-		util.WriteJson(rw, "", http.StatusConflict)
+		util.Respond409(rw, err)
 		return
 	}
 
