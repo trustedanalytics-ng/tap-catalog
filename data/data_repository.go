@@ -2,6 +2,7 @@ package data
 
 import (
 	"github.com/trustedanalytics/tapng-catalog/etcd"
+	"reflect"
 )
 
 type RepositoryConnector struct {
@@ -101,4 +102,23 @@ func (t *RepositoryConnector) CreateDirs() error {
 		}
 	}
 	return nil
+}
+
+func (t *RepositoryConnector) IsExistByName(expectedName string, model interface{}, key string) (bool, error) {
+
+	result, err := t.GetListOfData(key, model)
+	if err != nil {
+		return false, err
+	}
+
+	for _, el := range result {
+
+		nameField := reflect.ValueOf(el).FieldByName("Name").String()
+
+		if nameField == expectedName {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

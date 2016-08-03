@@ -83,13 +83,13 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	exists, err := c.isServiceExistsWithSameName(reqService.Name)
+	exists, err := c.repository.IsExistByName(reqService.Name, models.Service{}, data.Services)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 	if exists {
-		util.Respond409(rw, err)
+		util.Respond409(rw, errors.New("service with name: "+reqService.Name+" already exists!"))
 		return
 	}
 

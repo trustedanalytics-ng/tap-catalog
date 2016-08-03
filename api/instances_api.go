@@ -102,26 +102,6 @@ func (c *Context) getFilteredInstances(expectedInstanceType models.InstanceType,
 
 }
 
-func (c *Context) isInstanceExistsWithSameName(expectedName string) (bool, error) {
-
-	result, err := c.repository.GetListOfData(data.Instances, models.Instance{})
-	if err != nil {
-		return false, err
-	}
-
-	for _, el := range result {
-
-		instance, _ := el.(models.Instance)
-
-		if instance.Name == expectedName {
-			return true, nil
-		}
-	}
-
-	return false, nil
-
-}
-
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 
@@ -163,13 +143,13 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
-	exists, err := c.isInstanceExistsWithSameName(reqInstance.Name)
+	exists, err := c.repository.IsExistByName(reqInstance.Name, models.Instance{}, data.Instances)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 	if exists {
-		util.Respond409(rw, err)
+		util.Respond409(rw, errors.New("instance with name: "+reqInstance.Name+" already exists!"))
 		return
 	}
 
