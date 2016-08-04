@@ -29,11 +29,6 @@ kubernetes_update: docker_build
 	kubectl delete -f deployment.yaml
 	kubectl create -f deployment.yaml
 
-deps_update: verify_gopath
-	$(GOBIN)/govendor remove +all
-	$(GOBIN)/govendor add +external
-	@echo "Done"
-
 bin/govendor: verify_gopath
 	go get -v -u github.com/kardianos/govendor
 
@@ -43,9 +38,13 @@ deps_fetch_specific: bin/govendor
 		echo " make deps_fetch_specific DEP_URL=github.com/nu7hatch/gouuid";\
 	exit 1 ;\
 	fi
-	@echo "Fetchinf specific deps in newest versions"
-
+	@echo "Fetching specific dependency in newest versions"
 	$(GOBIN)/govendor fetch -v $(DEP_URL)
+
+deps_update_tapng: verify_gopath
+	$(GOBIN)/govendor update github.com/trustedanalytics/...
+	rm -Rf vendor/github.com/trustedanalytics/tapng-catalog
+	@echo "Done"
 
 verify_gopath:
 	@if [ -z "$(GOPATH)" ] || [ "$(GOPATH)" = "" ]; then\
@@ -67,3 +66,4 @@ build_anywhere: prepare_dirs
 	GOPATH=$(GOPATH) CGO_ENABLED=0 go install -tags netgo $(APP_DIR_LIST)
 	rm -Rf application && mkdir application
 	cp $(GOPATH)/bin/tapng-catalog ./application/tapng-catalog
+	rm -Rf ./temp
