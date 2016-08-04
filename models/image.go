@@ -13,6 +13,7 @@ const (
 	ImageTypeJava   ImageType = "JAVA"
 	ImageTypeGo     ImageType = "GO"
 	ImageTypeNodeJs ImageType = "NODEJS"
+	ImageTypePython ImageType = "PYTHON"
 )
 
 type ImageState string
