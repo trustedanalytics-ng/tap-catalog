@@ -63,6 +63,12 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
+	err = data.CheckIfDNSLabelCompatible(reqService.Name)
+	if err != nil {
+		util.Respond400(rw, err)
+		return
+	}
+
 	exists, err := c.repository.IsExistByName(reqService.Name, models.Service{}, data.Services)
 	if err != nil {
 		util.Respond500(rw, err)
