@@ -61,3 +61,13 @@ func (c *Context) allowStateChange(patches []models.Patch, stateMachine *fsm.FSM
 func (c *Context) removeQuotes(value string) string {
 	return value[1 : len(value)-1]
 }
+
+func handleGetDataError(rw web.ResponseWriter, err error) {
+	if err != nil {
+		if strings.Contains(err.Error(), keyNotFoundMessage) {
+			util.Respond404(rw, err)
+		} else {
+			util.Respond500(rw, err)
+		}
+	}
+}

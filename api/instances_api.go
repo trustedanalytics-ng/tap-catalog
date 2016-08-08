@@ -16,9 +16,9 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
-	"errors"
 	"github.com/gocraft/web"
 	"github.com/looplab/fsm"
 	"github.com/trustedanalytics/tapng-catalog/data"
@@ -51,7 +51,7 @@ func (c *Context) ServiceInstances(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	instances, err := c.getFilteredInstances(models.InstanceTypeService, serviceId)
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, instances, http.StatusOK)
@@ -61,7 +61,7 @@ func (c *Context) ApplicationsInstances(rw web.ResponseWriter, req *web.Request)
 
 	instances, err := c.getFilteredInstances(models.InstanceTypeApplication, "")
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, instances, http.StatusOK)
@@ -72,7 +72,7 @@ func (c *Context) ApplicationInstances(rw web.ResponseWriter, req *web.Request) 
 	appId := req.PathParams["applicationId"]
 	instances, err := c.getFilteredInstances(models.InstanceTypeApplication, appId)
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, instances, http.StatusOK)
@@ -107,7 +107,7 @@ func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 
@@ -165,7 +165,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 
 	instance, err := c.repository.GetData(c.buildInstanceKey(reqInstance.Id), models.Instance{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, instance, http.StatusCreated)
@@ -175,7 +175,7 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 	instanceInt, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 
@@ -212,7 +212,7 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 
 	instanceInt, err = c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, instanceInt, http.StatusOK)
@@ -222,7 +222,7 @@ func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 	err := c.repository.DeleteData(c.buildInstanceKey(instanceId))
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, "", http.StatusNoContent)

@@ -41,7 +41,7 @@ func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, result, http.StatusOK)
@@ -73,7 +73,7 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 
 	image, err := c.repository.GetData(c.buildImagesKey(reqImage.Id), models.Image{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, image, http.StatusCreated)
@@ -83,7 +83,7 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	imageInt, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 
@@ -120,7 +120,7 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 
 	imageInt, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, imageInt, http.StatusOK)
@@ -130,7 +130,7 @@ func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	err := c.repository.DeleteData(c.buildImagesKey(imageId))
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, "", http.StatusNoContent)

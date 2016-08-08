@@ -41,7 +41,7 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 
@@ -89,7 +89,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 
 	service, err := c.repository.GetData(c.buildServiceKey(reqService.Id), models.Service{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, service, http.StatusCreated)
@@ -99,7 +99,7 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	serviceInt, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 
@@ -136,7 +136,7 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 
 	serviceInt, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, serviceInt, http.StatusOK)
@@ -146,7 +146,7 @@ func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	err := c.repository.DeleteData(c.buildServiceKey(serviceId))
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, serviceId, http.StatusNoContent)

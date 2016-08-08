@@ -41,7 +41,7 @@ func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	result, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	template, err := c.repository.GetData(c.buildTemplateKey(reqTemplate.Id), models.Template{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, template, http.StatusCreated)
@@ -84,7 +84,7 @@ func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	err := c.repository.DeleteData(c.buildTemplateKey(templateId))
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 
@@ -95,7 +95,7 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 	templateInt, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 
@@ -132,7 +132,7 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	templateInt, err = c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
-		util.Respond500(rw, err)
+		handleGetDataError(rw, err)
 		return
 	}
 	util.WriteJson(rw, templateInt, http.StatusOK)
