@@ -43,6 +43,7 @@ func main() {
 
 	r := web.New(context)
 	r.Middleware(web.LoggerMiddleware)
+	r.Get("/healthz", api.Context.GetCatalogHealth)
 
 	apiRouter := r.Subrouter(context, "/api")
 
@@ -117,5 +118,4 @@ func route(router *web.Router) {
 	router.Delete("/templates/:templateId", (*api.Context).DeleteTemplate)
 	router.Patch("/templates/:templateId", (*api.Context).PatchTemplate)
 
-	router.Get("/healthz", (*api.Context).GetCatalogHealth)
 }
