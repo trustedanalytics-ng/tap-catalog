@@ -43,7 +43,7 @@ func main() {
 
 	r := web.New(context)
 	r.Middleware(web.LoggerMiddleware)
-	r.Get("/healthz", api.Context.GetCatalogHealth)
+	r.Get("/healthz", context.GetCatalogHealth)
 
 	apiRouter := r.Subrouter(context, "/api")
 
