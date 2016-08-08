@@ -20,15 +20,15 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"strings"
 
 	"github.com/dvsekhvalnov/jose2go"
 	jwtRsa "github.com/dvsekhvalnov/jose2go/keys/rsa"
 	"github.com/gocraft/web"
+
+	"github.com/trustedanalytics/tapng-go-common/util"
 )
 
 type TapJWTToken struct {
@@ -55,8 +55,7 @@ var publicKey *rsa.PublicKey
 func (c *Context) BasicAuthorizeMiddleware(rw web.ResponseWriter, req *web.Request, next web.NextMiddlewareFunc) {
 	username, password, is_ok := req.BasicAuth()
 	if !is_ok || username != os.Getenv("CATALOG_USER") || password != os.Getenv("CATALOG_PASS") {
-		rw.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(rw, "%s", `{"error":"invalid basic auth credentials"}`)
+		util.RespondUnauthorized(rw)
 		return
 	}
 	c.mapper.Username = username
@@ -68,7 +67,7 @@ func (c *Context) JWTAuthorizeMiddleware(rw web.ResponseWriter, req *web.Request
 		next(rw, req)
 		return
 	} else {
-		rw.WriteHeader(http.StatusUnauthorized)
+		util.RespondUnauthorized(rw)
 		return
 	}
 	next(rw, req)

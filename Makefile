@@ -2,7 +2,7 @@ APDIR=$(shell go list ./... | grep -v /vendor/)
 GOBIN=$(GOPATH)/bin
 
 build:
-	CGO_ENABLED=0 go install -tags netgo ${APDIR}
+	CGO_ENABLED=0 go build -tags netgo ${APDIR}
 	go fmt $(APDIR)
 
 run: build
@@ -63,7 +63,7 @@ prepare_dirs:
 build_anywhere: prepare_dirs
 	$(eval GOPATH=$(shell cd ./temp; pwd))
 	$(eval APP_DIR_LIST=$(shell GOPATH=$(GOPATH) go list ./temp/src/github.com/trustedanalytics/tapng-catalog/... | grep -v /vendor/))
-	GOPATH=$(GOPATH) CGO_ENABLED=0 go install -tags netgo $(APP_DIR_LIST)
+	GOPATH=$(GOPATH) CGO_ENABLED=0 go build -tags netgo $(APP_DIR_LIST)
 	rm -Rf application && mkdir application
-	cp $(GOPATH)/bin/tapng-catalog ./application/tapng-catalog
+	cp -RL ./temp/src/github.com/trustedanalytics/tapng-catalog/tapng-catalog ./application/tapng-catalog
 	rm -Rf ./temp
