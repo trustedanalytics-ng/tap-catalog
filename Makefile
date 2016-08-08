@@ -65,5 +65,5 @@ build_anywhere: prepare_dirs
 	$(eval APP_DIR_LIST=$(shell GOPATH=$(GOPATH) go list ./temp/src/github.com/trustedanalytics/tapng-catalog/... | grep -v /vendor/))
 	GOPATH=$(GOPATH) CGO_ENABLED=0 go build -tags netgo $(APP_DIR_LIST)
 	rm -Rf application && mkdir application
-	cp -RL ./temp/src/github.com/trustedanalytics/tapng-catalog/tapng-catalog ./application/tapng-catalog
+	cp -RL ./tapng-catalog ./application/tapng-catalog
 	rm -Rf ./temp
