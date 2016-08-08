@@ -5,15 +5,13 @@ build:
 	CGO_ENABLED=0 go build -tags netgo ${APDIR}
 	go fmt $(APDIR)
 
-run: build
+run: build_anywhere
 	${GOPATH}/bin/tapng-catalog
 
 run-local: build
 	CATALOG_PORT=8083 CATALOG_USER=admin CATALOG_PASS=password ${GOPATH}/bin/tapng-catalog
 
-docker_build: build
-	rm -Rf application && mkdir application
-	cp -Rf $(GOBIN)/tapng-catalog application/
+docker_build: build_anywhere
 	docker build -t tapng-catalog .
 
 push_docker: docker_build
