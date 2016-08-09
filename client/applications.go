@@ -35,3 +35,9 @@ func (c *TapCatalogApiConnector) UpdateApplication(applicationId string, patches
 	err := brokerHttp.PatchModel(connector, patches, http.StatusOK, result)
 	return *result, err
 }
+
+func (c *TapCatalogApiConnector) DeleteApplication(applicationId string) error {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, applications, applicationId))
+	err := brokerHttp.DeleteModel(connector, http.StatusNoContent)
+	return err
+}

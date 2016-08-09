@@ -15,6 +15,8 @@ type TapCatalogApi interface {
 	AddApplicationInstance(applicationId string, instance models.Instance) (models.Instance, error)
 	AddTemplate(template models.Template) (models.Template, error)
 	DeleteInstance(instanceId string) error
+	DeleteApplication(applicationId string) error
+	DeleteImage(imageId string) error
 	GetApplication(applicationId string) (models.Application, error)
 	GetCatalogHealth() error
 	GetImage(imageId string) (models.Image, error)

@@ -28,3 +28,9 @@ func (c *TapCatalogApiConnector) UpdateImage(imageId string, patches []models.Pa
 	err := brokerHttp.PatchModel(connector, patches, http.StatusOK, result)
 	return *result, err
 }
+
+func (c *TapCatalogApiConnector) DeleteImage(imageId string) error {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, images, imageId))
+	err := brokerHttp.DeleteModel(connector, http.StatusNoContent)
+	return err
+}
