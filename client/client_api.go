@@ -50,7 +50,7 @@ const (
 	applications = apiPrefix + apiVersion + "/applications"
 	templates    = apiPrefix + apiVersion + "/templates"
 	images       = apiPrefix + apiVersion + "/images"
-	healthz      = apiPrefix + apiVersion + "/healthz"
+	healthz      = "healthz"
 )
 
 func NewTapCatalogApiWithBasicAuth(address, username, password string) (*TapCatalogApiConnector, error) {
