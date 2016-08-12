@@ -92,9 +92,8 @@ func (t *RepositoryConnector) GetListOfData(key string, model interface{}) ([]in
 func (t *RepositoryConnector) CreateDirs() error {
 	dirs := []string{Templates, Instances, Applications, Services, Images}
 
-	_, err := t.etcdClient.GetKeyNodes(dirs[0])
-	if err != nil {
-		for _, dir := range dirs {
+	for _, dir := range dirs {
+		if _, err := t.etcdClient.GetKeyNodes(dir); err != nil {
 			err := t.etcdClient.AddOrUpdateDir(dir)
 			if err != nil {
 				return err
