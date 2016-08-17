@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/json"
 	"errors"
 	"reflect"
 	"strings"
@@ -112,6 +113,10 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 			if patch.Operation == models.OperationAdd {
 				if isCollection(originalField.Kind()) {
 					result.Add = MergeMap(result.Add, t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, true))
+					err := validatePatch(patchFieldName, patch, false)
+					if err != nil {
+						return result, err
+					}
 				} else {
 					return result, errors.New("Add operation is allowed only for Collections!")
 				}
@@ -128,8 +133,9 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 						}
 					}
 
-					if patchFieldName == idFieldName {
-						return result, errors.New("ID field can not be changed!")
+					err := validatePatch(patchFieldName, patch, true)
+					if err != nil {
+						return result, err
 					}
 					result.Update = append(result.Update, mapToPatchSingleUpdates(t.SingleFieldToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, patchFieldName, ""), receivedPreviousValueInterface)...)
 				}
@@ -153,6 +159,26 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 
 	result.Update = append(result.Update, mapToPatchSingleUpdates(t.updateAuditTrail(mainStructDirKey+"/AuditTrail", true), nil)...)
 	return result, nil
+}
+
+func validatePatch(patchFieldName string, patch models.Patch, isUpdateOp bool) error {
+	if isUpdateOp {
+		if patchFieldName == idFieldName || patchFieldName == nameFieldName {
+			return errors.New("ID and Name fields can not be changed!")
+		}
+	}
+	if patchFieldName == metadataFieldName {
+		metadataEntity := models.Metadata{}
+		err := json.Unmarshal([]byte(patch.Value), &metadataEntity)
+		if err != nil {
+			return err
+		}
+		err = CheckIfDNSLabelCompatible(metadataEntity.Id)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (t *DataMapper) ToKey(prefix string, key string) string {

@@ -13,6 +13,8 @@ import (
 )
 
 const idFieldName = "Id"
+const nameFieldName = "Name"
+const metadataFieldName = "Metadata"
 
 func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[string]interface{} {
 	result := map[string]interface{}{}
@@ -36,7 +38,7 @@ func CheckIfIdFieldIsEmpty(entity interface{}) error {
 
 func CheckIfDNSLabelCompatible(content string) error {
 
-	const dnsLabelRegexp = "[A-Za-z_][A-Za-z0-9_]*"
+	const dnsLabelRegexp = "^[A-Za-z_][A-Za-z0-9_]*$"
 
 	ok, _ := regexp.MatchString(dnsLabelRegexp, content)
 

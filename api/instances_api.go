@@ -143,6 +143,14 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
+	for _, entity := range reqInstance.Metadata {
+		err = data.CheckIfDNSLabelCompatible(entity.Id)
+		if err != nil {
+			util.Respond400(rw, err)
+			return
+		}
+	}
+
 	exists, err := c.repository.IsExistByName(reqInstance.Name, models.Instance{}, data.Instances)
 	if err != nil {
 		util.Respond500(rw, err)
