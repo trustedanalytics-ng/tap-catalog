@@ -49,6 +49,12 @@ func (c *Context) ServicesInstances(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) ServiceInstances(rw web.ResponseWriter, req *web.Request) {
 
 	serviceId := req.PathParams["serviceId"]
+
+	if _, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{}); err != nil {
+		handleGetDataError(rw, err)
+		return
+	}
+
 	instances, err := c.getFilteredInstances(models.InstanceTypeService, serviceId)
 	if err != nil {
 		handleGetDataError(rw, err)
@@ -70,6 +76,12 @@ func (c *Context) ApplicationsInstances(rw web.ResponseWriter, req *web.Request)
 func (c *Context) ApplicationInstances(rw web.ResponseWriter, req *web.Request) {
 
 	appId := req.PathParams["applicationId"]
+
+	if _, err := c.repository.GetData(c.buildApplicationKey(appId), models.Application{}); err != nil {
+		handleGetDataError(rw, err)
+		return
+	}
+
 	instances, err := c.getFilteredInstances(models.InstanceTypeApplication, appId)
 	if err != nil {
 		handleGetDataError(rw, err)
