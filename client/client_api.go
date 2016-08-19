@@ -14,7 +14,6 @@ type TapCatalogApi interface {
 	AddServiceInstance(serviceId string, instance models.Instance) (models.Instance, int, error)
 	AddApplicationInstance(applicationId string, instance models.Instance) (models.Instance, int, error)
 	AddTemplate(template models.Template) (models.Template, int, error)
-	DeleteInstance(instanceId string) (int, error)
 	GetApplication(applicationId string) (models.Application, int, error)
 	GetCatalogHealth() (int, error)
 	GetImage(imageId string) (models.Image, int, error)
@@ -31,6 +30,9 @@ type TapCatalogApi interface {
 	UpdatePlan(serviceId, planId string, patches []models.Patch) (models.ServicePlan, int, error)
 	UpdateService(serviceId string, patches []models.Patch) (models.Service, int, error)
 	UpdateTemplate(templateId string, patches []models.Patch) (models.Template, int, error)
+	DeleteApplication(applicationId string) (int, error)
+	DeleteImage(imageId string) (int, error)
+	DeleteInstance(instanceId string) (int, error)
 }
 
 type TapCatalogApiConnector struct {
@@ -52,7 +54,7 @@ const (
 )
 
 func NewTapCatalogApiWithBasicAuth(address, username, password string) (*TapCatalogApiConnector, error) {
-	client, _, err := brokerHttp.GetHttpClientWithBasicAuth()
+	client, _, err := brokerHttp.GetHttpClient()
 	if err != nil {
 		return nil, err
 	}

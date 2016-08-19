@@ -189,10 +189,10 @@
 			"revisionTime": "2016-08-10T07:13:14Z"
 		},
 		{
-			"checksumSHA1": "6+f2gaE260jteMQYUVDDBP6B8MU=",
+			"checksumSHA1": "FHH5vvuyglwKP3h05rYJdf29KQg=",
 			"path": "github.com/trustedanalytics/tapng-go-common/http",
-			"revision": "6b842bf5941a70b590f06f94aa5d2aa1bdc8940b",
-			"revisionTime": "2016-08-17T14:17:58Z"
+			"revision": "447b84567c96c43e6e2ef79e4f97be545f11fa0d",
+			"revisionTime": "2016-08-17T13:54:27Z"
 		},
 		{
 			"checksumSHA1": "RVbaAnp5aHoeOAwEiyyd7EHax+w=",

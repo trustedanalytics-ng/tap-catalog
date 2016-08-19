@@ -9,11 +9,12 @@ import (
 
 type ApiConnector struct {
 	BasicAuth *BasicAuth
+	OAuth2    *OAuth2
 	Client    *http.Client
 	Url       string
 }
 
-type CallFunc func(url string, requestBody string, basicAuth *BasicAuth, client *http.Client) (int, []byte, error)
+type CallFunc func(url string, requestBody, authHeader string, client *http.Client) (int, []byte, error)
 
 func GetModel(apiConnector ApiConnector, expectedStatus int, result interface{}) (int, error) {
 	return callModelTemplateWithBody(RestGETWithBody, apiConnector, "", expectedStatus, result)
@@ -46,7 +47,15 @@ func callModelTemplateWithBody(callFunc CallFunc, apiConnector ApiConnector, req
 		}
 	}
 
-	status, body, err := callFunc(apiConnector.Url, string(requestBodyByte), apiConnector.BasicAuth, apiConnector.Client)
+	authHeader := ""
+	if apiConnector.OAuth2 != nil {
+		authHeader = GetOAuth2Header(apiConnector.OAuth2)
+	}
+	if apiConnector.BasicAuth != nil {
+		authHeader = GetBasicAuthHeader(apiConnector.BasicAuth)
+	}
+
+	status, body, err := callFunc(apiConnector.Url, string(requestBodyByte), authHeader, apiConnector.Client)
 	if err != nil {
 		return status, err
 	}
