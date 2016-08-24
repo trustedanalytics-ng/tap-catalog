@@ -18,6 +18,7 @@ type TapCatalogApi interface {
 	GetCatalogHealth() (int, error)
 	GetImage(imageId string) (models.Image, int, error)
 	GetInstance(instanceId string) (models.Instance, int, error)
+	GetInstanceBindings(instanceId string) ([]models.Instance, int, error)
 	GetService(serviceId string) (models.Service, int, error)
 	GetServices() ([]models.Service, int, error)
 	ListApplications() ([]models.Application, int, error)
@@ -43,14 +44,15 @@ type TapCatalogApiConnector struct {
 }
 
 const (
-	apiPrefix    = "api/"
-	apiVersion   = "v1"
-	instances    = apiPrefix + apiVersion + "/instances"
-	services     = apiPrefix + apiVersion + "/services"
-	applications = apiPrefix + apiVersion + "/applications"
-	templates    = apiPrefix + apiVersion + "/templates"
-	images       = apiPrefix + apiVersion + "/images"
-	healthz      = "healthz"
+	apiPrefix        = "api/"
+	apiVersion       = "v1"
+	instances        = apiPrefix + apiVersion + "/instances"
+	instanceBindings = instances + "/bindings"
+	services         = apiPrefix + apiVersion + "/services"
+	applications     = apiPrefix + apiVersion + "/applications"
+	templates        = apiPrefix + apiVersion + "/templates"
+	images           = apiPrefix + apiVersion + "/images"
+	healthz          = "healthz"
 )
 
 func NewTapCatalogApiWithBasicAuth(address, username, password string) (*TapCatalogApiConnector, error) {

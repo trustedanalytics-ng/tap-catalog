@@ -109,6 +109,7 @@ func route(router *web.Router) {
 
 	router.Get("/instances", (*api.Context).Instances)
 	router.Get("/instances/:instanceId", (*api.Context).GetInstance)
+	router.Get("/instances/:instanceId/bindings", (*api.Context).GetInstanceBindings)
 	router.Delete("/instances/:instanceId", (*api.Context).DeleteInstance)
 	router.Patch("/instances/:instanceId", (*api.Context).PatchInstance)
 

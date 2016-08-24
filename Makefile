@@ -2,20 +2,20 @@ APDIR=$(shell go list ./... | grep -v /vendor/)
 GOBIN=$(GOPATH)/bin
 
 build:
-	CGO_ENABLED=0 go build -tags netgo ${APDIR}
+	CGO_ENABLED=0 go install -tags netgo ${APDIR}
 	go fmt $(APDIR)
 
 run: build_anywhere
-	${GOPATH}/bin/tapng-catalog
+	./application/tapng-catalog
 
 run-local: build
-	CATALOG_PORT=8083 CATALOG_USER=admin CATALOG_PASS=password ${GOPATH}/bin/tapng-catalog
+	PORT=8083 CATALOG_USER=admin CATALOG_PASS=password ${GOPATH}/bin/tapng-catalog
 
 docker_build: build_anywhere
 	docker build -t tapng-catalog .
 
 push_docker: docker_build
-	docker tag tapng-catalog $(REPOSITORY_URL)/tapng-catalog:latest
+	docker tag -f tapng-catalog $(REPOSITORY_URL)/tapng-catalog:latest
 	docker push $(REPOSITORY_URL)/tapng-catalog:latest
 
 kubernetes_deploy: docker_build

@@ -126,12 +126,37 @@ func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, result, http.StatusOK)
 }
 
+func (c *Context) GetInstanceBindings(rw web.ResponseWriter, req *web.Request) {
+	instanceId := req.PathParams["instanceId"]
+	result := []models.Instance{}
+
+	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
+	if err != nil {
+		handleGetDataError(rw, err)
+		return
+	}
+
+	for _, binding := range instance.(models.Instance).Bindings {
+		bindedInstance, err := c.repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
+		if err != nil {
+			handleGetDataError(rw, err)
+			return
+		}
+		result = append(result, bindedInstance.(models.Instance))
+	}
+	util.WriteJson(rw, result, http.StatusOK)
+}
+
 func (c *Context) AddApplicationInstance(rw web.ResponseWriter, req *web.Request) {
 	c.addInstance(rw, req, req.PathParams["applicationId"], models.InstanceTypeApplication)
 }
 
 func (c *Context) AddServiceInstance(rw web.ResponseWriter, req *web.Request) {
-	c.addInstance(rw, req, req.PathParams["serviceId"], models.InstanceTypeService)
+	if req.URL.Query().Get("isServiceBroker") == "true" {
+		c.addInstance(rw, req, req.PathParams["serviceId"], models.InstanceTypeServiceBroker)
+	} else {
+		c.addInstance(rw, req, req.PathParams["serviceId"], models.InstanceTypeService)
+	}
 }
 
 func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId string, instanceType models.InstanceType) {
@@ -155,7 +180,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
-	err = data.CheckIfDNSLabelCompatible(reqInstance.Name)
+	err = data.CheckIfDNSLabelLowercaseCompatible(reqInstance.Name)
 	if err != nil {
 		util.Respond400(rw, err)
 		return

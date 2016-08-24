@@ -49,6 +49,19 @@ func CheckIfDNSLabelCompatible(content string) error {
 	return nil
 }
 
+func CheckIfDNSLabelLowercaseCompatible(content string) error {
+
+	const dnsLabelRegexp = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+
+	ok, _ := regexp.MatchString(dnsLabelRegexp, content)
+
+	if !ok {
+		return errors.New(content + " doesn't match DNS label rule: " + dnsLabelRegexp)
+	}
+
+	return nil
+}
+
 func getStructId(structObject reflect.Value) string {
 	structObject = unwrapPointer(structObject)
 	idProperty := structObject.FieldByName(idFieldName)
