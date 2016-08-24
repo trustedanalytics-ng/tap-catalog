@@ -56,7 +56,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	reqPlan := &models.ServicePlan{}
 	err := util.ReadJson(req, reqPlan)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.Respond400(rw, err)
 		return
 	}
 
