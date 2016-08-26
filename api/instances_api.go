@@ -162,13 +162,21 @@ func (c *Context) AddServiceInstance(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId string, instanceType models.InstanceType) {
 	reqInstance := &models.Instance{}
 
-	_, err := c.repository.GetData(c.buildServiceKey(classId), models.Service{})
-	if err != nil {
-		util.Respond404(rw, errors.New("service with id: "+classId+" does not exists!"))
-		return
+	if instanceType == models.InstanceTypeService {
+		_, err := c.repository.GetData(c.buildServiceKey(classId), models.Service{})
+		if err != nil {
+			util.Respond404(rw, errors.New("service with id: "+classId+" does not exists!"))
+			return
+		}
+	} else if instanceType == models.InstanceTypeApplication {
+		_, err := c.repository.GetData(c.buildApplicationKey(classId), models.Application{})
+		if err != nil {
+			util.Respond404(rw, errors.New("application with id: "+classId+" does not exists!"))
+			return
+		}
 	}
 
-	err = util.ReadJson(req, reqInstance)
+	err := util.ReadJson(req, reqInstance)
 	if err != nil {
 		util.Respond400(rw, err)
 		return
