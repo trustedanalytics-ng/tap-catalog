@@ -295,7 +295,7 @@ func (c *Context) getInstancesFSM(initialState models.InstanceState) *fsm.FSM {
 	return fsm.NewFSM(string(initialState),
 		fsm.Events{
 			{Name: "DEPLOYING", Src: []string{"REQUESTED"}, Dst: "DEPLOYING"},
-			{Name: "FAILURE", Src: []string{"DEPLOYING"}, Dst: "FAILURE"},
+			{Name: "FAILURE", Src: []string{"DEPLOYING", "STARTING", "RUNNING", "STOPPING", "DESTROYING"}, Dst: "FAILURE"},
 			{Name: "STOPPED", Src: []string{"DEPLOYING", "STOPPING", "UNAVAILABLE"}, Dst: "STOPPED"},
 			{Name: "START_REQ", Src: []string{"STOPPED"}, Dst: "START_REQ"},
 			{Name: "STARTING", Src: []string{"START_REQ", "STOPPED"}, Dst: "STARTING"},
