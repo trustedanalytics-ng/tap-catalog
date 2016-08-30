@@ -188,17 +188,18 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
-	err = data.CheckIfDNSLabelLowercaseCompatible(reqInstance.Name)
+	err = data.CheckIfDNSLabelLowercaseCompatible(reqInstance.Name, "Name")
 	if err != nil {
 		util.Respond400(rw, err)
 		return
 	}
 
-	for _, entity := range reqInstance.Metadata {
-		err = data.CheckIfDNSLabelCompatible(entity.Id)
-		if err != nil {
-			util.Respond400(rw, err)
-			return
+	for _, binding := range reqInstance.Bindings {
+		for k, _ := range binding.Data {
+			if err = data.CheckIfDNSLabelCompatible(k, "Data"); err != nil {
+				util.Respond400(rw, err)
+				return
+			}
 		}
 	}
 

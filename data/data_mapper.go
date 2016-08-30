@@ -167,15 +167,15 @@ func validatePatch(patchFieldName string, patch models.Patch, isUpdateOp bool) e
 			return errors.New("ID and Name fields can not be changed!")
 		}
 	}
-	if patchFieldName == metadataFieldName {
-		metadataEntity := models.Metadata{}
-		err := json.Unmarshal([]byte(patch.Value), &metadataEntity)
-		if err != nil {
+	if patchFieldName == bindingsFieldName {
+		instanceBinding := models.InstanceBindings{}
+		if err := json.Unmarshal([]byte(patch.Value), &instanceBinding); err != nil {
 			return err
 		}
-		err = CheckIfDNSLabelCompatible(metadataEntity.Id)
-		if err != nil {
-			return err
+		for k, _ := range instanceBinding.Data {
+			if err := CheckIfDNSLabelCompatible(k, "Data"); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

@@ -63,7 +63,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = data.CheckIfDNSLabelLowercaseCompatible(reqService.Name)
+	err = data.CheckIfDNSLabelLowercaseCompatible(reqService.Name, "Name")
 	if err != nil {
 		util.Respond400(rw, err)
 		return

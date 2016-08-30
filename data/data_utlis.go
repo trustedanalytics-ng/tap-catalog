@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -14,7 +15,7 @@ import (
 
 const idFieldName = "Id"
 const nameFieldName = "Name"
-const metadataFieldName = "Metadata"
+const bindingsFieldName = "Bindings"
 
 func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[string]interface{} {
 	result := map[string]interface{}{}
@@ -36,29 +37,22 @@ func CheckIfIdFieldIsEmpty(entity interface{}) error {
 	}
 }
 
-func CheckIfDNSLabelCompatible(content string) error {
-
+func CheckIfDNSLabelCompatible(content, fieldName string) error {
 	const dnsLabelRegexp = "^[A-Za-z_][A-Za-z0-9_]*$"
 
-	ok, _ := regexp.MatchString(dnsLabelRegexp, content)
-
-	if !ok {
-		return errors.New(content + " doesn't match DNS label rule: " + dnsLabelRegexp)
+	if ok, _ := regexp.MatchString(dnsLabelRegexp, content); !ok {
+		return errors.New(fmt.Sprintf("Field: %s has incorrect value: %s!", fieldName, content))
 	}
 
 	return nil
 }
 
-func CheckIfDNSLabelLowercaseCompatible(content string) error {
-
+func CheckIfDNSLabelLowercaseCompatible(content, fieldName string) error {
 	const dnsLabelRegexp = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
 
-	ok, _ := regexp.MatchString(dnsLabelRegexp, content)
-
-	if !ok {
-		return errors.New(content + " doesn't match DNS label rule: " + dnsLabelRegexp)
+	if ok, _ := regexp.MatchString(dnsLabelRegexp, content); !ok {
+		return errors.New(fmt.Sprintf("Field: %s has incorrect value: %s!", fieldName, content))
 	}
-
 	return nil
 }
 
