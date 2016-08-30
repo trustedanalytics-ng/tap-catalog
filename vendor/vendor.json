@@ -147,10 +147,10 @@
 			"revisionTime": "2016-02-27T15:26:14Z"
 		},
 		{
-			"checksumSHA1": "9IRLqDiObOIchNkfUa9jp3bYGuQ=",
+			"checksumSHA1": "FQ4oawIapUZsI9+MgCSbSiKNOxI=",
 			"path": "github.com/trustedanalytics/tapng-catalog",
-			"revision": "bdaeca0c755ffe4a52618655afb968759e8ea583",
-			"revisionTime": "2016-08-09T15:37:41Z"
+			"revision": "f00eb26d75bbfeda7ee8e6656c10f618028b1e8a",
+			"revisionTime": "2016-08-30T09:52:52Z"
 		},
 		{
 			"checksumSHA1": "XlRuAJ79S/WN1F/zTsTCueUaGW4=",
@@ -159,52 +159,52 @@
 			"revisionTime": "2016-08-10T07:13:14Z"
 		},
 		{
-			"checksumSHA1": "QWXSKiBBHtWc2X5nh78yqLBP9OY=",
+			"checksumSHA1": "R6Ie2VtHJgGXORIyuRJdacmBWiM=",
 			"path": "github.com/trustedanalytics/tapng-catalog/api",
-			"revision": "ee401526c131209cbff0a0905d1dd5e0d655ef48",
-			"revisionTime": "2016-08-10T07:13:14Z"
+			"revision": "f00eb26d75bbfeda7ee8e6656c10f618028b1e8a",
+			"revisionTime": "2016-08-30T09:52:52Z"
 		},
 		{
-			"checksumSHA1": "cdwPcLxiUFlB4N0NSLw5SEDYo0Q=",
+			"checksumSHA1": "+tS3t9CGtqwZWK/bVcE3wVsr8EE=",
 			"path": "github.com/trustedanalytics/tapng-catalog/client",
-			"revision": "ee401526c131209cbff0a0905d1dd5e0d655ef48",
-			"revisionTime": "2016-08-10T07:13:14Z"
+			"revision": "f00eb26d75bbfeda7ee8e6656c10f618028b1e8a",
+			"revisionTime": "2016-08-30T09:52:52Z"
 		},
 		{
-			"checksumSHA1": "ZD/VhuyysqLo5GxqZ7D6HcKCEU0=",
+			"checksumSHA1": "YlkdRsXmDDmFkcEPLTJ0xUmsViY=",
 			"path": "github.com/trustedanalytics/tapng-catalog/data",
-			"revision": "ee401526c131209cbff0a0905d1dd5e0d655ef48",
-			"revisionTime": "2016-08-10T07:13:14Z"
+			"revision": "f00eb26d75bbfeda7ee8e6656c10f618028b1e8a",
+			"revisionTime": "2016-08-30T09:52:52Z"
 		},
 		{
 			"checksumSHA1": "EITNc1rh2ixVad0AduyugeVuCIg=",
 			"path": "github.com/trustedanalytics/tapng-catalog/etcd",
-			"revision": "ee401526c131209cbff0a0905d1dd5e0d655ef48",
-			"revisionTime": "2016-08-10T07:13:14Z"
+			"revision": "f00eb26d75bbfeda7ee8e6656c10f618028b1e8a",
+			"revisionTime": "2016-08-30T09:52:52Z"
 		},
 		{
-			"checksumSHA1": "05UT2j6zwYv1aNbMQ0yunk58+QA=",
+			"checksumSHA1": "unBjBF0VHMCBbuRtw2TmzqW4J5E=",
 			"path": "github.com/trustedanalytics/tapng-catalog/models",
-			"revision": "ee401526c131209cbff0a0905d1dd5e0d655ef48",
-			"revisionTime": "2016-08-10T07:13:14Z"
+			"revision": "f00eb26d75bbfeda7ee8e6656c10f618028b1e8a",
+			"revisionTime": "2016-08-30T09:52:52Z"
 		},
 		{
 			"checksumSHA1": "FHH5vvuyglwKP3h05rYJdf29KQg=",
 			"path": "github.com/trustedanalytics/tapng-go-common/http",
-			"revision": "447b84567c96c43e6e2ef79e4f97be545f11fa0d",
-			"revisionTime": "2016-08-17T13:54:27Z"
+			"revision": "c80dd6ae16430b1f64f0c4f9b0baa67d1d4f1ba9",
+			"revisionTime": "2016-08-30T12:08:32Z"
 		},
 		{
 			"checksumSHA1": "RVbaAnp5aHoeOAwEiyyd7EHax+w=",
 			"path": "github.com/trustedanalytics/tapng-go-common/logger",
-			"revision": "6b842bf5941a70b590f06f94aa5d2aa1bdc8940b",
-			"revisionTime": "2016-08-17T14:17:58Z"
+			"revision": "c80dd6ae16430b1f64f0c4f9b0baa67d1d4f1ba9",
+			"revisionTime": "2016-08-30T12:08:32Z"
 		},
 		{
-			"checksumSHA1": "uy1dWe+cZBlJvG9+8+8eCteT/IA=",
+			"checksumSHA1": "DLO1hCmudCC4dQhrm9tVEkVuwsI=",
 			"path": "github.com/trustedanalytics/tapng-go-common/util",
-			"revision": "6b842bf5941a70b590f06f94aa5d2aa1bdc8940b",
-			"revisionTime": "2016-08-17T14:17:58Z"
+			"revision": "c80dd6ae16430b1f64f0c4f9b0baa67d1d4f1ba9",
+			"revisionTime": "2016-08-30T12:08:32Z"
 		},
 		{
 			"checksumSHA1": "tHm2SMtuRfrwh6NnnymsuoJ6e0Q=",
