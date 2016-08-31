@@ -6,6 +6,10 @@ func init() {
 	RegisterType("Plans", reflect.TypeOf(ServicePlan{}))
 }
 
+const SOURCE_OFFERING_ID_ENV = "source_offering_id"
+const BROKER_SHORT_INSTANCE_ID_ENV = "broker_short_instance_id"
+const BROKER_INSTANCE_ID_ENV = "broker_instance_id"
+
 type Service struct {
 	Id          string        `json:"id"`
 	Name        string        `json:"name"`

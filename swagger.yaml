@@ -915,6 +915,8 @@ definitions:
     properties:
       id:
         type: string
+      data:
+        type: object
   AuditTrail:
     type: object
     properties:
