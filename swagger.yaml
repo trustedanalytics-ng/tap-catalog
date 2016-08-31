@@ -1,7 +1,8 @@
 swagger: '2.0'
 info:
-  title: Catalog API
   version: "1"
+  title: tapng-console
+  description: The Catalog acts as the central registry and coordination point for the entire TAP NG instance.  It provides an integrated, logical, view of the platform offerings including their deployment status, state and dependencies.
 schemes:
   - https
 produces:
@@ -9,6 +10,14 @@ produces:
 consumes:
   - application/json
 paths:
+  /healthz:
+    get:
+      summary: Get health status for catalog
+      responses:
+        200:
+          description: OK
+        500:
+          description: Unexpected error
   /api/v1/services:
     get:
       summary: Services List
@@ -186,9 +195,21 @@ paths:
           description: Plan deleted
         500:
           description: unexpected error
+  /api/v1/services/instances:
+    get:
+      summary: Services Instances List
+      responses:
+        200:
+          description: An array of services instances
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Instance'
+        500:
+          description: unexpected response
   /api/v1/services/{serviceId}/instances:
     get:
-      summary: Service Instance List
+      summary: Service Instances List
       parameters:
         - name: serviceId
           in: path
@@ -289,7 +310,7 @@ paths:
       summary: List Applications
       responses:
         200:
-          description: Instance object
+          description: Application object
           schema:
             type: array
             items:
@@ -359,6 +380,18 @@ paths:
       responses:
         204:
           description: Application deleted
+        500:
+          description: unexpected error
+  /api/v1/applications/instances:
+    get:
+      summary: List Applications Instances
+      responses:
+        200:
+          description: Applications instances list
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Instance'
         500:
           description: unexpected error
   /api/v1/applications/{applicationId}/instances:
@@ -519,6 +552,23 @@ paths:
           description: Instance deleted
         500:
           description: unexpected error
+  /api/v1/instances/{instanceId}/bindings:
+    get:
+      summary: Get bound instances
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Instance objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Instance'
+        500:
+          description: unexpected error
   /api/v1/templates:
     get:
       summary: List templates
@@ -594,9 +644,8 @@ paths:
       responses:
         204:
           description: Template deleted
-        500: 
+        500:
           description: unexpected error
-          
   /api/v1/images:
     get:
       summary: List images

@@ -36,7 +36,7 @@ func main() {
 
 	err := (&data.RepositoryConnector{}).CreateDirs()
 	if err != nil {
-		log.Fatalln("Can't create directories oin ETCD!", err)
+		log.Fatalln("Can't create directories in ETCD!", err)
 	}
 
 	context := api.Context{}
