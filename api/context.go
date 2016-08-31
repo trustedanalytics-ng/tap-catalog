@@ -21,10 +21,10 @@ import (
 	"github.com/gocraft/web"
 	"github.com/looplab/fsm"
 
-	"github.com/trustedanalytics/tapng-catalog/data"
-	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-go-common/logger"
-	"github.com/trustedanalytics/tapng-go-common/util"
+	"github.com/trustedanalytics/tap-catalog/data"
+	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tap-go-common/logger"
+	"github.com/trustedanalytics/tap-go-common/util"
 	"strings"
 )
 

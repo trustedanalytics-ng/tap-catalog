@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/trustedanalytics/tapng-catalog/etcd"
+	"github.com/trustedanalytics/tap-catalog/etcd"
 	"reflect"
 )
 

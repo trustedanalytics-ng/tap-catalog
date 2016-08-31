@@ -17,13 +17,13 @@ FROM tapimages.us.enableiot.com:8080/tap-base-binary:binary-jessie
 MAINTAINER Jakub Wierzbowski <jakub.a.wierzbowski@intel.com>
 
 RUN mkdir -p /opt/app
-ADD application/tapng-catalog /opt/app
+ADD application/tap-catalog /opt/app
 
-RUN chmod +x /opt/app/tapng-catalog
+RUN chmod +x /opt/app/tap-catalog
 
 WORKDIR /opt/app/
 
 EXPOSE 80
 
-ENTRYPOINT ["/opt/app/tapng-catalog"]
+ENTRYPOINT ["/opt/app/tap-catalog"]
 CMD [""]

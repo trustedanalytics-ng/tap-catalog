@@ -20,9 +20,9 @@ import (
 
 	"github.com/gocraft/web"
 
-	"github.com/trustedanalytics/tapng-catalog/data"
-	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-go-common/util"
+	"github.com/trustedanalytics/tap-catalog/data"
+	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tap-go-common/util"
 )
 
 const keyNotFoundMessage = "Key not found"

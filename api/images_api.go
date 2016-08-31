@@ -22,9 +22,9 @@ import (
 
 	"errors"
 	"github.com/looplab/fsm"
-	"github.com/trustedanalytics/tapng-catalog/data"
-	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-go-common/util"
+	"github.com/trustedanalytics/tap-catalog/data"
+	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tap-go-common/util"
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {

@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   version: "1"
-  title: tapng-console
+  title: tap-console
   description: The Catalog acts as the central registry and coordination point for the entire TAP NG instance.  It provides an integrated, logical, view of the platform offerings including their deployment status, state and dependencies.
 schemes:
   - https

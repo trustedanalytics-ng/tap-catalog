@@ -24,7 +24,7 @@
             imagePullPolicy: "IfNotPresent"
           - 
             name: "catalog"
-            image: "tapng-catalog"
+            image: "tap-catalog"
             ports:
               - 
                 containerPort: 80

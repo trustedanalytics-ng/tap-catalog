@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	brokerHttp "github.com/trustedanalytics/tapng-go-common/http"
+	brokerHttp "github.com/trustedanalytics/tap-go-common/http"
 	"strconv"
 )
 

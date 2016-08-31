@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/trustedanalytics/tapng-catalog/models"
-	brokerHttp "github.com/trustedanalytics/tapng-go-common/http"
+	"github.com/trustedanalytics/tap-catalog/models"
+	brokerHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *TapCatalogApiConnector) AddImage(image models.Image) (models.Image, int, error) {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/nu7hatch/gouuid"
 
-	"github.com/trustedanalytics/tapng-catalog/models"
+	"github.com/trustedanalytics/tap-catalog/models"
 )
 
 const idFieldName = "Id"

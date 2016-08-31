@@ -22,9 +22,9 @@ import (
 	"github.com/looplab/fsm"
 
 	"errors"
-	"github.com/trustedanalytics/tapng-catalog/data"
-	"github.com/trustedanalytics/tapng-catalog/models"
-	"github.com/trustedanalytics/tapng-go-common/util"
+	"github.com/trustedanalytics/tap-catalog/data"
+	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tap-go-common/util"
 )
 
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {

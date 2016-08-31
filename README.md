@@ -33,8 +33,8 @@ cd etcd-v2.3.6-linux-amd64
 ## Compilation
 To build project:
 ```
-  git clone https://github.com/intel-data/tapng-catalog
-  cd tapng-catalog
+  git clone https://github.com/intel-data/tap-catalog
+  cd tap-catalog
   make build_anywhere
 ```
 Binaries are available in ./application/
