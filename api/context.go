@@ -33,6 +33,7 @@ var logger = logger_wrapper.InitLogger("api")
 type Context struct {
 	mapper     data.DataMapper
 	repository data.RepositoryConnector
+	organization string
 }
 
 func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {

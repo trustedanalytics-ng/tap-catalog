@@ -1,6 +1,18 @@
 ---
   kind: "ConfigMap"
   apiVersion: "v1"
+  metadata:
+    name: "platform"
+    labels:
+      id: "platform"
+  data:
+    domain: "example.com"
+    tap-version: "0.8"
+    cli-version: "0.8"
+    core-organization: "trustedanalytics"
+---
+  kind: "ConfigMap"
+  apiVersion: "v1"
   metadata: 
     name: "catalog-credentials"
     labels: 

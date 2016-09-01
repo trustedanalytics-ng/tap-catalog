@@ -28,7 +28,7 @@ import (
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Images, models.Image{})
+	result, err := c.repository.GetListOfData(c.getImagesKey(), models.Image{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -63,7 +63,7 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqImage.State = models.ImageStatePending
-	imageKeyStore := c.mapper.ToKeyValue(data.Images, reqImage, true)
+	imageKeyStore := c.mapper.ToKeyValue(c.getImagesKey(), reqImage, true)
 
 	err = c.repository.StoreData(imageKeyStore)
 	if err != nil {
@@ -136,8 +136,12 @@ func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, "", http.StatusNoContent)
 }
 
+func (c *Context) getImagesKey() string {
+	return c.mapper.ToKey(c.organization,data.Images)
+}
+
 func (c *Context) buildImagesKey(imageId string) string {
-	return c.mapper.ToKey(data.Images, imageId)
+	return c.mapper.ToKey(c.getImagesKey(), imageId)
 }
 
 func (c *Context) getImagesFSM(initialState models.ImageState) *fsm.FSM {

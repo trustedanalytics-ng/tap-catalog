@@ -28,7 +28,7 @@ import (
 )
 
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Services, models.Service{})
+	result, err := c.repository.GetListOfData(c.getServiceKey(), models.Service{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -69,7 +69,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	exists, err := c.repository.IsExistByName(reqService.Name, models.Service{}, data.Services)
+	exists, err := c.repository.IsExistByName(reqService.Name, models.Service{}, c.getServiceKey())
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -80,7 +80,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqService.State = models.ServiceStateDeploying
-	serviceKeyStore := c.mapper.ToKeyValue(data.Services, reqService, true)
+	serviceKeyStore := c.mapper.ToKeyValue(c.getServiceKey(), reqService, true)
 	err = c.repository.StoreData(serviceKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
@@ -152,8 +152,12 @@ func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, serviceId, http.StatusNoContent)
 }
 
+func (c *Context) getServiceKey() string {
+	return c.mapper.ToKey(c.organization, data.Services)
+}
+
 func (c *Context) buildServiceKey(serviceId string) string {
-	return c.mapper.ToKey(data.Services, serviceId)
+	return c.mapper.ToKey(c.getServiceKey(), serviceId)
 }
 
 func (c *Context) getServicesFSM(initialState models.ServiceState) *fsm.FSM {

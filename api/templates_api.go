@@ -28,7 +28,7 @@ import (
 )
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Templates, models.Template{})
+	result, err := c.repository.GetListOfData(c.getTemplateKey(), models.Template{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -64,7 +64,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	reqTemplate.State = models.TemplateStateInProgress
-	templateKeyStore := c.mapper.ToKeyValue(data.Templates, reqTemplate, true)
+	templateKeyStore := c.mapper.ToKeyValue(c.getTemplateKey(), reqTemplate, true)
 	err = c.repository.StoreData(templateKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
@@ -138,8 +138,12 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, templateInt, http.StatusOK)
 }
 
+func (c *Context) getTemplateKey() string {
+	return c.mapper.ToKey(c.organization, data.Templates)
+}
+
 func (c *Context) buildTemplateKey(templateId string) string {
-	return c.mapper.ToKey(data.Templates, templateId)
+	return c.mapper.ToKey(c.getTemplateKey(), templateId)
 }
 
 func (c *Context) getTemplatesFSM(initialState models.TemplateState) *fsm.FSM {

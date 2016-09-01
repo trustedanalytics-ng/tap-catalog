@@ -28,7 +28,7 @@ import (
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
 
-	result, err := c.repository.GetListOfData(data.Instances, models.Instance{})
+	result, err := c.repository.GetListOfData(c.getInstanceKey(), models.Instance{})
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -94,7 +94,7 @@ func (c *Context) getFilteredInstances(expectedInstanceType models.InstanceType,
 
 	filteredInstances := []models.Instance{}
 
-	result, err := c.repository.GetListOfData(data.Instances, models.Instance{})
+	result, err := c.repository.GetListOfData(c.getInstanceKey(), models.Instance{})
 
 	if err != nil {
 		return filteredInstances, err
@@ -203,7 +203,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		}
 	}
 
-	exists, err := c.repository.IsExistByName(reqInstance.Name, models.Instance{}, data.Instances)
+	exists, err := c.repository.IsExistByName(reqInstance.Name, models.Instance{}, c.getInstanceKey())
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -217,7 +217,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 	reqInstance.Type = instanceType
 	reqInstance.State = models.InstanceStateRequested
 
-	err = c.repository.StoreData(c.mapper.ToKeyValue(data.Instances, reqInstance, true))
+	err = c.repository.StoreData(c.mapper.ToKeyValue(c.getInstanceKey(), reqInstance, true))
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -288,8 +288,12 @@ func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, "", http.StatusNoContent)
 }
 
+func (c *Context) getInstanceKey() string {
+	return c.mapper.ToKey(c.organization, data.Instances)
+}
+
 func (c *Context) buildInstanceKey(instanceId string) string {
-	return c.mapper.ToKey(data.Instances, instanceId)
+	return c.mapper.ToKey(c.getInstanceKey(), instanceId)
 }
 
 func (c *Context) getInstancesFSM(initialState models.InstanceState) *fsm.FSM {
