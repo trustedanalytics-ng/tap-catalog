@@ -27,7 +27,7 @@ import (
 
 func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	result, err := c.repository.GetListOfData(buildHomeDir(serviceId), models.ServicePlan{})
+	result, err := c.repository.GetListOfData(c.buildHomeDir(serviceId), models.ServicePlan{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -39,7 +39,7 @@ func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
 
-	key := c.mapper.ToKey(buildHomeDir(serviceId), planId)
+	key := c.mapper.ToKey(c.buildHomeDir(serviceId), planId)
 
 	result, err := c.repository.GetData(key, models.ServicePlan{})
 	if err != nil {
@@ -72,7 +72,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	planKeyStore := c.mapper.ToKeyValue(buildHomeDir(serviceId), reqPlan, true)
+	planKeyStore := c.mapper.ToKeyValue(c.buildHomeDir(serviceId), reqPlan, true)
 	err = c.repository.StoreData(planKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
@@ -137,9 +137,9 @@ func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) buildPlanKey(serviceId, planId string) string {
-	return buildHomeDir(serviceId) + "/" + planId
+	return c.buildHomeDir(serviceId) + "/" + planId
 }
 
-func buildHomeDir(serviceId string) string {
-	return data.Services + "/" + serviceId + data.Plans
+func (c *Context) buildHomeDir(serviceId string) string {
+	return c.getServiceKey() + "/" + serviceId + data.Plans
 }

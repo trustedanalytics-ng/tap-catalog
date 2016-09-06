@@ -28,7 +28,7 @@ import (
 const keyNotFoundMessage = "Key not found"
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(data.Applications, models.Application{})
+	result, err := c.repository.GetListOfData(c.getApplicationKey(), models.Application{})
 	if err != nil {
 		util.Respond500(rw, err)
 	}
@@ -61,7 +61,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	applicationKeyStore := c.mapper.ToKeyValue(data.Applications, reqApplication, true)
+	applicationKeyStore := c.mapper.ToKeyValue(c.getApplicationKey(), reqApplication, true)
 	err = c.repository.StoreData(applicationKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
@@ -121,6 +121,10 @@ func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, "", http.StatusNoContent)
 }
 
+func (c *Context) getApplicationKey() string {
+	return c.mapper.ToKey(c.organization, data.Applications)
+}
+
 func (c *Context) buildApplicationKey(applicationId string) string {
-	return c.mapper.ToKey(data.Applications, applicationId)
+	return c.mapper.ToKey(c.getApplicationKey(), applicationId)
 }

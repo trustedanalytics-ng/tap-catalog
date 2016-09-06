@@ -89,8 +89,14 @@ func (t *RepositoryConnector) GetListOfData(key string, model interface{}) ([]in
 	}
 	return result, nil
 }
-func (t *RepositoryConnector) CreateDirs() error {
-	dirs := []string{Templates, Instances, Applications, Services, Images}
+func (t *RepositoryConnector) CreateDirs(org string) error {
+	dirs := []string{
+		org,
+		t.mapper.ToKey(org,Templates),
+		t.mapper.ToKey(org,Instances),
+		t.mapper.ToKey(org,Applications),
+		t.mapper.ToKey(org,Services),
+		t.mapper.ToKey(org,Images)}
 
 	for _, dir := range dirs {
 		if _, err := t.etcdClient.GetKeyNodes(dir); err != nil {

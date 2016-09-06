@@ -38,9 +38,8 @@ var waitGroup = &sync.WaitGroup{}
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
+	err := (&data.RepositoryConnector{}).CreateDirs(os.Getenv("CORE_ORGANIZATION"))
 	go util.TerminationObserver(waitGroup, "Catalog")
-
-	err := (&data.RepositoryConnector{}).CreateDirs()
 	if err != nil {
 		log.Fatalln("Can't create directories in ETCD!", err)
 	}
@@ -74,6 +73,7 @@ func main() {
 
 func route(router *web.Router) {
 	router.Middleware((*api.Context).BasicAuthorizeMiddleware)
+	router.Middleware((*api.Context).OrganizationSetupMiddleware)
 
 	router.Get("/services", (*api.Context).Services)
 	router.Get("/services/:serviceId", (*api.Context).GetService)

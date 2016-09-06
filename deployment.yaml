@@ -30,7 +30,12 @@
                 containerPort: 80
                 protocol: "TCP"
             env: 
-              - 
+              - name: "CORE_ORGANIZATION"
+                valueFrom:
+                  configMapKeyRef:
+                    name: "platform"
+                    key: "core-organization"
+              -
                 name: "CATALOG_PORT"
                 valueFrom: 
                   configMapKeyRef: 
