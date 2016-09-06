@@ -20,6 +20,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gocraft/web"
@@ -27,14 +28,18 @@ import (
 	"github.com/trustedanalytics/tap-catalog/api"
 	"github.com/trustedanalytics/tap-catalog/data"
 	httpGoCommon "github.com/trustedanalytics/tap-go-common/http"
+	"github.com/trustedanalytics/tap-go-common/util"
 )
 
 type appHandler func(web.ResponseWriter, *web.Request) error
+
+var waitGroup = &sync.WaitGroup{}
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	err := (&data.RepositoryConnector{}).CreateDirs(os.Getenv("CORE_ORGANIZATION"))
+	go util.TerminationObserver(waitGroup, "Catalog")
 	if err != nil {
 		log.Fatalln("Can't create directories in ETCD!", err)
 	}
@@ -119,5 +124,4 @@ func route(router *web.Router) {
 	router.Get("/templates/:templateId", (*api.Context).GetTemplate)
 	router.Delete("/templates/:templateId", (*api.Context).DeleteTemplate)
 	router.Patch("/templates/:templateId", (*api.Context).PatchTemplate)
-
 }

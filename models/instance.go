@@ -7,6 +7,11 @@ func init() {
 	RegisterType("Bindings", reflect.TypeOf(InstanceBindings{}))
 }
 
+const BROKER_OFFERING_PREFIX = "BROKER_OFFERING"
+const BROKER_TEMPLATE_ID = "BROKER_TEMPLATE_ID"
+const APPLICATION_IMAGE_ID = "APPLICATION_IMAGE_ID"
+const OFFERING_PLAN_ID = "PLAN_ID"
+
 type Instance struct {
 	Id         string             `json:"id"`
 	Name       string             `json:"name"`
@@ -52,3 +57,12 @@ const (
 	InstanceTypeService       InstanceType = "SERVICE"
 	InstanceTypeServiceBroker InstanceType = "SERVICE_BROKER"
 )
+
+func GetValueFromMetadata(metadatas []Metadata, key string) string {
+	for _, metadata := range metadatas {
+		if metadata.Id == key {
+			return metadata.Value
+		}
+	}
+	return ""
+}

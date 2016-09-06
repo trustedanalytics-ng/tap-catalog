@@ -53,8 +53,14 @@ func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
+	_, err := c.repository.GetData(serviceId, models.Service{})
+	if err != nil {
+		handleGetDataError(rw, err)
+		return
+	}
+
 	reqPlan := &models.ServicePlan{}
-	err := util.ReadJson(req, reqPlan)
+	err = util.ReadJson(req, reqPlan)
 	if err != nil {
 		util.Respond400(rw, err)
 		return
