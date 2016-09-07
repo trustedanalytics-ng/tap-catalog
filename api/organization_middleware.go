@@ -17,20 +17,18 @@
 package api
 
 import (
-	"os"
 	"github.com/gocraft/web"
+	"os"
 )
-
-
 
 func (c *Context) OrganizationSetupMiddleware(rw web.ResponseWriter, req *web.Request, next web.NextMiddlewareFunc) {
 	c.organization = os.Getenv("CORE_ORGANIZATION")
 
 	/* if need for having more orgs
-		orgName := req.PathParams["org"]
-		if orgName != "" {
-			c.organization = orgName
-		}
+	orgName := req.PathParams["org"]
+	if orgName != "" {
+		c.organization = orgName
+	}
 	*/
 	next(rw, req)
 }

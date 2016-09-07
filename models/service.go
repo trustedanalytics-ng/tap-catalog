@@ -6,9 +6,13 @@ func init() {
 	RegisterType("Plans", reflect.TypeOf(ServicePlan{}))
 }
 
-const SOURCE_OFFERING_ID_ENV = "source_offering_id"
-const BROKER_SHORT_INSTANCE_ID_ENV = "broker_short_instance_id"
-const BROKER_INSTANCE_ID_ENV = "broker_instance_id"
+const (
+	ENV_SOURCE_OFFERING_ID       = "source_offering_id"
+	ENV_BROKER_SHORT_INSTANCE_ID = "broker_short_instance_id"
+	ENV_BROKER_INSTANCE_ID       = "broker_instance_id"
+	ENV_PLAN_ID                  = "plan_id"
+	ENV_SOURCE_PLAN_ID_PREFIX    = "source_plan_id-"
+)
 
 type Service struct {
 	Id          string        `json:"id"`
@@ -37,3 +41,7 @@ const (
 	ServiceStateReady     ServiceState = "READY"
 	ServiceStateOffline   ServiceState = "OFFLINE"
 )
+
+func GetPrefixedSourcePlanName(planName string) string {
+	return ENV_SOURCE_PLAN_ID_PREFIX + planName
+}

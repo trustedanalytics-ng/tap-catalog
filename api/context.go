@@ -31,8 +31,8 @@ import (
 var logger = logger_wrapper.InitLogger("api")
 
 type Context struct {
-	mapper     data.DataMapper
-	repository data.RepositoryConnector
+	mapper       data.DataMapper
+	repository   data.RepositoryConnector
 	organization string
 }
 
