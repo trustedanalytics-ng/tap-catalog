@@ -17,6 +17,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gocraft/web"
@@ -195,6 +196,12 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 	}
 
 	for _, binding := range reqInstance.Bindings {
+		_, err = c.repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
+		if err != nil {
+			util.Respond400(rw, errors.New(
+				fmt.Sprintf("Field: binding ID has incorrect value: %s!", binding.Id)))
+			return
+		}
 		for k, _ := range binding.Data {
 			if err = data.CheckIfDNSLabelCompatible(k, "Data"); err != nil {
 				util.Respond400(rw, err)
