@@ -56,12 +56,6 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = data.CheckIfIdFieldIsEmpty(reqImage)
-	if err != nil {
-		util.Respond400(rw, err)
-		return
-	}
-
 	reqImage.State = models.ImageStatePending
 	imageKeyStore := c.mapper.ToKeyValue(c.getImagesKey(), reqImage, true)
 

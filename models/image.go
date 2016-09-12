@@ -1,5 +1,9 @@
 package models
 
+import "strings"
+
+const IMAGE_ID_PREFIX = "image-"
+
 type Image struct {
 	Id         string     `json:"id"`
 	Type       ImageType  `json:"type"`
@@ -24,3 +28,15 @@ const (
 	ImageStateError    ImageState = "ERROR"
 	ImageStateReady    ImageState = "READY"
 )
+
+func IsApplicationInstance(imageId string) bool {
+	return strings.Contains(imageId, IMAGE_ID_PREFIX)
+}
+
+func GetApplicationId(imageId string) string {
+	return strings.TrimPrefix(imageId, IMAGE_ID_PREFIX)
+}
+
+func GenerateImageId(applicationId string) string {
+	return IMAGE_ID_PREFIX + applicationId
+}
