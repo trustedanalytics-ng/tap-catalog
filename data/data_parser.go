@@ -101,7 +101,7 @@ func setValue(field reflect.Value, value, fieldName string) error {
 		value, err := unmarshalJSON([]byte(value), fieldName, field.Type())
 		if err != nil {
 			return err
-		} else if value == nil{
+		} else if value == nil {
 			return nil
 		} else {
 			v := reflect.ValueOf(value)

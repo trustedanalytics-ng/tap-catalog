@@ -51,7 +51,7 @@ func (c *TapCatalogApiConnector) GetInstance(instanceId string) (models.Instance
 }
 
 func (c *TapCatalogApiConnector) GetInstanceBindings(instanceId string) ([]models.Instance, int, error) {
-	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, instanceBindings, instanceId))
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s/%s", c.Address, instances, instanceId, bindings))
 	result := &[]models.Instance{}
 	status, err := brokerHttp.GetModel(connector, http.StatusOK, result)
 	return *result, status, err
