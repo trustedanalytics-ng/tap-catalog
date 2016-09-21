@@ -13,9 +13,14 @@ import (
 	"github.com/trustedanalytics/tap-catalog/models"
 )
 
-const idFieldName = "Id"
-const nameFieldName = "Name"
-const bindingsFieldName = "Bindings"
+const (
+	idFieldName = "Id"
+	nameFieldName = "Name"
+	bindingsFieldName = "Bindings"
+
+	RegexpDnsLabel = "^[A-Za-z_][A-Za-z0-9_]*$"
+	RegexpDnsLabelLowercase = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+)
 
 func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[string]interface{} {
 	result := map[string]interface{}{}
@@ -37,21 +42,10 @@ func CheckIfIdFieldIsEmpty(entity interface{}) error {
 	}
 }
 
-func CheckIfDNSLabelCompatible(content, fieldName string) error {
-	const dnsLabelRegexp = "^[A-Za-z_][A-Za-z0-9_]*$"
+func CheckIfMatchingRegexp(content, regexpRule string) error {
 
-	if ok, _ := regexp.MatchString(dnsLabelRegexp, content); !ok {
-		return errors.New(fmt.Sprintf("Field: %s has incorrect value: %s!", fieldName, content))
-	}
-
-	return nil
-}
-
-func CheckIfDNSLabelLowercaseCompatible(content, fieldName string) error {
-	const dnsLabelRegexp = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
-
-	if ok, _ := regexp.MatchString(dnsLabelRegexp, content); !ok {
-		return errors.New(fmt.Sprintf("Field: %s has incorrect value: %s!", fieldName, content))
+	if ok, _ := regexp.MatchString(regexpRule, content); !ok {
+		return errors.New(fmt.Sprintf("Content: %s doesn't match regexp: %s !", content, regexpRule))
 	}
 	return nil
 }

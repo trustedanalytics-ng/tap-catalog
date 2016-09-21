@@ -189,9 +189,9 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
-	err = data.CheckIfDNSLabelLowercaseCompatible(reqInstance.Name, "Name")
+	err = data.CheckIfMatchingRegexp(reqInstance.Name, data.RegexpDnsLabelLowercase)
 	if err != nil {
-		util.Respond400(rw, err)
+		util.Respond400(rw, errors.New("Field: Name has incorrect value: " + reqInstance.Name))
 		return
 	}
 
@@ -203,8 +203,8 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 			return
 		}
 		for k, _ := range binding.Data {
-			if err = data.CheckIfDNSLabelCompatible(k, "Data"); err != nil {
-				util.Respond400(rw, err)
+			if err = data.CheckIfMatchingRegexp(k, data.RegexpDnsLabel); err != nil {
+				util.Respond400(rw, errors.New("Field: data has incorrect value: " + k))
 				return
 			}
 		}

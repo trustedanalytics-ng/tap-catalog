@@ -16,6 +16,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gocraft/web"
@@ -58,6 +59,22 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 	err = data.CheckIfIdFieldIsEmpty(reqApplication)
 	if err != nil {
 		util.Respond400(rw, err)
+		return
+	}
+
+	err = data.CheckIfMatchingRegexp(reqApplication.Name, data.RegexpDnsLabelLowercase)
+	if err != nil {
+		util.Respond400(rw, errors.New("Field: Name has incorrect value:" + reqApplication.Name))
+		return
+	}
+
+	exists, err := c.repository.IsExistByName(reqApplication.Name, models.Application{}, c.getInstanceKey())
+	if err != nil {
+		util.Respond500(rw, err)
+		return
+	}
+	if exists {
+		util.Respond409(rw, errors.New("application with name: "+reqApplication.Name+" already exists!"))
 		return
 	}
 

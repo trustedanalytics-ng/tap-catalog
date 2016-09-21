@@ -173,8 +173,8 @@ func validatePatch(patchFieldName string, patch models.Patch, isUpdateOp bool) e
 			return err
 		}
 		for k, _ := range instanceBinding.Data {
-			if err := CheckIfDNSLabelCompatible(k, "Data"); err != nil {
-				return err
+			if err := CheckIfMatchingRegexp(k, RegexpDnsLabel); err != nil {
+				return errors.New("Field: Data has incorrect value: " + k)
 			}
 		}
 	}

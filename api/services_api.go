@@ -63,9 +63,9 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = data.CheckIfDNSLabelLowercaseCompatible(reqService.Name, "Name")
+	err = data.CheckIfMatchingRegexp(reqService.Name, data.RegexpDnsLabelLowercase)
 	if err != nil {
-		util.Respond400(rw, err)
+		util.Respond400(rw, errors.New("Field: Name has incorrect value: " + reqService.Name))
 		return
 	}
 
