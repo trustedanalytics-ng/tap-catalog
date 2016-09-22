@@ -27,12 +27,16 @@ import (
 
 func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	result, err := c.repository.GetListOfData(c.buildHomeDir(serviceId), models.ServicePlan{})
+	services, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
 	}
-	util.WriteJson(rw, result, http.StatusOK)
+	plans := []models.ServicePlan{}
+	if services.(models.Service).Plans != nil {
+		plans = services.(models.Service).Plans
+	}
+	util.WriteJson(rw, plans, http.StatusOK)
 }
 
 func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
@@ -53,7 +57,7 @@ func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
-	_, err := c.repository.GetData(serviceId, models.Service{})
+	_, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -141,5 +145,5 @@ func (c *Context) buildPlanKey(serviceId, planId string) string {
 }
 
 func (c *Context) buildHomeDir(serviceId string) string {
-	return c.getServiceKey() + "/" + serviceId + data.Plans
+	return c.getServiceKey() + "/" + serviceId + "/" + data.Plans
 }
