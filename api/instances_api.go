@@ -191,7 +191,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 
 	err = data.CheckIfMatchingRegexp(reqInstance.Name, data.RegexpDnsLabelLowercase)
 	if err != nil {
-		util.Respond400(rw, errors.New("Field: Name has incorrect value: " + reqInstance.Name))
+		util.Respond400(rw, errors.New("Field: Name has incorrect value: "+reqInstance.Name))
 		return
 	}
 
@@ -204,7 +204,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		}
 		for k, _ := range binding.Data {
 			if err = data.CheckIfMatchingRegexp(k, data.RegexpDnsLabel); err != nil {
-				util.Respond400(rw, errors.New("Field: data has incorrect value: " + k))
+				util.Respond400(rw, errors.New("Field: data has incorrect value: "+k))
 				return
 			}
 		}

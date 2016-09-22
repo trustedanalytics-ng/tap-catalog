@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	idFieldName = "Id"
-	nameFieldName = "Name"
+	idFieldName       = "Id"
+	nameFieldName     = "Name"
 	bindingsFieldName = "Bindings"
 
-	RegexpDnsLabel = "^[A-Za-z_][A-Za-z0-9_]*$"
+	RegexpDnsLabel          = "^[A-Za-z_][A-Za-z0-9_]*$"
 	RegexpDnsLabelLowercase = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
 )
 

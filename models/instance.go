@@ -1,6 +1,9 @@
 package models
 
-import "reflect"
+import (
+	"reflect"
+	"strings"
+)
 
 func init() {
 	RegisterType("Metadata", reflect.TypeOf(Metadata{}))
@@ -71,4 +74,8 @@ func GetValueFromMetadata(metadatas []Metadata, key string) string {
 
 func GetPrefixedOfferingName(offeringName string) string {
 	return BROKER_OFFERING_PREFIX + offeringName
+}
+
+func IsServiceBrokerOfferingMetadata(metadata Metadata) bool {
+	return strings.Contains(metadata.Id, BROKER_OFFERING_PREFIX)
 }

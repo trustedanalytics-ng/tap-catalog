@@ -64,7 +64,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 
 	err = data.CheckIfMatchingRegexp(reqApplication.Name, data.RegexpDnsLabelLowercase)
 	if err != nil {
-		util.Respond400(rw, errors.New("Field: Name has incorrect value:" + reqApplication.Name))
+		util.Respond400(rw, errors.New("Field: Name has incorrect value:"+reqApplication.Name))
 		return
 	}
 
