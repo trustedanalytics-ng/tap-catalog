@@ -42,3 +42,9 @@ func (c *TapCatalogApiConnector) AddService(service models.Service) (models.Serv
 	status, err := brokerHttp.PostModel(connector, service, http.StatusCreated, result)
 	return *result, status, err
 }
+
+func (c *TapCatalogApiConnector) DeleteService(serviceId string) (int, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, services, serviceId))
+	status, err := brokerHttp.DeleteModel(connector, http.StatusNoContent)
+	return status, err
+}
