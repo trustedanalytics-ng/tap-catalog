@@ -68,7 +68,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	exists, err := c.repository.IsExistByName(reqApplication.Name, models.Application{}, c.getInstanceKey())
+	exists, err := c.repository.IsExistByName(reqApplication.Name, models.Application{}, c.getApplicationKey())
 	if err != nil {
 		util.Respond500(rw, err)
 		return
