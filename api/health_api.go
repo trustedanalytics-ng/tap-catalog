@@ -16,10 +16,19 @@
 package api
 
 import (
-	"github.com/gocraft/web"
 	"net/http"
+
+	"github.com/gocraft/web"
+
+	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tap-go-common/util"
 )
 
 func (c *Context) GetCatalogHealth(rw web.ResponseWriter, req *web.Request) {
+	_, err := c.repository.GetListOfData(c.getServiceKey(), models.Service{})
+	if err != nil {
+		util.Respond500(rw, err)
+		return
+	}
 	rw.WriteHeader(http.StatusOK)
 }
