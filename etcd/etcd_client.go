@@ -38,8 +38,9 @@ func (c *EtcdConnector) GetKeyIntoStruct(key string, result interface{}) error {
 	}
 
 	//todo we need to find why etcd returns "client: etcd cluster is unavailable or misconfigured" error
+	var resp *client.Response
 	for i := 1; i <= 10; i++ {
-		if resp, err := kapi.Get(context.Background(), key, nil); err != nil {
+		if resp, err = kapi.Get(context.Background(), key, nil); err != nil {
 			logger.Errorf("Getinng key: %s, error: %v, Tries: %d", key, err, i)
 		} else {
 			return json.Unmarshal([]byte(resp.Node.Value), result)
@@ -61,15 +62,16 @@ func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
 	}
 
 	//todo we need to find why etcd returns "client: etcd cluster is unavailable or misconfigured" error
+	var resp *client.Response
 	for i := 1; i <= 10; i++ {
-		if resp, err := kapi.Get(context.Background(), key, &client.GetOptions{Recursive: true}); err != nil {
+		if resp, err = kapi.Get(context.Background(), key, &client.GetOptions{Recursive: true}); err != nil {
 			logger.Errorf("Getting key: %s, error: %v, Tries: %d", key, err, i)
 		} else {
 			return *resp.Node, nil
 		}
 	}
 	logger.Errorf("Getting key: %s failed: %v", key, err)
-	return client.Node{}, err
+	return resultNode, err
 }
 
 func (c *EtcdConnector) Set(key string, value, prevValue interface{}, prevIndex uint64) error {
