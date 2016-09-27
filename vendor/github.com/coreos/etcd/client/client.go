@@ -341,6 +341,7 @@ func (c *httpClusterClient) Do(ctx context.Context, act httpAction) (*http.Respo
 		hc := c.clientFactory(eps[k])
 		resp, body, err = hc.Do(ctx, action)
 		if err != nil {
+			fmt.Println("TAP-NG error: " + err.Error())
 			cerr.Errors = append(cerr.Errors, err)
 			if err == ctx.Err() {
 				return nil, nil, ctx.Err()

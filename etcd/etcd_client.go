@@ -37,18 +37,20 @@ func (c *EtcdConnector) GetKeyIntoStruct(key string, result interface{}) error {
 		return err
 	}
 
-	resp, err := kapi.Get(context.Background(), key, nil)
-
-	if err != nil {
-		logger.Error("Getinng key value error:", err)
-		return err
+	//todo we need to find why etcd returns "client: etcd cluster is unavailable or misconfigured" error
+	for i := 1; i <= 10; i++ {
+		if resp, err := kapi.Get(context.Background(), key, nil); err != nil {
+			logger.Errorf("Getinng key: %s, error: %v, Tries: %d", key, err, i)
+		} else {
+			return json.Unmarshal([]byte(resp.Node.Value), result)
+		}
 	}
-	err = json.Unmarshal([]byte(resp.Node.Value), result)
-	return nil
+	logger.Errorf("Getinng key: %s failed: %v", key, err)
+	return err
 }
 
 func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
-	logger.Debug("Getting nodes of key:", key)
+	//logger.Debug("Getting nodes of key:", key)
 
 	kapi, err := getKVApiV2DefaultConnector()
 
@@ -58,18 +60,20 @@ func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
 		return resultNode, err
 	}
 
-	resp, err := kapi.Get(context.Background(), key, &client.GetOptions{Recursive: true})
-
-	if err != nil {
-		logger.Error("Getinng key value error:", err)
-		return resultNode, err
+	//todo we need to find why etcd returns "client: etcd cluster is unavailable or misconfigured" error
+	for i := 1; i <= 10; i++ {
+		if resp, err := kapi.Get(context.Background(), key, &client.GetOptions{Recursive: true}); err != nil {
+			logger.Errorf("Getting key: %s, error: %v, Tries: %d", key, err, i)
+		} else {
+			return *resp.Node, nil
+		}
 	}
-
-	return *resp.Node, nil
+	logger.Errorf("Getting key: %s failed: %v", key, err)
+	return client.Node{}, err
 }
 
 func (c *EtcdConnector) Set(key string, value, prevValue interface{}, prevIndex uint64) error {
-	logger.Debug("Setting value of key:", key)
+	//logger.Debug("Setting value of key:", key)
 
 	valueByte, err := json.Marshal(value)
 	if err != nil {
@@ -97,12 +101,16 @@ func (c *EtcdConnector) Set(key string, value, prevValue interface{}, prevIndex 
 		}
 	}
 
-	_, err = kapi.Set(context.Background(), key, string(valueByte), options)
-	if err != nil {
-		logger.Error("Setting key value error", err)
-		return err
+	//todo we need to find why etcd returns "client: etcd cluster is unavailable or misconfigured" error
+	for i := 1; i <= 10; i++ {
+		if _, err = kapi.Set(context.Background(), key, string(valueByte), options); err != nil {
+			logger.Errorf("Setting key: %s, error: %v, Tries: %d", key, err, i)
+		} else {
+			return nil
+		}
 	}
-	return nil
+	logger.Errorf("Setting key: %s failed: %v", key, err)
+	return err
 }
 
 func isNotEmptyValue(value string) bool {
