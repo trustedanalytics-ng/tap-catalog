@@ -9,7 +9,7 @@ run: build_anywhere
 	./application/tap-catalog
 
 run-local: build
-	PORT=8083 CATALOG_USER=admin CATALOG_PASS=password ${GOPATH}/bin/tap-catalog
+	BROKER_LOG_LEVEL=DEBUG PORT=8083 CATALOG_USER=admin CATALOG_PASS=password ${GOPATH}/bin/tap-catalog
 
 docker_build: build_anywhere
 	docker build -t tap-catalog .
