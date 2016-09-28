@@ -138,12 +138,12 @@ func (c *Context) GetInstanceBindings(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	for _, binding := range instance.(models.Instance).Bindings {
-		bindedInstance, err := c.repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
+		boundInstance, err := c.repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
 		if err != nil {
 			handleGetDataError(rw, err)
 			return
 		}
-		result = append(result, bindedInstance.(models.Instance))
+		result = append(result, boundInstance.(models.Instance))
 	}
 	util.WriteJson(rw, result, http.StatusOK)
 }
