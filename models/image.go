@@ -7,6 +7,7 @@ const IMAGE_ID_PREFIX = "image-"
 type Image struct {
 	Id         string     `json:"id"`
 	Type       ImageType  `json:"type"`
+	BlobType   BlobType   `json:"blobType"`
 	State      ImageState `json:"state"`
 	AuditTrail AuditTrail `json:"auditTrail"`
 }
@@ -18,6 +19,14 @@ const (
 	ImageTypeGo     ImageType = "GO"
 	ImageTypeNodeJs ImageType = "NODEJS"
 	ImageTypePython ImageType = "PYTHON"
+)
+
+type BlobType string
+
+const (
+	BlobTypeTarGz BlobType = "TARGZ"
+	BlobTypeJar   BlobType = "JAR"
+	BlobTypeExec  BlobType = "EXEC"
 )
 
 type ImageState string
