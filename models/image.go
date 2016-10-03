@@ -15,10 +15,11 @@ type Image struct {
 type ImageType string
 
 const (
-	ImageTypeJava   ImageType = "JAVA"
-	ImageTypeGo     ImageType = "GO"
-	ImageTypeNodeJs ImageType = "NODEJS"
-	ImageTypePython ImageType = "PYTHON"
+	ImageTypeJava     ImageType = "JAVA"
+	ImageTypeGo       ImageType = "GO"
+	ImageTypeNodeJs   ImageType = "NODEJS"
+	ImageTypePython27 ImageType = "PYTHON2.7"
+	ImageTypePython34 ImageType = "PYTHON3.4"
 )
 
 type BlobType string
