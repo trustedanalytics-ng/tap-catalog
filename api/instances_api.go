@@ -296,7 +296,8 @@ func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) getInstanceKey() string {
-	return c.mapper.ToKey(c.organization, data.Instances)
+	org := c.mapper.ToKey("", c.organization)
+	return c.mapper.ToKey(org, data.Instances)
 }
 
 func (c *Context) buildInstanceKey(instanceId string) string {

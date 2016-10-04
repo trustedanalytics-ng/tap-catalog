@@ -131,7 +131,8 @@ func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) getImagesKey() string {
-	return c.mapper.ToKey(c.organization, data.Images)
+	org := c.mapper.ToKey("", c.organization)
+	return c.mapper.ToKey(org, data.Images)
 }
 
 func (c *Context) buildImagesKey(imageId string) string {

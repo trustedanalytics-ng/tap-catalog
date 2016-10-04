@@ -139,7 +139,8 @@ func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) getApplicationKey() string {
-	return c.mapper.ToKey(c.organization, data.Applications)
+	org := c.mapper.ToKey("", c.organization)
+	return c.mapper.ToKey(org, data.Applications)
 }
 
 func (c *Context) buildApplicationKey(applicationId string) string {

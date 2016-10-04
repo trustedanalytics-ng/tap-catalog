@@ -153,7 +153,8 @@ func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) getServiceKey() string {
-	return c.mapper.ToKey(c.organization, data.Services)
+	org := c.mapper.ToKey("", c.organization)
+	return c.mapper.ToKey(org, data.Services)
 }
 
 func (c *Context) buildServiceKey(serviceId string) string {

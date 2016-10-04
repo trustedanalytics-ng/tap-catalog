@@ -139,7 +139,8 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) getTemplateKey() string {
-	return c.mapper.ToKey(c.organization, data.Templates)
+	org := c.mapper.ToKey("", c.organization)
+	return c.mapper.ToKey(org, data.Templates)
 }
 
 func (c *Context) buildTemplateKey(templateId string) string {
