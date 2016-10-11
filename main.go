@@ -27,8 +27,10 @@ import (
 
 	"github.com/trustedanalytics/tap-catalog/api"
 	"github.com/trustedanalytics/tap-catalog/data"
+	"github.com/trustedanalytics/tap-catalog/metrics"
 	httpGoCommon "github.com/trustedanalytics/tap-go-common/http"
 	"github.com/trustedanalytics/tap-go-common/util"
+	mutils "github.com/trustedanalytics/metrics/utils"
 )
 
 type appHandler func(web.ResponseWriter, *web.Request) error
@@ -44,11 +46,20 @@ func main() {
 		log.Fatalln("Can't create directories in ETCD!", err)
 	}
 
+	mcfenv := os.Getenv("METRICS_COLLECTING_FREQUENCY")
+	mcf, err := time.ParseDuration(mcfenv)
+	if err != nil {
+		log.Printf("Couldn't parse metrics frequency setting (got: %s), fallback to default.", mcfenv)
+		mcf = 15 * time.Second
+	}
+	metrics.EnableCollection(mcf)
+
 	context := api.Context{}
 
 	r := web.New(context)
 	r.Middleware(web.LoggerMiddleware)
 	r.Get("/healthz", context.GetCatalogHealth)
+	r.Get("/metrics", metricsHandler())
 
 	apiRouter := r.Subrouter(context, "/api")
 
@@ -69,6 +80,13 @@ func main() {
 		httpGoCommon.StartServer(r)
 	}
 
+}
+
+func metricsHandler() func(rw web.ResponseWriter, req *web.Request) {
+	mHandler := mutils.GetHandler()
+	return func(rw web.ResponseWriter, req *web.Request) {
+		mHandler.ServeHTTP(rw, req.Request)
+	}
 }
 
 func route(router *web.Router, context *api.Context) {
