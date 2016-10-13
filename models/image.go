@@ -2,7 +2,8 @@ package models
 
 import "strings"
 
-const IMAGE_ID_PREFIX = "image-"
+const USER_DEFINED_APPLICATION_IMAGE_PREFIX = "app_"
+const USER_DEFINED_OFFERING_IMAGE_PREFIX = "svc_"
 
 type Image struct {
 	Id         string     `json:"id"`
@@ -40,13 +41,25 @@ const (
 )
 
 func IsApplicationInstance(imageId string) bool {
-	return strings.Contains(imageId, IMAGE_ID_PREFIX)
+	return strings.HasPrefix(imageId, USER_DEFINED_APPLICATION_IMAGE_PREFIX)
 }
 
 func GetApplicationId(imageId string) string {
-	return strings.TrimPrefix(imageId, IMAGE_ID_PREFIX)
+	return strings.TrimPrefix(imageId, USER_DEFINED_APPLICATION_IMAGE_PREFIX)
 }
 
 func GenerateImageId(applicationId string) string {
-	return IMAGE_ID_PREFIX + applicationId
+	return USER_DEFINED_APPLICATION_IMAGE_PREFIX + applicationId
+}
+
+func IsUserDefinedOffering(imageId string) bool {
+	return strings.HasPrefix(imageId, USER_DEFINED_OFFERING_IMAGE_PREFIX)
+}
+
+func GetOfferingId(imageId string) string {
+	return strings.TrimPrefix(imageId, USER_DEFINED_OFFERING_IMAGE_PREFIX)
+}
+
+func ConstructImageIdForUserOffering(offeringId string) string {
+	return USER_DEFINED_OFFERING_IMAGE_PREFIX + offeringId
 }
