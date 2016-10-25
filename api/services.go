@@ -16,12 +16,13 @@
 package api
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gocraft/web"
 	"github.com/looplab/fsm"
 
-	"errors"
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-go-common/util"
@@ -36,16 +37,34 @@ func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, result, http.StatusOK)
 }
 
+func (c *Context) getService(id string) (models.Service, error) {
+	entity, err := c.repository.GetData(c.buildServiceKey(id), models.Service{})
+	if err != nil {
+		err = fmt.Errorf("service %q retrieval failed: %v", id, err)
+		logger.Warning(err)
+		return models.Service{}, err
+	}
+
+	service, ok := entity.(models.Service)
+	if !ok {
+		err = fmt.Errorf("type assertion for service %q failed: object from database: %v", id, entity)
+		logger.Error(err)
+		return models.Service{}, err
+	}
+
+	return service, nil
+}
+
 func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
-	result, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
+	service, err := c.getService(serviceId)
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
 	}
 
-	util.WriteJson(rw, result, http.StatusOK)
+	util.WriteJson(rw, service, http.StatusOK)
 }
 
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {

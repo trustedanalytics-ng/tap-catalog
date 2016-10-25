@@ -25,12 +25,12 @@ import (
 
 	"github.com/gocraft/web"
 
+	mutils "github.com/trustedanalytics/metrics/utils"
 	"github.com/trustedanalytics/tap-catalog/api"
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/metrics"
 	httpGoCommon "github.com/trustedanalytics/tap-go-common/http"
 	"github.com/trustedanalytics/tap-go-common/util"
-	mutils "github.com/trustedanalytics/metrics/utils"
 )
 
 type appHandler func(web.ResponseWriter, *web.Request) error
@@ -107,10 +107,10 @@ func route(router *web.Router, context *api.Context) {
 
 	router.Get("/services/instances", context.ServicesInstances)
 	router.Get("/services/:serviceId/instances", context.ServiceInstances)
-	router.Get("/services/:serviceId/instances/:instanceId", context.GetInstance)
+	router.Get("/services/:serviceId/instances/:instanceId", context.GetServiceInstance)
 	router.Post("/services/:serviceId/instances", context.AddServiceInstance)
-	router.Patch("/services/:serviceId/instances/:instanceId", context.PatchInstance)
-	router.Delete("/services/:serviceId/instances/:instanceId", context.DeleteInstance)
+	router.Patch("/services/:serviceId/instances/:instanceId", context.PatchServiceInstance)
+	router.Delete("/services/:serviceId/instances/:instanceId", context.DeleteServiceInstance)
 
 	router.Get("/applications", context.Applications)
 	router.Get("/applications/:applicationId", context.GetApplication)
@@ -120,10 +120,10 @@ func route(router *web.Router, context *api.Context) {
 
 	router.Get("/applications/instances", context.ApplicationsInstances)
 	router.Get("/applications/:applicationId/instances", context.ApplicationInstances)
-	router.Get("/applications/:applicationId/instances/:instanceId", context.GetInstance)
+	router.Get("/applications/:applicationId/instances/:instanceId", context.GetApplicationInstance)
 	router.Post("/applications/:applicationId/instances", context.AddApplicationInstance)
-	router.Patch("/applications/:applicationId/instances/:instanceId", context.PatchInstance)
-	router.Delete("/applications/:applicationId/instances/:instanceId", context.DeleteInstance)
+	router.Patch("/applications/:applicationId/instances/:instanceId", context.PatchApplicationInstance)
+	router.Delete("/applications/:applicationId/instances/:instanceId", context.DeleteApplicationInstance)
 
 	router.Get("/images", context.Images)
 	router.Get("/images/:imageId", context.GetImage)

@@ -17,6 +17,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gocraft/web"
@@ -36,15 +37,34 @@ func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJson(rw, result, http.StatusOK)
 }
 
+func (c *Context) getApplication(id string) (models.Application, error) {
+	entity, err := c.repository.GetData(c.buildApplicationKey(id), models.Application{})
+	if err != nil {
+		err = fmt.Errorf("application %q retrieval failed: %v", id, err)
+		logger.Warning(err)
+		return models.Application{}, err
+	}
+
+	application, ok := entity.(models.Application)
+	if !ok {
+		err = fmt.Errorf("type assertion for application %q failed: object from database: %v", id, entity)
+		logger.Error(err)
+		return models.Application{}, err
+	}
+
+	return application, nil
+}
+
 func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 
-	result, err := c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
+	app, err := c.getApplication(applicationId)
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
 	}
-	util.WriteJson(rw, result, http.StatusOK)
+
+	util.WriteJson(rw, app, http.StatusOK)
 }
 
 func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
