@@ -9,10 +9,10 @@
 			"revisionTime": "2016-08-04T10:47:26Z"
 		},
 		{
-			"checksumSHA1": "Fa/Hw0ByZgcIDU5iG+Jt0MdeYYg=",
+			"checksumSHA1": "notbffREntR8tWXGpo3y9R7wlJc=",
 			"path": "github.com/coreos/etcd/client",
-			"revision": "8111e0f7dc6edfa50571fd2f5f87a746378b52e6",
-			"revisionTime": "2016-06-19T21:50:15Z"
+			"revision": "8e5f34fd97c03025c531fa547e654838ca490f04",
+			"revisionTime": "2016-10-25T01:52:46Z"
 		},
 		{
 			"checksumSHA1": "mKIXx1kDwmVmdIpZ3pJtRBuUKso=",

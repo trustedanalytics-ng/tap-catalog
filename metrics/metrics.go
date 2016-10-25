@@ -7,14 +7,13 @@ import (
 	mutils "github.com/trustedanalytics/metrics/utils"
 )
 
-
 var tapCounts = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "tap",
-			Subsystem: "catalog",
-			Name:      "counts",
-			Help:      "Count of various TAP components",
-		}, []string{"component"})
+	prometheus.GaugeOpts{
+		Namespace: "tap",
+		Subsystem: "catalog",
+		Name:      "counts",
+		Help:      "Count of various TAP components",
+	}, []string{"component"})
 
 func collectApplicationsCount() error {
 	// TODO
@@ -42,4 +41,3 @@ func EnableCollection(delay time.Duration) chan<- struct{} {
 		collectServiceInstancesCount,
 	)
 }
-
