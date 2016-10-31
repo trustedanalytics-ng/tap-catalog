@@ -17,7 +17,6 @@
 package main
 
 import (
-	"log"
 	"math/rand"
 	"os"
 	"sync"
@@ -25,17 +24,19 @@ import (
 
 	"github.com/gocraft/web"
 
-	mutils "github.com/trustedanalytics/metrics/utils"
 	"github.com/trustedanalytics/tap-catalog/api"
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/metrics"
 	httpGoCommon "github.com/trustedanalytics/tap-go-common/http"
+	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
 	"github.com/trustedanalytics/tap-go-common/util"
+	mutils "github.com/trustedanalytics/tap-metrics/utils"
 )
 
 type appHandler func(web.ResponseWriter, *web.Request) error
 
 var waitGroup = &sync.WaitGroup{}
+var logger, _ = commonLogger.InitLogger("main")
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -43,13 +44,13 @@ func main() {
 	err := (&data.RepositoryConnector{}).CreateDirs(os.Getenv("CORE_ORGANIZATION"))
 	go util.TerminationObserver(waitGroup, "Catalog")
 	if err != nil {
-		log.Fatalln("Can't create directories in ETCD!", err)
+		logger.Fatal("Can't create directories in ETCD!", err)
 	}
 
 	mcfenv := os.Getenv("METRICS_COLLECTING_FREQUENCY")
 	mcf, err := time.ParseDuration(mcfenv)
 	if err != nil {
-		log.Printf("Couldn't parse metrics frequency setting (got: %s), fallback to default.", mcfenv)
+		logger.Warningf("Couldn't parse metrics frequency setting (got: %s), fallback to default.", mcfenv)
 		mcf = 15 * time.Second
 	}
 	metrics.EnableCollection(mcf)

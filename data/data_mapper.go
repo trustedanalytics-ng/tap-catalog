@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/logger"
+	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
 )
 
-var logger = logger_wrapper.InitLogger("template_wrapper")
+var logger, _ = commonLogger.InitLogger("DataMapper")
 
 type DataMapper struct {
 	Username string
@@ -29,7 +29,7 @@ func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}, isRootEl
 		}
 	} else {
 		if structInputValues.Type() == reflect.TypeOf(models.AuditTrail{}) {
-			result = MergeMap(result, t.updateAuditTrail(dirKey, false))
+			result = MergeMap(result, t.updateAuditTrail(dirKey, false, structInputValues.Interface().(models.AuditTrail)))
 		} else {
 			structAsMap := t.structToMap(dirKey, structInputValues, isRootElement)
 			result = MergeMap(result, structAsMap)
@@ -38,28 +38,29 @@ func (t *DataMapper) ToKeyValue(dirKey string, inputStruct interface{}, isRootEl
 	return result
 }
 
-func (t *DataMapper) updateAuditTrail(mainStructDirKey string, isUpdateAction bool) map[string]interface{} {
+func (t *DataMapper) updateAuditTrail(mainStructDirKey string, isUpdateAction bool, auditTrail models.AuditTrail) map[string]interface{} {
 	result := map[string]interface{}{}
-	auditTrail := models.AuditTrail{
-		CreatedBy:     t.Username,
-		CreatedOn:     time.Now().Unix(),
-		LastUpdateBy:  t.Username,
-		LastUpdatedOn: time.Now().Unix(),
-	}
+	auditTrail.CreatedOn = time.Now().Unix()
+	auditTrail.LastUpdatedOn = time.Now().Unix()
+
 	valueOfAuditTrial := reflect.ValueOf(auditTrail)
 	for i := 0; i < valueOfAuditTrial.NumField(); i++ {
 		fieldName := valueOfAuditTrial.Type().Field(i).Name
-		if shouldUpdateAuditTrailField(fieldName, isUpdateAction) {
-			objectAsMap := t.SingleFieldToMap(buildEtcdKey(mainStructDirKey, fieldName, "", false), valueOfAuditTrial.Field(i), fieldName, "")
+		fieldValue := valueOfAuditTrial.Field(i)
+
+		if shouldUpdateAuditTrailField(fieldName, fieldValue, isUpdateAction) {
+			objectAsMap := t.SingleFieldToMap(buildEtcdKey(mainStructDirKey, fieldName, "", false), fieldValue, fieldName, "")
 			result = MergeMap(result, objectAsMap)
 		}
 	}
 	return result
 }
 
-func shouldUpdateAuditTrailField(fieldName string, isUpdateAction bool) bool {
+func shouldUpdateAuditTrailField(fieldName string, fieldValue reflect.Value, isUpdateAction bool) bool {
 	if isUpdateAction {
 		if fieldName == "CreatedOn" || fieldName == "CreatedBy" {
+			return false
+		} else if fieldValue.Kind() == reflect.String && fieldValue.String() == "" {
 			return false
 		} else {
 			return true
@@ -98,7 +99,9 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 		Delete: make(map[string]interface{}),
 	}
 
+	username := ""
 	for _, patch := range patches {
+		username = patch.Username
 		patchFieldName := strings.Title(patch.Field)
 
 		if patch.Field == "" {
@@ -157,7 +160,10 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 		}
 	}
 
-	result.Update = append(result.Update, mapToPatchSingleUpdates(t.updateAuditTrail(mainStructDirKey+"/AuditTrail", true), nil)...)
+	result.Update = append(
+		result.Update,
+		mapToPatchSingleUpdates(t.updateAuditTrail(mainStructDirKey+"/AuditTrail", true, models.AuditTrail{LastUpdateBy: username}), nil)...,
+	)
 	return result, nil
 }
 

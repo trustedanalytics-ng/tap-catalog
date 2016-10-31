@@ -24,4 +24,5 @@ type Patch struct {
 	Field     string          `json:"field"`
 	Value     json.RawMessage `json:"value"`
 	PrevValue json.RawMessage `json:"prevValue,omitempty"`
+	Username  string          `json:"username"`
 }

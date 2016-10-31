@@ -7,7 +7,7 @@ import (
 	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
 
-	"github.com/trustedanalytics/tap-go-common/logger"
+	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
 )
 
 type EtcdKVStore interface {
@@ -20,7 +20,7 @@ type EtcdKVStore interface {
 
 type EtcdConnector struct{}
 
-var logger = logger_wrapper.InitLogger("etcd")
+var logger, _ = commonLogger.InitLogger("etcd")
 
 func (c *EtcdConnector) GetKeyValue(key string) (string, error) {
 	logger.Debug("Getting value of key:", key)

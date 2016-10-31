@@ -17,18 +17,18 @@ package api
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gocraft/web"
 	"github.com/looplab/fsm"
 
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/logger"
+	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
 	"github.com/trustedanalytics/tap-go-common/util"
-	"strings"
 )
 
-var logger = logger_wrapper.InitLogger("api")
+var logger, _ = commonLogger.InitLogger("api")
 
 type Context struct {
 	mapper       data.DataMapper

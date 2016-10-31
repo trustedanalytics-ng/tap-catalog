@@ -4,7 +4,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"time"
 
-	mutils "github.com/trustedanalytics/metrics/utils"
+	mutils "github.com/trustedanalytics/tap-metrics/utils"
 )
 
 var tapCounts = prometheus.NewGaugeVec(

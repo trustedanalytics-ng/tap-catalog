@@ -765,6 +765,8 @@ definitions:
         type: object
       prevValue:
         type: object
+      username:
+        type: string
   Service:
     type: object
     required:
