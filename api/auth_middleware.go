@@ -17,40 +17,12 @@
 package api
 
 import (
-	"crypto/rsa"
-	"encoding/json"
-	"errors"
-	"io/ioutil"
 	"os"
-	"strings"
 
-	"github.com/dvsekhvalnov/jose2go"
-	jwtRsa "github.com/dvsekhvalnov/jose2go/keys/rsa"
 	"github.com/gocraft/web"
 
 	"github.com/trustedanalytics/tap-go-common/util"
 )
-
-type TapJWTToken struct {
-	Jti       string   `json:"jti"`
-	Sub       string   `json:"sub"`
-	Scope     []string `json:"scope"`
-	ClientId  string   `json:"client_id"`
-	Cid       string   `json:"cid"`
-	Azp       string   `json:"azp"`
-	GrantType string   `json:"grant_type"`
-	UserId    string   `json:"user_id"`
-	Username  string   `json:"user_name"`
-	Email     string   `json:"email"`
-	RevSig    string   `json:"rev_sig"`
-	Iat       int64    `json:"iat"`
-	Exp       int64    `json:"exp"`
-	Iss       string   `json:"iss"`
-	Zid       string   `json:"zid"`
-	Aud       []string `json:"aud"`
-}
-
-var publicKey *rsa.PublicKey
 
 func (c *Context) BasicAuthorizeMiddleware(rw web.ResponseWriter, req *web.Request, next web.NextMiddlewareFunc) {
 	username, password, is_ok := req.BasicAuth()
@@ -60,62 +32,4 @@ func (c *Context) BasicAuthorizeMiddleware(rw web.ResponseWriter, req *web.Reque
 	}
 	c.mapper.Username = username
 	next(rw, req)
-}
-
-func (c *Context) JWTAuthorizeMiddleware(rw web.ResponseWriter, req *web.Request, next web.NextMiddlewareFunc) {
-	if ok := isUserAuthorized(req); ok {
-		next(rw, req)
-		return
-	} else {
-		util.RespondUnauthorized(rw)
-		return
-	}
-	next(rw, req)
-}
-
-func isUserAuthorized(req *web.Request) bool {
-	validScope := "console.admin"
-
-	var err error
-	if publicKey == nil {
-		publicKey, err = getJWTPublicKey()
-		if err != nil {
-			return false
-		}
-	}
-
-	tapToken, err := parseJWTToken(req.Header.Get("Authorization"))
-	if err != nil {
-		return false
-	}
-
-	for _, scope := range tapToken.Scope {
-		if scope == validScope {
-			return true
-		}
-	}
-	return false
-}
-
-func getJWTPublicKey() (*rsa.PublicKey, error) {
-	publicKeyFile, err := ioutil.ReadFile(os.Getenv("JWT_PUBLIC_KEY_FILE_LOCATION"))
-	if err != nil {
-		return nil, err
-	}
-	return jwtRsa.ReadPublic(publicKeyFile)
-}
-
-func parseJWTToken(authHeader string) (*TapJWTToken, error) {
-	if authHeader != "" && len(strings.Split(authHeader, " ")) > 1 {
-		token := strings.Split(authHeader, " ")[1]
-		payload, _, err := jose.Decode(token, publicKey)
-		if err != nil {
-			return nil, err
-		}
-		tapToken := &TapJWTToken{}
-		err = json.Unmarshal([]byte(payload), tapToken)
-		return tapToken, err
-	} else {
-		return nil, errors.New("Authorisation header incorrect!")
-	}
 }
