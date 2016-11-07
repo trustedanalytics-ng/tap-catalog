@@ -63,6 +63,16 @@ func (c *Context) removeQuotes(value string) string {
 	return value[1 : len(value)-1]
 }
 
+func getHttpStatusOrStatusError(status int, err error) int {
+	if err != nil {
+		if strings.Contains(err.Error(), keyNotFoundMessage) {
+			return http.StatusNotFound
+		}
+		return http.StatusInternalServerError
+	}
+	return status
+}
+
 func handleGetDataError(rw web.ResponseWriter, err error) {
 	if err != nil {
 		if strings.Contains(err.Error(), keyNotFoundMessage) {

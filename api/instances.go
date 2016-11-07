@@ -29,20 +29,12 @@ import (
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getInstanceKey(), models.Instance{})
-	if err != nil {
-		util.Respond500(rw, err)
-		return
-	}
-	util.WriteJson(rw, result, http.StatusOK)
+	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) ServicesInstances(rw web.ResponseWriter, req *web.Request) {
 	instances, err := c.getFilteredInstances(models.InstanceTypeService, "")
-	if err != nil {
-		util.Respond500(rw, err)
-		return
-	}
-	util.WriteJson(rw, instances, http.StatusOK)
+	util.WriteJsonOrError(rw, instances, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) ServiceInstances(rw web.ResponseWriter, req *web.Request) {
@@ -54,20 +46,12 @@ func (c *Context) ServiceInstances(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	instances, err := c.getFilteredInstances(models.InstanceTypeService, serviceId)
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, instances, http.StatusOK)
+	util.WriteJsonOrError(rw, instances, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) ApplicationsInstances(rw web.ResponseWriter, req *web.Request) {
 	instances, err := c.getFilteredInstances(models.InstanceTypeApplication, "")
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, instances, http.StatusOK)
+	util.WriteJsonOrError(rw, instances, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) ApplicationInstances(rw web.ResponseWriter, req *web.Request) {
@@ -79,11 +63,7 @@ func (c *Context) ApplicationInstances(rw web.ResponseWriter, req *web.Request) 
 	}
 
 	instances, err := c.getFilteredInstances(models.InstanceTypeApplication, appId)
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, instances, http.StatusOK)
+	util.WriteJsonOrError(rw, instances, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) getFilteredInstances(expectedInstanceType models.InstanceType, expectedClassId string) ([]models.Instance, error) {
@@ -135,12 +115,7 @@ func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 
 	result, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-
-	util.WriteJson(rw, result, http.StatusOK)
+	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) GetInstanceBindings(rw web.ResponseWriter, req *web.Request) {
@@ -348,11 +323,7 @@ func (c *Context) DeleteApplicationInstance(rw web.ResponseWriter, req *web.Requ
 func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceID := req.PathParams["instanceId"]
 	err := c.repository.DeleteData(c.buildInstanceKey(instanceID))
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, "", http.StatusNoContent)
+	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 
 func (c *Context) getInstanceKey() string {

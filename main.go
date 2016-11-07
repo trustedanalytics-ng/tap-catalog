@@ -33,8 +33,6 @@ import (
 	mutils "github.com/trustedanalytics/tap-metrics/utils"
 )
 
-type appHandler func(web.ResponseWriter, *web.Request) error
-
 var waitGroup = &sync.WaitGroup{}
 var logger, _ = commonLogger.InitLogger("main")
 

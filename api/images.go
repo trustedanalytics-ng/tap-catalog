@@ -29,22 +29,14 @@ import (
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getImagesKey(), models.Image{})
-	if err != nil {
-		util.Respond500(rw, err)
-		return
-	}
-	util.WriteJson(rw, result, http.StatusOK)
+	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 
 	result, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, result, http.StatusOK)
+	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
@@ -66,11 +58,7 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	image, err := c.repository.GetData(c.buildImagesKey(reqImage.Id), models.Image{})
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, image, http.StatusCreated)
+	util.WriteJsonOrError(rw, image, getHttpStatusOrStatusError(http.StatusCreated, err), err)
 }
 
 func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
@@ -113,21 +101,13 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	imageInt, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, imageInt, http.StatusOK)
+	util.WriteJsonOrError(rw, imageInt, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	err := c.repository.DeleteData(c.buildImagesKey(imageId))
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, "", http.StatusNoContent)
+	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 
 func (c *Context) getImagesKey() string {

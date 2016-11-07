@@ -31,10 +31,7 @@ const keyNotFoundMessage = "Key not found"
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getApplicationKey(), models.Application{})
-	if err != nil {
-		util.Respond500(rw, err)
-	}
-	util.WriteJson(rw, result, http.StatusOK)
+	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) getApplication(id string) (models.Application, error) {
@@ -59,12 +56,7 @@ func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 
 	app, err := c.getApplication(applicationId)
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-
-	util.WriteJson(rw, app, http.StatusOK)
+	util.WriteJsonOrError(rw, app, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
@@ -106,11 +98,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	application, err := c.repository.GetData(c.buildApplicationKey(reqApplication.Id), models.Application{})
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, application, http.StatusCreated)
+	util.WriteJsonOrError(rw, application, getHttpStatusOrStatusError(http.StatusCreated, err), err)
 }
 
 func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
@@ -141,21 +129,13 @@ func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	application, err = c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, application, http.StatusOK)
+	util.WriteJsonOrError(rw, application, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 	err := c.repository.DeleteData(c.buildApplicationKey(applicationId))
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, "", http.StatusNoContent)
+	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 
 func (c *Context) getApplicationKey() string {

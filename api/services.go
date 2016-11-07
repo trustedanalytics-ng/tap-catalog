@@ -30,11 +30,7 @@ import (
 
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getServiceKey(), models.Service{})
-	if err != nil {
-		util.Respond500(rw, err)
-		return
-	}
-	util.WriteJson(rw, result, http.StatusOK)
+	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) getService(id string) (models.Service, error) {
@@ -59,12 +55,7 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
 	service, err := c.getService(serviceId)
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-
-	util.WriteJson(rw, service, http.StatusOK)
+	util.WriteJsonOrError(rw, service, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
@@ -107,11 +98,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	service, err := c.repository.GetData(c.buildServiceKey(reqService.Id), models.Service{})
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, service, http.StatusCreated)
+	util.WriteJsonOrError(rw, service, getHttpStatusOrStatusError(http.StatusCreated, err), err)
 }
 
 func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
@@ -154,21 +141,13 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	serviceInt, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, serviceInt, http.StatusOK)
+	util.WriteJsonOrError(rw, serviceInt, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	err := c.repository.DeleteData(c.buildServiceKey(serviceId))
-	if err != nil {
-		handleGetDataError(rw, err)
-		return
-	}
-	util.WriteJson(rw, serviceId, http.StatusNoContent)
+	util.WriteJsonOrError(rw, serviceId, getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 
 func (c *Context) getServiceKey() string {
