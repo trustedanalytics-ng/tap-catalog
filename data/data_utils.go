@@ -58,11 +58,41 @@ func CheckIfIdFieldIsEmpty(entity interface{}) error {
 }
 
 func CheckIfMatchingRegexp(content, regexpRule string) error {
-
 	if ok, _ := regexp.MatchString(regexpRule, content); !ok {
 		return errors.New(fmt.Sprintf("Content: %s doesn't match regexp: %s !", content, regexpRule))
 	}
 	return nil
+}
+
+func GetEntityKey(organization string, entity string) string {
+	dataMapper := DataMapper{}
+	org := dataMapper.ToKey("", organization)
+	return dataMapper.ToKey(org, entity)
+}
+
+func GetFilteredInstances(expectedInstanceType models.InstanceType, expectedClassId string, org string, repositoryApi RepositoryApi) ([]models.Instance, error) {
+	filteredInstances := []models.Instance{}
+
+	result, err := repositoryApi.GetListOfData(GetEntityKey(org, Instances), models.Instance{})
+
+	if err != nil {
+		return filteredInstances, err
+	}
+
+	for _, el := range result {
+
+		instance, ok := el.(models.Instance)
+		if !ok {
+			return filteredInstances, errors.New("Cannot convert element to models.Instance")
+		}
+
+		if instance.Type == expectedInstanceType &&
+			(expectedClassId == "" || instance.ClassId == expectedClassId) {
+
+			filteredInstances = append(filteredInstances, instance)
+		}
+	}
+	return filteredInstances, nil
 }
 
 func getStructId(structObject reflect.Value) string {

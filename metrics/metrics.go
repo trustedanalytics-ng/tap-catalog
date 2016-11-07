@@ -16,10 +16,21 @@
 package metrics
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
+	"errors"
+	"os"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/trustedanalytics/tap-catalog/data"
+	"github.com/trustedanalytics/tap-catalog/models"
 	mutils "github.com/trustedanalytics/tap-metrics/utils"
+)
+
+const (
+	applicationsMetricName      = "applications"
+	servicesMetricName          = "services"
+	servicesInstancesMetricName = "serviceInstances"
 )
 
 var tapCounts = prometheus.NewGaugeVec(
@@ -28,31 +39,77 @@ var tapCounts = prometheus.NewGaugeVec(
 		Subsystem: "catalog",
 		Name:      "counts",
 		Help:      "Count of various TAP components",
-	}, []string{"component"})
+	}, []string{"component", "organization"})
 
-func collectApplicationsCount() error {
-	// TODO
-	tapCounts.WithLabelValues("applications").Set(43)
-	return nil
+var repositoryConnector = &data.RepositoryConnector{}
+
+func collectApplicationsCount(org string) (string, float64, error) {
+	applicationsCount, err := repositoryConnector.GetDataCounter(data.GetEntityKey(org, data.Applications), models.Application{})
+	if err != nil {
+		return "", 0, err
+	}
+	return applicationsMetricName, float64(applicationsCount), nil
 }
 
-func collectServicesCount() error {
-	// TODO
-	tapCounts.WithLabelValues("services").Set(43)
-	return nil
+func collectServicesCount(org string) (string, float64, error) {
+	servicesCount, err := repositoryConnector.GetDataCounter(data.GetEntityKey(org, data.Services), models.Service{})
+	if err != nil {
+		return "", 0, err
+	}
+	return servicesMetricName, float64(servicesCount), nil
 }
 
-func collectServiceInstancesCount() error {
-	// TODO
-	tapCounts.WithLabelValues("serviceInstances").Set(43)
+func collectServiceInstancesCount(org string) (string, float64, error) {
+	serviceInstances, err := data.GetFilteredInstances(models.InstanceTypeService, "", org, repositoryConnector)
+	if err != nil {
+		return "", 0, err
+	}
+	return servicesInstancesMetricName, float64(len(serviceInstances)), nil
+}
+
+func collectCount() error {
+	organizations, err := getAllOrgs()
+	if err != nil {
+		return err
+	}
+	for _, org := range organizations {
+		metricName, metricValue, err := collectApplicationsCount(org)
+		if err != nil {
+			return err
+		}
+		tapCounts.WithLabelValues(metricName, org).Set(metricValue)
+
+		metricName, metricValue, err = collectServicesCount(org)
+		if err != nil {
+			return err
+		}
+		tapCounts.WithLabelValues(metricName, org).Set(metricValue)
+
+		metricName, metricValue, err = collectServiceInstancesCount(org)
+		if err != nil {
+			return err
+		}
+		tapCounts.WithLabelValues(metricName, org).Set(metricValue)
+	}
 	return nil
 }
 
 func EnableCollection(delay time.Duration) chan<- struct{} {
 	mutils.RegisterMetrics("catalog", tapCounts)
 	return mutils.EnableMetricsCollecting(delay,
-		collectApplicationsCount,
-		collectServicesCount,
-		collectServiceInstancesCount,
+		collectCount,
 	)
+}
+
+func getAllOrgs() ([]string, error) {
+	/*
+		For more orgs, they should be get from user-management
+	*/
+	coreOrg := os.Getenv("CORE_ORGANIZATION")
+	if coreOrg == "" {
+		return nil, errors.New("CORE_ORGANIZATION env is empty")
+	}
+	orgs := []string{coreOrg}
+
+	return orgs, nil
 }

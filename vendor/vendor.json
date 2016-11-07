@@ -33,6 +33,11 @@
 			"revisionTime": "2015-12-31T19:58:24Z"
 		},
 		{
+			"checksumSHA1": "JSHl8b3nI8EWvzm+uyrIqj2Hiu4=",
+			"path": "github.com/golang/mock/gomock",
+			"revision": ""
+		},
+		{
 			"checksumSHA1": "qjr2SKQanbmna221z0Ce2n0hnDE=",
 			"path": "github.com/golang/protobuf/proto",
 			"revision": "df1d3ca07d2d07bba352d5b73c4313b4e2a6203e",

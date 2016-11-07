@@ -28,14 +28,14 @@ import (
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(c.getImagesKey(), models.Image{})
+	result, err := c.Repository.GetListOfData(c.getImagesKey(), models.Image{})
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 
-	result, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
+	result, err := c.Repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
@@ -51,19 +51,19 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 	reqImage.State = models.ImageStatePending
 	imageKeyStore := c.mapper.ToKeyValue(c.getImagesKey(), reqImage, true)
 
-	err = c.repository.StoreData(imageKeyStore)
+	err = c.Repository.StoreData(imageKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	image, err := c.repository.GetData(c.buildImagesKey(reqImage.Id), models.Image{})
+	image, err := c.Repository.GetData(c.buildImagesKey(reqImage.Id), models.Image{})
 	util.WriteJsonOrError(rw, image, getHttpStatusOrStatusError(http.StatusCreated, err), err)
 }
 
 func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
-	imageInt, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
+	imageInt, err := c.Repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -94,19 +94,19 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = c.repository.ApplyPatchedValues(patchedValues)
+	err = c.Repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	imageInt, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
+	imageInt, err = c.Repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	util.WriteJsonOrError(rw, imageInt, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
-	err := c.repository.DeleteData(c.buildImagesKey(imageId))
+	err := c.Repository.DeleteData(c.buildImagesKey(imageId))
 	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 

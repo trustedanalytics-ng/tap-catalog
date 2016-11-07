@@ -53,7 +53,7 @@ func main() {
 	}
 	metrics.EnableCollection(mcf)
 
-	context := api.Context{}
+	context := api.Context{Repository: &data.RepositoryConnector{}}
 
 	r := web.New(context)
 	r.Middleware(web.LoggerMiddleware)
@@ -78,7 +78,6 @@ func main() {
 	} else {
 		httpGoCommon.StartServer(r)
 	}
-
 }
 
 func metricsHandler() func(rw web.ResponseWriter, req *web.Request) {

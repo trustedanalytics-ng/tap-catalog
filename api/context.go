@@ -32,7 +32,7 @@ var logger, _ = commonLogger.InitLogger("api")
 
 type Context struct {
 	mapper       data.DataMapper
-	repository   data.RepositoryConnector
+	Repository   data.RepositoryApi
 	organization string
 }
 

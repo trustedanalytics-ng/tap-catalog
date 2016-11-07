@@ -30,12 +30,12 @@ import (
 const keyNotFoundMessage = "Key not found"
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(c.getApplicationKey(), models.Application{})
+	result, err := c.Repository.GetListOfData(c.getApplicationKey(), models.Application{})
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) getApplication(id string) (models.Application, error) {
-	entity, err := c.repository.GetData(c.buildApplicationKey(id), models.Application{})
+	entity, err := c.Repository.GetData(c.buildApplicationKey(id), models.Application{})
 	if err != nil {
 		err = fmt.Errorf("application %q retrieval failed: %v", id, err)
 		logger.Warning(err)
@@ -80,7 +80,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	exists, err := c.repository.IsExistByName(reqApplication.Name, models.Application{}, c.getApplicationKey())
+	exists, err := c.Repository.IsExistByName(reqApplication.Name, models.Application{}, c.getApplicationKey())
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -91,19 +91,19 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	applicationKeyStore := c.mapper.ToKeyValue(c.getApplicationKey(), reqApplication, true)
-	err = c.repository.StoreData(applicationKeyStore)
+	err = c.Repository.StoreData(applicationKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	application, err := c.repository.GetData(c.buildApplicationKey(reqApplication.Id), models.Application{})
+	application, err := c.Repository.GetData(c.buildApplicationKey(reqApplication.Id), models.Application{})
 	util.WriteJsonOrError(rw, application, getHttpStatusOrStatusError(http.StatusCreated, err), err)
 }
 
 func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
-	application, err := c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
+	application, err := c.Repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -122,25 +122,24 @@ func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = c.repository.ApplyPatchedValues(patchedValues)
+	err = c.Repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	application, err = c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
+	application, err = c.Repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	util.WriteJsonOrError(rw, application, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
-	err := c.repository.DeleteData(c.buildApplicationKey(applicationId))
+	err := c.Repository.DeleteData(c.buildApplicationKey(applicationId))
 	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 
 func (c *Context) getApplicationKey() string {
-	org := c.mapper.ToKey("", c.organization)
-	return c.mapper.ToKey(org, data.Applications)
+	return data.GetEntityKey(c.organization, data.Applications)
 }
 
 func (c *Context) buildApplicationKey(applicationId string) string {

@@ -28,13 +28,13 @@ import (
 )
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(c.getTemplateKey(), models.Template{})
+	result, err := c.Repository.GetListOfData(c.getTemplateKey(), models.Template{})
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
-	result, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
+	result, err := c.Repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
@@ -55,26 +55,26 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	reqTemplate.State = models.TemplateStateInProgress
 	templateKeyStore := c.mapper.ToKeyValue(c.getTemplateKey(), reqTemplate, true)
-	err = c.repository.StoreData(templateKeyStore)
+	err = c.Repository.StoreData(templateKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	template, err := c.repository.GetData(c.buildTemplateKey(reqTemplate.Id), models.Template{})
+	template, err := c.Repository.GetData(c.buildTemplateKey(reqTemplate.Id), models.Template{})
 	util.WriteJsonOrError(rw, template, getHttpStatusOrStatusError(http.StatusCreated, err), err)
 }
 
 func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 
-	err := c.repository.DeleteData(c.buildTemplateKey(templateId))
+	err := c.Repository.DeleteData(c.buildTemplateKey(templateId))
 	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 
 func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
-	templateInt, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
+	templateInt, err := c.Repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -105,13 +105,13 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = c.repository.ApplyPatchedValues(patchedValues)
+	err = c.Repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	templateInt, err = c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
+	templateInt, err = c.Repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	util.WriteJsonOrError(rw, templateInt, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 

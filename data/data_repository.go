@@ -20,6 +20,19 @@ import (
 	"reflect"
 )
 
+type RepositoryApi interface {
+	StoreData(keyStore map[string]interface{}) error
+	UpdateData(updates []PatchSingleUpdate) error
+	ApplyPatchedValues(patchedKeyValues PatchedKeyValues) error
+	DeleteData(key string) error
+	GetData(key string, model interface{}) (interface{}, error)
+	GetListOfData(key string, model interface{}) ([]interface{}, error)
+	GetListOfDataFlat(key string, model interface{}) ([]interface{}, error)
+	GetDataCounter(key string, model interface{}) (int, error)
+	CreateDirs(org string) error
+	IsExistByName(expectedName string, model interface{}, key string) (bool, error)
+}
+
 type RepositoryConnector struct {
 	etcdClient etcd.EtcdConnector
 	mapper     DataMapper
@@ -39,7 +52,7 @@ func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
 func (t *RepositoryConnector) UpdateData(updates []PatchSingleUpdate) error {
 	var err error
 	for _, update := range updates {
-		node, err := t.etcdClient.GetKeyNodes(update.Key)
+		node, err := t.etcdClient.GetKeyNodesRecursively(update.Key)
 		if err != nil {
 			logger.Error("UpdateData in etcd error! Can't get key: ", update.Key, err)
 			return err
@@ -79,7 +92,7 @@ func (t *RepositoryConnector) DeleteData(key string) error {
 }
 
 func (t *RepositoryConnector) GetData(key string, model interface{}) (interface{}, error) {
-	node, err := t.etcdClient.GetKeyNodes(key)
+	node, err := t.etcdClient.GetKeyNodesRecursively(key)
 	if err != nil {
 		return "", err
 	}
@@ -87,6 +100,25 @@ func (t *RepositoryConnector) GetData(key string, model interface{}) (interface{
 }
 
 func (t *RepositoryConnector) GetListOfData(key string, model interface{}) ([]interface{}, error) {
+	node, err := t.etcdClient.GetKeyNodesRecursively(key)
+
+	result := []interface{}{}
+
+	if err != nil {
+		return result, err
+	}
+
+	for _, childNode := range node.Nodes {
+		elem, err := t.mapper.ToModelInstance(childNode.Key, *childNode, model)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, elem)
+	}
+	return result, nil
+}
+
+func (t *RepositoryConnector) GetListOfDataFlat(key string, model interface{}) ([]interface{}, error) {
 	node, err := t.etcdClient.GetKeyNodes(key)
 
 	result := []interface{}{}
@@ -104,6 +136,15 @@ func (t *RepositoryConnector) GetListOfData(key string, model interface{}) ([]in
 	}
 	return result, nil
 }
+
+func (t *RepositoryConnector) GetDataCounter(key string, model interface{}) (int, error) {
+	nodes, err := t.GetListOfDataFlat(key, model)
+	if err != nil {
+		return 0, err
+	}
+	return len(nodes), nil
+}
+
 func (t *RepositoryConnector) CreateDirs(org string) error {
 
 	dirs := []string{
@@ -115,7 +156,7 @@ func (t *RepositoryConnector) CreateDirs(org string) error {
 		t.mapper.ToKey(org, Images)}
 
 	for _, dir := range dirs {
-		if _, err := t.etcdClient.GetKeyNodes(dir); err != nil {
+		if _, err := t.etcdClient.GetKeyNodesRecursively(dir); err != nil {
 			err := t.etcdClient.AddOrUpdateDir(dir)
 			if err != nil {
 				return err

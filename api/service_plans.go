@@ -27,7 +27,7 @@ import (
 
 func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	services, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
+	services, err := c.Repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -45,14 +45,14 @@ func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 
 	key := c.mapper.ToKey(c.buildHomeDir(serviceId), planId)
 
-	result, err := c.repository.GetData(key, models.ServicePlan{})
+	result, err := c.Repository.GetData(key, models.ServicePlan{})
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
-	_, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
+	_, err := c.Repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -72,13 +72,13 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	planKeyStore := c.mapper.ToKeyValue(c.buildHomeDir(serviceId), reqPlan, true)
-	err = c.repository.StoreData(planKeyStore)
+	err = c.Repository.StoreData(planKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, reqPlan.Id), models.ServicePlan{})
+	plan, err := c.Repository.GetData(c.buildPlanKey(serviceId, reqPlan.Id), models.ServicePlan{})
 	util.WriteJsonOrError(rw, plan, getHttpStatusOrStatusError(http.StatusCreated, err), err)
 }
 
@@ -86,7 +86,7 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
 
-	plan, err := c.repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
+	plan, err := c.Repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -105,20 +105,20 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = c.repository.ApplyPatchedValues(patchedValues)
+	err = c.Repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	plan, err = c.repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
+	plan, err = c.Repository.GetData(c.buildPlanKey(serviceId, planId), models.ServicePlan{})
 	util.WriteJsonOrError(rw, plan, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
-	err := c.repository.DeleteData(c.buildPlanKey(serviceId, planId))
+	err := c.Repository.DeleteData(c.buildPlanKey(serviceId, planId))
 	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 

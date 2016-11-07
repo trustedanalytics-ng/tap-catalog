@@ -64,8 +64,8 @@ verify_gopath:
 		exit 1 ;\
 	fi
 
-tests: verify_gopath
-	go test --cover $(APP_DIR_LIST)
+test: verify_gopath
+	go test --cover $(APDIR)
 	
 prepare_dirs:
 	mkdir -p ./temp/src/github.com/trustedanalytics/tap-catalog
@@ -79,3 +79,6 @@ build_anywhere: prepare_dirs
 	rm -Rf application && mkdir application
 	cp -RL ./tap-catalog ./application/tap-catalog
 	rm -Rf ./temp
+
+mock_update:
+	$(GOBIN)/mockgen -source=data/data_repository.go -package=data -destination=data/data_repository_mock_test.go

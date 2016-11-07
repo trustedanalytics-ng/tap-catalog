@@ -61,23 +61,11 @@ func (c *EtcdConnector) GetKeyIntoStruct(key string, result interface{}) error {
 }
 
 func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
-	logger.Debug("Getting nodes of key:", key)
+	return getKeyNodes(key, client.GetOptions{Recursive: false})
+}
 
-	kapi, err := getKVApiV2DefaultConnector()
-
-	resultNode := client.Node{}
-	if err != nil {
-		logger.Error("Can't connect with ETCD:", err)
-		return resultNode, err
-	}
-
-	resp, err := kapi.Get(context.Background(), key, &client.GetOptions{Recursive: true})
-	if err != nil {
-		logger.Errorf("Getinng key: %s, error:", key, err)
-		return resultNode, err
-	}
-
-	return *resp.Node, nil
+func (c *EtcdConnector) GetKeyNodesRecursively(key string) (client.Node, error) {
+	return getKeyNodes(key, client.GetOptions{Recursive: true})
 }
 
 func (c *EtcdConnector) Set(key string, value, prevValue interface{}, prevIndex uint64) error {
@@ -185,6 +173,26 @@ func (c *EtcdConnector) delete(key string, options *client.DeleteOptions) error 
 		return err
 	}
 	return nil
+}
+
+func getKeyNodes(key string, getOptions client.GetOptions) (client.Node, error) {
+	logger.Debug("Getting nodes of key:", key)
+
+	kapi, err := getKVApiV2DefaultConnector()
+
+	resultNode := client.Node{}
+	if err != nil {
+		logger.Error("Can't connect with ETCD:", err)
+		return resultNode, err
+	}
+
+	resp, err := kapi.Get(context.Background(), key, &getOptions)
+	if err != nil {
+		logger.Errorf("Getinng key: %s, error:", key, err)
+		return resultNode, err
+	}
+
+	return *resp.Node, nil
 }
 
 func getKVApiV2DefaultConnector() (client.KeysAPI, error) {

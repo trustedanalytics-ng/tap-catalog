@@ -25,6 +25,6 @@ import (
 )
 
 func (c *Context) GetCatalogHealth(rw web.ResponseWriter, req *web.Request) {
-	_, err := c.repository.GetListOfData(c.getServiceKey(), models.Service{})
+	_, err := c.Repository.GetListOfData(c.getServiceKey(), models.Service{})
 	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
