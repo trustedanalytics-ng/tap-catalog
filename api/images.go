@@ -122,6 +122,7 @@ func (c *Context) buildImagesKey(imageId string) string {
 func (c *Context) getImagesFSM(initialState models.ImageState) *fsm.FSM {
 	return fsm.NewFSM(string(initialState),
 		fsm.Events{
+			{Name: "PENDING", Src: []string{"REQUESTED"}, Dst: "PENDING"},
 			{Name: "BUILDING", Src: []string{"PENDING"}, Dst: "BUILDING"},
 			{Name: "ERROR", Src: []string{"BUILDING"}, Dst: "ERROR"},
 			{Name: "READY", Src: []string{"BUILDING"}, Dst: "READY"},

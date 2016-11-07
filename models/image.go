@@ -49,10 +49,11 @@ const (
 type ImageState string
 
 const (
-	ImageStatePending  ImageState = "PENDING"
-	ImageStateBuilding ImageState = "BUILDING"
-	ImageStateError    ImageState = "ERROR"
-	ImageStateReady    ImageState = "READY"
+	ImageStateBuilding  ImageState = "BUILDING"
+	ImageStateError     ImageState = "ERROR"
+	ImageStatePending   ImageState = "PENDING"
+	ImageStateReady     ImageState = "READY"
+	ImageStateRequested ImageState = "REQUESTED"
 )
 
 func IsApplicationInstance(imageId string) bool {
