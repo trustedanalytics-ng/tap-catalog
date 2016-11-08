@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-APDIR=$(shell go list ./... | grep -v /vendor/)
+APP_DIR_LIST=$(shell go list ./... | grep -v /vendor/)
 GOBIN=$(GOPATH)/bin
 
 build:
-	CGO_ENABLED=0 go install -tags netgo ${APDIR}
-	go fmt $(APDIR)
+	CGO_ENABLED=0 go install -tags netgo ${APP_DIR_LIST}
+	go fmt $(APP_DIR_LIST)
 
 run: build_anywhere
 	./application/tap-catalog
@@ -65,7 +65,7 @@ verify_gopath:
 	fi
 
 test: verify_gopath
-	go test --cover $(APDIR)
+	go test --cover $(APP_DIR_LIST)
 	
 prepare_dirs:
 	mkdir -p ./temp/src/github.com/trustedanalytics/tap-catalog

@@ -85,14 +85,6 @@ func NewTapCatalogApiWithBasicAuth(address, username, password string) (*TapCata
 	return &TapCatalogApiConnector{address, username, password, client}, nil
 }
 
-func NewTapCatalogApiWithSSLAndBasicAuth(address, username, password, certPemFile, keyPemFile, caPemFile string) (*TapCatalogApiConnector, error) {
-	client, _, err := brokerHttp.GetHttpClientWithCertAndCaFromFile(certPemFile, keyPemFile, caPemFile)
-	if err != nil {
-		return nil, err
-	}
-	return &TapCatalogApiConnector{address, username, password, client}, nil
-}
-
 func (c *TapCatalogApiConnector) getApiConnector(url string) brokerHttp.ApiConnector {
 	return brokerHttp.ApiConnector{
 		BasicAuth: &brokerHttp.BasicAuth{User: c.Username, Password: c.Password},

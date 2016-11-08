@@ -72,12 +72,7 @@ func main() {
 	r.Get("/", (*api.Context).Index)
 	r.Error((*api.Context).Error)
 
-	if os.Getenv("CATALOG_SSL_CERT_FILE_LOCATION") != "" {
-		httpGoCommon.StartServerTLS(os.Getenv("CATALOG_SSL_CERT_FILE_LOCATION"),
-			os.Getenv("CATALOG_SSL_KEY_FILE_LOCATION"), r)
-	} else {
-		httpGoCommon.StartServer(r)
-	}
+	httpGoCommon.StartServer(r)
 }
 
 func metricsHandler() func(rw web.ResponseWriter, req *web.Request) {
