@@ -48,7 +48,7 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	reqImage.State = models.ImageStatePending
+	reqImage.State = models.ImageStateRequested
 	imageKeyStore := c.mapper.ToKeyValue(c.getImagesKey(), reqImage, true)
 
 	err = c.Repository.StoreData(imageKeyStore)
