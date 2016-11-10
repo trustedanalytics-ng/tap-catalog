@@ -1,0 +1,113 @@
+/**
+ * Copyright (c) 2016 Intel Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package builder
+
+import (
+	"encoding/json"
+	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
+
+	"github.com/trustedanalytics/tap-catalog/models"
+)
+
+func TestMakePatch(t *testing.T) {
+	field := "metadata"
+	operation := models.OperationAdd
+	value := models.Metadata{Id: "id", Value: "value"}
+
+	Convey("Test MakePatch", t, func() {
+		Convey("Should return proper response", func() {
+			byteValue, err := json.Marshal(value)
+			So(err, ShouldBeNil)
+
+			expectedPatch := models.Patch{
+				Operation: operation,
+				Field:     field,
+				Value:     byteValue,
+			}
+
+			patch, err := MakePatch(field, value, operation)
+			So(err, ShouldBeNil)
+			So(patch, ShouldResemble, expectedPatch)
+		})
+	})
+}
+
+func TestMakePatchesForInstanceStateAndLastStateMetadata(t *testing.T) {
+	Convey("Test MakePatchesForInstanceStateAndLastStateMetadata", t, func() {
+		Convey("Should return one patch without set PrevValue", func() {
+			byteValue, err := json.Marshal(models.InstanceStateStarting)
+			So(err, ShouldBeNil)
+
+			patches, err := MakePatchesForInstanceStateAndLastStateMetadata("", "", models.InstanceStateStarting)
+			So(err, ShouldBeNil)
+			So(len(patches), ShouldEqual, 1)
+			So(patches[0].Field, ShouldEqual, "State")
+			So(patches[0].Operation, ShouldEqual, models.OperationUpdate)
+			So(patches[0].Value, ShouldResemble, json.RawMessage(byteValue))
+			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(nil))
+		})
+
+		Convey("Should return one patch with set PrevValue", func() {
+			newState := models.InstanceStateStarting
+			byteNewValue, err := json.Marshal(newState)
+			So(err, ShouldBeNil)
+
+			oldState := models.InstanceStateStopped
+			byteOldValue, err := json.Marshal(oldState)
+			So(err, ShouldBeNil)
+
+			patches, err := MakePatchesForInstanceStateAndLastStateMetadata("", oldState, newState)
+			So(err, ShouldBeNil)
+			So(len(patches), ShouldEqual, 1)
+			So(patches[0].Field, ShouldEqual, "State")
+			So(patches[0].Operation, ShouldEqual, models.OperationUpdate)
+			So(patches[0].Value, ShouldResemble, json.RawMessage(byteNewValue))
+			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(byteOldValue))
+		})
+
+		Convey("Should return two patches if message set", func() {
+			state := models.InstanceStateStarting
+			byteStateValue, err := json.Marshal(state)
+			So(err, ShouldBeNil)
+
+			message := "test-message"
+			byteMessageValue, err := json.Marshal(models.Metadata{
+				Id: models.LAST_STATE_CHANGE_REASON, Value: message,
+			})
+			So(err, ShouldBeNil)
+
+			patches, err := MakePatchesForInstanceStateAndLastStateMetadata(message, "", state)
+			So(err, ShouldBeNil)
+			So(len(patches), ShouldEqual, 2)
+
+			for _, patch := range patches {
+				if patch.Field == "State" {
+					So(patch.Operation, ShouldEqual, models.OperationUpdate)
+					So(patch.Value, ShouldResemble, json.RawMessage(byteStateValue))
+					So(patch.PrevValue, ShouldResemble, json.RawMessage(nil))
+				} else if patch.Field == "Metadata" {
+					So(patch.Operation, ShouldEqual, models.OperationAdd)
+					So(patch.Value, ShouldResemble, json.RawMessage(byteMessageValue))
+					So(patch.PrevValue, ShouldResemble, json.RawMessage(nil))
+				} else {
+					t.Fatal("Patch field not supported yet in tests: ", patch.Field)
+				}
+			}
+		})
+	})
+}
