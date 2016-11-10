@@ -81,4 +81,4 @@ build_anywhere: prepare_dirs
 	rm -Rf ./temp
 
 mock_update:
-	$(GOBIN)/mockgen -source=data/data_repository.go -package=data -destination=data/data_repository_mock_test.go
+	$(GOBIN)/mockgen -source=data/data_repository.go -package=data -destination=data/data_repository_mock.go

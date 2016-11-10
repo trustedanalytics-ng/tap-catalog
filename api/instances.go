@@ -161,6 +161,11 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
+	if instanceType != models.InstanceTypeApplication && models.GetValueFromMetadata(reqInstance.Metadata, models.OFFERING_PLAN_ID) == "" {
+		util.Respond400(rw, errors.New(fmt.Sprintf("key %s not found!", models.OFFERING_PLAN_ID)))
+		return
+	}
+
 	err = data.CheckIfMatchingRegexp(reqInstance.Name, data.RegexpDnsLabelLowercase)
 	if err != nil {
 		util.Respond400(rw, errors.New("Field: Name has incorrect value: "+reqInstance.Name))

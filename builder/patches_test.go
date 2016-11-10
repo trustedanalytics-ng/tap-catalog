@@ -94,20 +94,14 @@ func TestMakePatchesForInstanceStateAndLastStateMetadata(t *testing.T) {
 			patches, err := MakePatchesForInstanceStateAndLastStateMetadata(message, "", state)
 			So(err, ShouldBeNil)
 			So(len(patches), ShouldEqual, 2)
-
-			for _, patch := range patches {
-				if patch.Field == "State" {
-					So(patch.Operation, ShouldEqual, models.OperationUpdate)
-					So(patch.Value, ShouldResemble, json.RawMessage(byteStateValue))
-					So(patch.PrevValue, ShouldResemble, json.RawMessage(nil))
-				} else if patch.Field == "Metadata" {
-					So(patch.Operation, ShouldEqual, models.OperationAdd)
-					So(patch.Value, ShouldResemble, json.RawMessage(byteMessageValue))
-					So(patch.PrevValue, ShouldResemble, json.RawMessage(nil))
-				} else {
-					t.Fatal("Patch field not supported yet in tests: ", patch.Field)
-				}
-			}
+			So(patches[0].Field, ShouldEqual, "State")
+			So(patches[0].Operation, ShouldEqual, models.OperationUpdate)
+			So(patches[0].Value, ShouldResemble, json.RawMessage(byteStateValue))
+			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(nil))
+			So(patches[1].Field, ShouldEqual, "Metadata")
+			So(patches[1].Operation, ShouldEqual, models.OperationAdd)
+			So(patches[1].Value, ShouldResemble, json.RawMessage(byteMessageValue))
+			So(patches[1].PrevValue, ShouldResemble, json.RawMessage(nil))
 		})
 	})
 }
