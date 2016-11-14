@@ -78,6 +78,28 @@ func TestAddServiceInstance(t *testing.T) {
 			So(responseInstance, ShouldResemble, instance)
 		})
 
+		Convey("Adding service-broker instance ok if no PLAN_ID, response status is 201", func() {
+			instance := getSampleInstance()
+			instance.Type = models.InstanceTypeServiceBroker
+			instance.Metadata = []models.Metadata{}
+			gomock.InOrder(
+				repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
+				repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(false, nil),
+				repositoryMock.EXPECT().StoreData(gomock.Any()).Return(nil),
+				repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
+			)
+
+			byteBody := util.PrepareAndValidateRequest(instance, t)
+			requestPath := strings.Replace(urlPostServiceInstance, serviceIDWildcard, serviceId, 1)
+			response := util.SendRequest("POST", requestPath+"?isServiceBroker=true", byteBody, router)
+			util.AssertResponse(response, "", http.StatusCreated)
+
+			responseInstance := models.Instance{}
+			err := util.ReadJsonFromByte(response.Body.Bytes(), &responseInstance)
+			So(err, ShouldBeNil)
+			So(responseInstance, ShouldResemble, instance)
+		})
+
 		Convey("Service not exist, response status is 404", func() {
 			gomock.InOrder(
 				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, errors.New("not exist")),
