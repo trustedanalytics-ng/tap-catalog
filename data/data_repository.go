@@ -16,15 +16,19 @@
 package data
 
 import (
-	"github.com/trustedanalytics/tap-catalog/etcd"
+	"fmt"
 	"reflect"
+
+	"github.com/trustedanalytics/tap-catalog/etcd"
 )
 
 type RepositoryApi interface {
-	StoreData(keyStore map[string]interface{}) error
+	CreateData(keyStore map[string]interface{}) error
+	SetData(keyStore map[string]interface{}) error
 	UpdateData(updates []PatchSingleUpdate) error
 	ApplyPatchedValues(patchedKeyValues PatchedKeyValues) error
 	DeleteData(key string) error
+	CreateDir(key string) error
 	GetData(key string, model interface{}) (interface{}, error)
 	GetListOfData(key string, model interface{}) ([]interface{}, error)
 	GetListOfDataFlat(key string, model interface{}) ([]interface{}, error)
@@ -34,19 +38,36 @@ type RepositoryApi interface {
 }
 
 type RepositoryConnector struct {
-	etcdClient etcd.EtcdConnector
+	etcdClient etcd.EtcdKVStore
 	mapper     DataMapper
 }
 
-func (t *RepositoryConnector) StoreData(keyStore map[string]interface{}) error {
-	var err error
+func NewRepositoryAPI(etcdKVStore etcd.EtcdKVStore, dataMapper DataMapper) RepositoryApi {
+	return &RepositoryConnector{etcdClient: etcdKVStore, mapper: dataMapper}
+}
+
+func (t *RepositoryConnector) CreateData(keyStore map[string]interface{}) error {
 	for k, v := range keyStore {
-		err = t.etcdClient.Set(k, v, nil, 0)
+		err := t.etcdClient.Create(k, v)
 		if err != nil {
 			return err
 		}
 	}
-	return err
+	return nil
+}
+
+func (t *RepositoryConnector) SetData(keyStore map[string]interface{}) error {
+	for k, v := range keyStore {
+		err := t.etcdClient.Set(k, v, nil, 0)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (t *RepositoryConnector) CreateDir(key string) error {
+	return t.etcdClient.CreateDir(key)
 }
 
 func (t *RepositoryConnector) UpdateData(updates []PatchSingleUpdate) error {
@@ -54,21 +75,19 @@ func (t *RepositoryConnector) UpdateData(updates []PatchSingleUpdate) error {
 	for _, update := range updates {
 		node, err := t.etcdClient.GetKeyNodesRecursively(update.Key)
 		if err != nil {
-			logger.Error("UpdateData in etcd error! Can't get key: ", update.Key, err)
-			return err
+			return fmt.Errorf("updateData in etcd error: cannnot get key %q: %v", update.Key, err)
 		}
 
 		err = t.etcdClient.Set(update.Key, update.Value, update.PreviousValue, node.ModifiedIndex)
 		if err != nil {
-			logger.Error("UpdateData in etcd error! key: ", update.Key, err)
-			return err
+			return fmt.Errorf("updateData in etcd error: key %q: %s", update.Key, err)
 		}
 	}
 	return err
 }
 
 func (t *RepositoryConnector) ApplyPatchedValues(patchedKeyValues PatchedKeyValues) error {
-	err := t.StoreData(patchedKeyValues.Add)
+	err := t.SetData(patchedKeyValues.Add)
 	if err != nil {
 		return err
 	}
@@ -146,7 +165,6 @@ func (t *RepositoryConnector) GetDataCounter(key string, model interface{}) (int
 }
 
 func (t *RepositoryConnector) CreateDirs(org string) error {
-
 	dirs := []string{
 		org,
 		t.mapper.ToKey(org, Templates),

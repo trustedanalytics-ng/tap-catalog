@@ -16,6 +16,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -28,12 +29,32 @@ import (
 	"github.com/trustedanalytics/tap-go-common/util"
 )
 
+const (
+	maxUUIDGenerationTrials = 10
+)
+
 var logger, _ = commonLogger.InitLogger("api")
 
 type Context struct {
 	mapper       data.DataMapper
-	Repository   data.RepositoryApi
+	repository   data.RepositoryApi
 	organization string
+}
+
+func NewContext(r data.RepositoryApi, org string) (Context, error) {
+	ctx := Context{
+		repository:   r,
+		organization: org,
+	}
+	return ctx, ctx.initDB(org)
+}
+
+func (c *Context) initDB(org string) error {
+	err := c.repository.CreateDirs(org)
+	if err != nil {
+		return fmt.Errorf("cannot create directories in ETCD for organization %s: %v", org, err)
+	}
+	return nil
 }
 
 func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {
@@ -41,7 +62,7 @@ func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {
 }
 
 func (c *Context) Error(rw web.ResponseWriter, r *web.Request, err interface{}) {
-	logger.Error("Respond500: reason: error ", err)
+	logger.Errorf("Respond500: reason: %v", err)
 	rw.WriteHeader(http.StatusInternalServerError)
 }
 
@@ -61,6 +82,28 @@ func (c *Context) allowStateChange(patches []models.Patch, stateMachine *fsm.FSM
 
 func (c *Context) removeQuotes(value string) string {
 	return value[1 : len(value)-1]
+}
+
+func (c *Context) reserveID(path string) (string, error) {
+	id := ""
+	var err error
+	idCreated := false
+	for i := 0; i < maxUUIDGenerationTrials; i++ {
+		id, err = data.GenerateID()
+		if err != nil {
+			return "", fmt.Errorf("generation ID failed: %v", err)
+		}
+		dir := fmt.Sprintf("%s/%s", path, id)
+		if err := c.repository.CreateDir(dir); err == nil {
+			idCreated = true
+			break
+		}
+	}
+
+	if !idCreated {
+		return "", fmt.Errorf("cannot create entity with generated ID after %d trials (notice: this is incredibly unlikely)", maxUUIDGenerationTrials)
+	}
+	return id, nil
 }
 
 func getHttpStatusOrStatusError(status int, err error) int {

@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package util
+package api
 
 import (
-	"os"
-	"os/signal"
-	"sync"
+	"testing"
+
+	"github.com/gocraft/web"
+	"github.com/golang/mock/gomock"
+
+	"github.com/trustedanalytics/tap-catalog/data"
 )
 
-func GetTerminationObserverChannel() chan os.Signal {
-	channel := make(chan os.Signal, 1)
-	signal.Notify(channel, os.Interrupt)
-	return channel
-}
-
-func TerminationObserver(waitGroup *sync.WaitGroup, appName string) {
-	<-GetTerminationObserverChannel()
-	logger.Info(appName, "is going to be stopped now...")
-	waitGroup.Wait()
-	logger.Info(appName, "stopped!")
-	os.Exit(0)
+func prepareMocksAndRouter(t *testing.T) (router *web.Router, c Context, repositoryMock *data.MockRepositoryApi) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	repositoryMock = data.NewMockRepositoryApi(mockCtrl)
+	c = Context{
+		repository: repositoryMock,
+	}
+	router = web.New(c)
+	return
 }

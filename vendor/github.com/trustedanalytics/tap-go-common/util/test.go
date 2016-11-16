@@ -18,10 +18,10 @@ package util
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
-	"encoding/json"
 	"testing"
 
 	"github.com/gocraft/web"
@@ -38,7 +38,7 @@ func SendRequest(rType, path string, body []byte, r *web.Router) *httptest.Respo
 func PrepareAndValidateRequest(v interface{}, t *testing.T) []byte {
 	byteBody, marshalError := json.Marshal(v)
 	if marshalError != nil {
-		t.Fatal("Marhal request error:", marshalError)
+		t.Fatal("Marshal request error: ", marshalError)
 	}
 	return byteBody
 }

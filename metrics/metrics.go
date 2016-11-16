@@ -41,10 +41,10 @@ var tapCounts = prometheus.NewGaugeVec(
 		Help:      "Count of various TAP components",
 	}, []string{"component", "organization"})
 
-var repositoryConnector = &data.RepositoryConnector{}
+var repository data.RepositoryApi
 
 func collectApplicationsCount(org string) (string, float64, error) {
-	applicationsCount, err := repositoryConnector.GetDataCounter(data.GetEntityKey(org, data.Applications), models.Application{})
+	applicationsCount, err := repository.GetDataCounter(data.GetEntityKey(org, data.Applications), models.Application{})
 	if err != nil {
 		return "", 0, err
 	}
@@ -52,7 +52,7 @@ func collectApplicationsCount(org string) (string, float64, error) {
 }
 
 func collectServicesCount(org string) (string, float64, error) {
-	servicesCount, err := repositoryConnector.GetDataCounter(data.GetEntityKey(org, data.Services), models.Service{})
+	servicesCount, err := repository.GetDataCounter(data.GetEntityKey(org, data.Services), models.Service{})
 	if err != nil {
 		return "", 0, err
 	}
@@ -60,7 +60,7 @@ func collectServicesCount(org string) (string, float64, error) {
 }
 
 func collectServiceInstancesCount(org string) (string, float64, error) {
-	serviceInstances, err := data.GetFilteredInstances(models.InstanceTypeService, "", org, repositoryConnector)
+	serviceInstances, err := data.GetFilteredInstances(models.InstanceTypeService, "", org, repository)
 	if err != nil {
 		return "", 0, err
 	}
@@ -94,7 +94,8 @@ func collectCount() error {
 	return nil
 }
 
-func EnableCollection(delay time.Duration) chan<- struct{} {
+func EnableCollection(repo data.RepositoryApi, delay time.Duration) chan<- struct{} {
+	repository = repo
 	mutils.RegisterMetrics("catalog", tapCounts)
 	return mutils.EnableMetricsCollecting(delay,
 		collectCount,

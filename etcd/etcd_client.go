@@ -17,6 +17,7 @@ package etcd
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/coreos/etcd/client"
@@ -26,16 +27,49 @@ import (
 )
 
 type EtcdKVStore interface {
+	Connect() error
 	GetKeyValue(key string) (string, error)
 	GetKeyIntoStruct(key string, result interface{}) error
-	Set(key string, value interface{}) error
-	Update(key string, value interface{}) error
-	Delete(key string) error
+	Create(key string, value interface{}) error
+	CreateDir(key string) error
+	Set(key string, value, prevValue interface{}, prevIndex uint64) error
+	Update(key string, value, prevValue interface{}, prevIndex uint64) error
+	Delete(key string, prevIndex uint64) error
+	DeleteDir(key string) error
+	AddOrUpdateDir(key string) error
+	GetKeyNodes(key string) (client.Node, error)
+	GetKeyNodesRecursively(key string) (client.Node, error)
 }
 
-type EtcdConnector struct{}
+type EtcdConnector struct {
+	address string
+	port    int
+	keysAPI client.KeysAPI
+}
 
 var logger, _ = commonLogger.InitLogger("etcd")
+
+func NewEtcdKVStore(address string, port int) (EtcdKVStore, error) {
+	res := &EtcdConnector{address: address, port: port}
+	err := res.Connect()
+	return res, err
+}
+
+func (c *EtcdConnector) Connect() error {
+	cfg := client.Config{
+		Endpoints: []string{fmt.Sprintf("http://%s:%d", c.address, c.port)},
+		Transport: client.DefaultTransport,
+		// set timeout per request to fail fast when the target endpoint is unavailable
+		HeaderTimeoutPerRequest: time.Second,
+	}
+	newClient, err := client.New(cfg)
+	if err != nil {
+		err := fmt.Errorf("connection error: %v", err)
+		return err
+	}
+	c.keysAPI = client.NewKeysAPI(newClient)
+	return nil
+}
 
 func (c *EtcdConnector) GetKeyValue(key string) (string, error) {
 	logger.Debug("Getting value of key:", key)
@@ -46,49 +80,71 @@ func (c *EtcdConnector) GetKeyValue(key string) (string, error) {
 
 func (c *EtcdConnector) GetKeyIntoStruct(key string, result interface{}) error {
 	logger.Debug("Getting value of key:", key)
-	kapi, err := getKVApiV2DefaultConnector()
+	err := c.Connect()
 	if err != nil {
-		logger.Error("Can't connect with ETCD:", err)
-		return err
+		return fmt.Errorf("cannot connect with ETCD: %v", err)
 	}
 
-	resp, err := kapi.Get(context.Background(), key, nil)
+	resp, err := c.keysAPI.Get(context.Background(), key, nil)
 	if err != nil {
-		logger.Errorf("Getinng key: %s, error:", key, err)
-		return err
+		return fmt.Errorf("getting key %q error: %v", key, err)
 	}
 	return json.Unmarshal([]byte(resp.Node.Value), result)
 }
 
 func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
-	return getKeyNodes(key, client.GetOptions{Recursive: false})
+	return c.getKeyNodes(key, client.GetOptions{Recursive: false})
 }
 
 func (c *EtcdConnector) GetKeyNodesRecursively(key string) (client.Node, error) {
-	return getKeyNodes(key, client.GetOptions{Recursive: true})
+	return c.getKeyNodes(key, client.GetOptions{Recursive: true})
+}
+
+func (c *EtcdConnector) Create(key string, value interface{}) error {
+	logger.Debug("Creating value of key: ", key)
+
+	options := &client.SetOptions{PrevExist: client.PrevNoExist}
+
+	return c.set(key, value, options)
+}
+
+func (c *EtcdConnector) CreateDir(key string) error {
+	logger.Debug("Creating value of key: ", key)
+
+	options := &client.SetOptions{PrevExist: client.PrevNoExist, Dir: true}
+
+	return c.set(key, "", options)
 }
 
 func (c *EtcdConnector) Set(key string, value, prevValue interface{}, prevIndex uint64) error {
-	logger.Debug("Setting value of key:", key)
-
-	valueByte, err := json.Marshal(value)
-	if err != nil {
-		logger.Error("Can't marshall etcd key value!:", err)
-		return err
-	}
-
-	kapi, err := getKVApiV2DefaultConnector()
-	if err != nil {
-		logger.Error("Can't connect with ETCD:", err)
-		return err
-	}
+	logger.Debug("Setting value of key: ", key)
 
 	options := &client.SetOptions{PrevIndex: prevIndex}
 
+	if err := addPrevValueToOptions(prevValue, options); err != nil {
+		return err
+	}
+
+	return c.set(key, value, options)
+}
+
+func (c *EtcdConnector) Update(key string, value, prevValue interface{}, prevIndex uint64) error {
+	logger.Debug("Updating value of key: ", key)
+
+	options := &client.SetOptions{PrevIndex: prevIndex, PrevExist: client.PrevNoExist}
+
+	if err := addPrevValueToOptions(prevValue, options); err != nil {
+		return err
+	}
+
+	return c.set(key, value, options)
+}
+
+func addPrevValueToOptions(prevValue interface{}, options *client.SetOptions) error {
 	if prevValue != nil {
 		prevValueByte, err := json.Marshal(prevValue)
 		if err != nil {
-			logger.Error("Can't marshall prevValue!:", err)
+			err = fmt.Errorf("cannot marshal prevValue: %v", err)
 			return err
 		}
 		prevValueString := string(prevValueByte)
@@ -96,10 +152,23 @@ func (c *EtcdConnector) Set(key string, value, prevValue interface{}, prevIndex 
 			options.PrevValue = prevValueString
 		}
 	}
+	return nil
+}
 
-	_, err = kapi.Set(context.Background(), key, string(valueByte), options)
+func (c *EtcdConnector) set(key string, value interface{}, options *client.SetOptions) error {
+	valueByte, err := json.Marshal(value)
 	if err != nil {
-		logger.Errorf("Setinng key: %s, error:", key, err)
+		err = fmt.Errorf("cannot marshal etcd key value: %v", err)
+		return err
+	}
+
+	if err = c.Connect(); err != nil {
+		return fmt.Errorf("cannot connect with ETCD: %v", err)
+	}
+
+	_, err = c.keysAPI.Set(context.Background(), key, string(valueByte), options)
+	if err != nil {
+		err = fmt.Errorf("setting key %s error: %v", key, err)
 		return err
 	}
 	return nil
@@ -110,28 +179,6 @@ func isNotEmptyValue(value string) bool {
 		return true
 	}
 	return false
-}
-
-func (c *EtcdConnector) Update(key string, value interface{}) error {
-	logger.Debug("Updating value of key:", key)
-	valueByte, err := json.Marshal(value)
-	if err != nil {
-		logger.Error("Can't marshall etcd key value!:", err)
-		return err
-	}
-
-	kapi, err := getKVApiV2DefaultConnector()
-	if err != nil {
-		logger.Error("Can't connect with ETCD:", err)
-		return err
-	}
-
-	_, err = kapi.Update(context.Background(), key, string(valueByte))
-	if err != nil {
-		logger.Error("Updating key value error", err)
-		return err
-	}
-	return nil
 }
 
 func (c *EtcdConnector) Delete(key string, prevIndex uint64) error {
@@ -145,67 +192,45 @@ func (c *EtcdConnector) DeleteDir(key string) error {
 }
 
 func (c *EtcdConnector) AddOrUpdateDir(key string) error {
-	kapi, err := getKVApiV2DefaultConnector()
-	if err != nil {
-		logger.Error("Can't connect with ETCD:", err)
-		return err
+	logger.Debugf("Adding or updating directory of key %s", key)
+
+	if err := c.Connect(); err != nil {
+		return fmt.Errorf("cannot connect with ETCD: %v", err)
 	}
 
-	_, err = kapi.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevIgnore})
+	_, err := c.keysAPI.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevIgnore})
 	if err != nil {
-		logger.Error("Setting key value error", err)
-		return err
+		return fmt.Errorf("setting key value error: %v", err)
 	}
 	return nil
 }
 
 func (c *EtcdConnector) delete(key string, options *client.DeleteOptions) error {
 	logger.Debug("Deleting value of key:", key)
-	kapi, err := getKVApiV2DefaultConnector()
-	if err != nil {
-		logger.Error("Can't connect with ETCD:", err)
-		return err
+
+	if err := c.Connect(); err != nil {
+		return fmt.Errorf("cannot connect with ETCD: %v", err)
 	}
 
-	_, err = kapi.Delete(context.Background(), key, options)
+	_, err := c.keysAPI.Delete(context.Background(), key, options)
 	if err != nil {
-		logger.Error("Getinng key value error:", err)
-		return err
+		return fmt.Errorf("getting key value error: %v", err)
 	}
 	return nil
 }
 
-func getKeyNodes(key string, getOptions client.GetOptions) (client.Node, error) {
+func (c *EtcdConnector) getKeyNodes(key string, getOptions client.GetOptions) (client.Node, error) {
 	logger.Debug("Getting nodes of key:", key)
 
-	kapi, err := getKVApiV2DefaultConnector()
-
 	resultNode := client.Node{}
-	if err != nil {
-		logger.Error("Can't connect with ETCD:", err)
-		return resultNode, err
+	if err := c.Connect(); err != nil {
+		return resultNode, fmt.Errorf("cannot connect with ETCD: %v", err)
 	}
 
-	resp, err := kapi.Get(context.Background(), key, &getOptions)
+	resp, err := c.keysAPI.Get(context.Background(), key, &getOptions)
 	if err != nil {
-		logger.Errorf("Getinng key: %s, error:", key, err)
-		return resultNode, err
+		return resultNode, fmt.Errorf("getting key %q error: %v", key, err)
 	}
 
 	return *resp.Node, nil
-}
-
-func getKVApiV2DefaultConnector() (client.KeysAPI, error) {
-	cfg := client.Config{
-		Endpoints: []string{"http://localhost:2379"},
-		Transport: client.DefaultTransport,
-		// set timeout per request to fail fast when the target endpoint is unavailable
-		HeaderTimeoutPerRequest: time.Second,
-	}
-	c, err := client.New(cfg)
-	if err != nil {
-		logger.Error("connection error:", err)
-		return nil, err
-	}
-	return client.NewKeysAPI(c), nil
 }

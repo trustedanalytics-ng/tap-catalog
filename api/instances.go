@@ -28,7 +28,7 @@ import (
 )
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.Repository.GetListOfData(c.getInstanceKey(), models.Instance{})
+	result, err := c.repository.GetListOfData(c.getInstanceKey(), models.Instance{})
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
@@ -40,7 +40,7 @@ func (c *Context) ServicesInstances(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) ServiceInstances(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
-	if _, err := c.Repository.GetData(c.buildServiceKey(serviceId), models.Service{}); err != nil {
+	if _, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{}); err != nil {
 		handleGetDataError(rw, err)
 		return
 	}
@@ -57,7 +57,7 @@ func (c *Context) ApplicationsInstances(rw web.ResponseWriter, req *web.Request)
 func (c *Context) ApplicationInstances(rw web.ResponseWriter, req *web.Request) {
 	appId := req.PathParams["applicationId"]
 
-	if _, err := c.Repository.GetData(c.buildApplicationKey(appId), models.Application{}); err != nil {
+	if _, err := c.repository.GetData(c.buildApplicationKey(appId), models.Application{}); err != nil {
 		handleGetDataError(rw, err)
 		return
 	}
@@ -67,7 +67,7 @@ func (c *Context) ApplicationInstances(rw web.ResponseWriter, req *web.Request) 
 }
 
 func (c *Context) getFilteredInstances(expectedInstanceType models.InstanceType, expectedClassId string) ([]models.Instance, error) {
-	return data.GetFilteredInstances(expectedInstanceType, expectedClassId, c.organization, c.Repository)
+	return data.GetFilteredInstances(expectedInstanceType, expectedClassId, c.organization, c.repository)
 }
 
 func (c *Context) GetApplicationInstance(rw web.ResponseWriter, req *web.Request) {
@@ -95,7 +95,7 @@ func (c *Context) GetServiceInstance(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 
-	result, err := c.Repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
+	result, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
@@ -103,14 +103,14 @@ func (c *Context) GetInstanceBindings(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 	result := []models.Instance{}
 
-	instance, err := c.Repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
+	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
 	}
 
 	for _, binding := range instance.(models.Instance).Bindings {
-		boundInstance, err := c.Repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
+		boundInstance, err := c.repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
 		if err != nil {
 			handleGetDataError(rw, err)
 			return
@@ -136,13 +136,13 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 	reqInstance := &models.Instance{}
 
 	if instanceType == models.InstanceTypeService {
-		_, err := c.Repository.GetData(c.buildServiceKey(classId), models.Service{})
+		_, err := c.repository.GetData(c.buildServiceKey(classId), models.Service{})
 		if err != nil {
 			util.Respond404(rw, errors.New("service with id: "+classId+" does not exists!"))
 			return
 		}
 	} else if instanceType == models.InstanceTypeApplication {
-		_, err := c.Repository.GetData(c.buildApplicationKey(classId), models.Application{})
+		_, err := c.repository.GetData(c.buildApplicationKey(classId), models.Application{})
 		if err != nil {
 			util.Respond404(rw, errors.New("application with id: "+classId+" does not exists!"))
 			return
@@ -173,7 +173,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 	}
 
 	for _, binding := range reqInstance.Bindings {
-		_, err = c.Repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
+		_, err = c.repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
 		if err != nil {
 			util.Respond400(rw, errors.New(
 				fmt.Sprintf("Field: binding ID has incorrect value: %s!", binding.Id)))
@@ -187,7 +187,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		}
 	}
 
-	exists, err := c.Repository.IsExistByName(reqInstance.Name, models.Instance{}, c.getInstanceKey())
+	exists, err := c.repository.IsExistByName(reqInstance.Name, models.Instance{}, c.getInstanceKey())
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -197,17 +197,22 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
+	if reqInstance.Id, err = c.reserveID(c.getInstanceKey()); err != nil {
+		util.Respond500(rw, err)
+		return
+	}
+
 	reqInstance.ClassId = classId
 	reqInstance.Type = instanceType
 	reqInstance.State = models.InstanceStateRequested
 
-	err = c.Repository.StoreData(c.mapper.ToKeyValue(c.getInstanceKey(), reqInstance, true))
+	err = c.repository.CreateData(c.mapper.ToKeyValue(c.getInstanceKey(), reqInstance, true))
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	instance, err := c.Repository.GetData(c.buildInstanceKey(reqInstance.Id), models.Instance{})
+	instance, err := c.repository.GetData(c.buildInstanceKey(reqInstance.Id), models.Instance{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -239,7 +244,7 @@ func (c *Context) PatchApplicationInstance(rw web.ResponseWriter, req *web.Reque
 
 func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
-	instanceInt, err := c.Repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
+	instanceInt, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -270,13 +275,13 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = c.Repository.ApplyPatchedValues(patchedValues)
+	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	instanceInt, err = c.Repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
+	instanceInt, err = c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -308,7 +313,7 @@ func (c *Context) DeleteApplicationInstance(rw web.ResponseWriter, req *web.Requ
 
 func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceID := req.PathParams["instanceId"]
-	err := c.Repository.DeleteData(c.buildInstanceKey(instanceID))
+	err := c.repository.DeleteData(c.buildInstanceKey(instanceID))
 	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 

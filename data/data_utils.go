@@ -49,7 +49,7 @@ func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[stri
 }
 
 func CheckIfIdFieldIsEmpty(entity interface{}) error {
-	idPropertyValue := getStructId(reflect.ValueOf(entity))
+	idPropertyValue := getStructID(reflect.ValueOf(entity))
 	if idPropertyValue != "" {
 		return errors.New("Id field has to be empty!")
 	} else {
@@ -95,7 +95,7 @@ func GetFilteredInstances(expectedInstanceType models.InstanceType, expectedClas
 	return filteredInstances, nil
 }
 
-func getStructId(structObject reflect.Value) string {
+func getStructID(structObject reflect.Value) string {
 	structObject = unwrapPointer(structObject)
 	idProperty := structObject.FieldByName(idFieldName)
 	if idProperty == (reflect.Value{}) {
@@ -105,16 +105,24 @@ func getStructId(structObject reflect.Value) string {
 	}
 }
 
-func getOrCreateStructId(structObject reflect.Value) string {
-	structId := getStructId(structObject)
+func getOrCreateStructID(structObject reflect.Value) string {
+	structId := getStructID(structObject)
 	if structId == "" {
-		newId, _ := uuid.NewV4()
+		newId, _ := GenerateID()
 		idProperty := structObject.FieldByName(idFieldName)
-		idProperty.SetString(newId.String())
-		return newId.String()
+		idProperty.SetString(newId)
+		return newId
 	} else {
 		return structId
 	}
+}
+
+func GenerateID() (string, error) {
+	id, err := uuid.NewV4()
+	if err != nil {
+		return "", err
+	}
+	return id.String(), nil
 }
 
 func unwrapPointer(structObject reflect.Value) reflect.Value {

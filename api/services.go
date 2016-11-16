@@ -29,12 +29,12 @@ import (
 )
 
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.Repository.GetListOfData(c.getServiceKey(), models.Service{})
+	result, err := c.repository.GetListOfData(c.getServiceKey(), models.Service{})
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) getService(id string) (models.Service, error) {
-	entity, err := c.Repository.GetData(c.buildServiceKey(id), models.Service{})
+	entity, err := c.repository.GetData(c.buildServiceKey(id), models.Service{})
 	if err != nil {
 		err = fmt.Errorf("service %q retrieval failed: %v", id, err)
 		logger.Warning(err)
@@ -79,7 +79,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	exists, err := c.Repository.IsExistByName(reqService.Name, models.Service{}, c.getServiceKey())
+	exists, err := c.repository.IsExistByName(reqService.Name, models.Service{}, c.getServiceKey())
 	if err != nil {
 		util.Respond500(rw, err)
 		return
@@ -89,21 +89,26 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
+	if reqService.Id, err = c.reserveID(c.getServiceKey()); err != nil {
+		util.Respond500(rw, err)
+		return
+	}
+
 	reqService.State = models.ServiceStateDeploying
 	serviceKeyStore := c.mapper.ToKeyValue(c.getServiceKey(), reqService, true)
-	err = c.Repository.StoreData(serviceKeyStore)
+	err = c.repository.CreateData(serviceKeyStore)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	service, err := c.Repository.GetData(c.buildServiceKey(reqService.Id), models.Service{})
+	service, err := c.repository.GetData(c.buildServiceKey(reqService.Id), models.Service{})
 	util.WriteJsonOrError(rw, service, getHttpStatusOrStatusError(http.StatusCreated, err), err)
 }
 
 func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	serviceInt, err := c.Repository.GetData(c.buildServiceKey(serviceId), models.Service{})
+	serviceInt, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
 		handleGetDataError(rw, err)
 		return
@@ -134,19 +139,19 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = c.Repository.ApplyPatchedValues(patchedValues)
+	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
 		util.Respond500(rw, err)
 		return
 	}
 
-	serviceInt, err = c.Repository.GetData(c.buildServiceKey(serviceId), models.Service{})
+	serviceInt, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	util.WriteJsonOrError(rw, serviceInt, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
-	err := c.Repository.DeleteData(c.buildServiceKey(serviceId))
+	err := c.repository.DeleteData(c.buildServiceKey(serviceId))
 	util.WriteJsonOrError(rw, serviceId, getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 

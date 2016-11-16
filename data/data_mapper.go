@@ -159,7 +159,7 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 				}
 			} else if patch.Operation == models.OperationDelete {
 				if isCollection(originalField.Kind()) {
-					if structId := getStructId(receivedElement); structId != "" {
+					if structId := getStructID(receivedElement); structId != "" {
 						result.Delete[mainStructDirKey+"/"+patchFieldName+"/"+structId] = nil
 					} else {
 						return result, errors.New("Delete operation required NOT EMPPTY ID field!")
@@ -209,7 +209,7 @@ func (t *DataMapper) ToKey(prefix string, key string) string {
 func (t *DataMapper) structToMap(dirKey string, structObject reflect.Value, addIdToKey bool) map[string]interface{} {
 	result := map[string]interface{}{}
 	structObject = unwrapPointer(structObject)
-	structId := getOrCreateStructId(structObject)
+	structId := getOrCreateStructID(structObject)
 
 	for i := 0; i < structObject.NumField(); i++ {
 		fieldName := structObject.Type().Field(i).Name

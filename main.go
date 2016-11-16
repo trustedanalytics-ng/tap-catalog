@@ -26,11 +26,17 @@ import (
 
 	"github.com/trustedanalytics/tap-catalog/api"
 	"github.com/trustedanalytics/tap-catalog/data"
+	"github.com/trustedanalytics/tap-catalog/etcd"
 	"github.com/trustedanalytics/tap-catalog/metrics"
 	httpGoCommon "github.com/trustedanalytics/tap-go-common/http"
 	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
 	"github.com/trustedanalytics/tap-go-common/util"
 	mutils "github.com/trustedanalytics/tap-metrics/utils"
+)
+
+const (
+	etcdAddress = "localhost"
+	etcdPort    = 2379
 )
 
 var waitGroup = &sync.WaitGroup{}
@@ -39,22 +45,19 @@ var logger, _ = commonLogger.InitLogger("main")
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	err := (&data.RepositoryConnector{}).CreateDirs(os.Getenv("CORE_ORGANIZATION"))
 	go util.TerminationObserver(waitGroup, "Catalog")
-	if err != nil {
-		logger.Fatal("Can't create directories in ETCD!", err)
-	}
 
-	mcfenv := os.Getenv("METRICS_COLLECTING_FREQUENCY")
-	mcf, err := time.ParseDuration(mcfenv)
-	if err != nil {
-		logger.Warningf("Couldn't parse metrics frequency setting (got: %s), fallback to default.", mcfenv)
-		mcf = 15 * time.Second
-	}
-	metrics.EnableCollection(mcf)
+	repository := setupRepository()
+	context := setupContext(repository)
 
-	context := api.Context{Repository: &data.RepositoryConnector{}}
+	startMetrics(repository)
 
+	r := setupRouter(context)
+
+	httpGoCommon.StartServer(r)
+}
+
+func setupRouter(context api.Context) *web.Router {
 	r := web.New(context)
 	r.Middleware(web.LoggerMiddleware)
 	r.Get("/healthz", context.GetCatalogHealth)
@@ -65,14 +68,42 @@ func main() {
 	basicAuthRouter := apiRouter.Subrouter(context, "/v1")
 	route(basicAuthRouter, &context)
 
-	// for testing purpose, where v1 is current version
 	v1AliasRouter := apiRouter.Subrouter(context, "/v1.0")
 	route(v1AliasRouter, &context)
 
-	r.Get("/", (*api.Context).Index)
-	r.Error((*api.Context).Error)
+	r.Get("/", context.Index)
+	r.Error(context.Error)
+	return r
+}
 
-	httpGoCommon.StartServer(r)
+func setupContext(repository data.RepositoryApi) api.Context {
+	context, err := api.NewContext(repository, getDefaultOrganization())
+	if err != nil {
+		logger.Fatalf("Cannot create new Context: %v", err)
+	}
+	return context
+}
+
+func setupRepository() data.RepositoryApi {
+	etcdKVStore, err := etcd.NewEtcdKVStore(etcdAddress, etcdPort)
+	if err != nil {
+		logger.Fatalf("Cannnot connect to ETCD on %s:%d: %v", etcdAddress, etcdPort, err)
+	}
+	return data.NewRepositoryAPI(etcdKVStore, data.DataMapper{})
+}
+
+func getDefaultOrganization() string {
+	return os.Getenv("CORE_ORGANIZATION")
+}
+
+func startMetrics(repository data.RepositoryApi) {
+	mcfenv := os.Getenv("METRICS_COLLECTING_FREQUENCY")
+	mcf, err := time.ParseDuration(mcfenv)
+	if err != nil {
+		logger.Warningf("Couldn't parse metrics frequency setting (got: %s), fallback to default.", mcfenv)
+		mcf = 15 * time.Second
+	}
+	metrics.EnableCollection(repository, mcf)
 }
 
 func metricsHandler() func(rw web.ResponseWriter, req *web.Request) {

@@ -23,11 +23,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gocraft/web"
 	"github.com/golang/mock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-go-common/util"
 )
@@ -36,21 +34,9 @@ const (
 	instanceId string = "test-instance-id"
 	serviceId  string = "test-service-id"
 
-	urlPrefix              = "/api/v1"
 	serviceIDWildcard      = ":serviceId"
 	urlPostServiceInstance = urlPrefix + "/services/" + serviceIDWildcard + "/instances"
 )
-
-func prepareMocksAndRouter(t *testing.T) (router *web.Router, c Context, repositoryMock *data.MockRepositoryApi) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	repositoryMock = data.NewMockRepositoryApi(mockCtrl)
-	c = Context{
-		Repository: repositoryMock,
-	}
-	router = web.New(c)
-	return
-}
 
 func TestAddServiceInstance(t *testing.T) {
 	router, context, repositoryMock := prepareMocksAndRouter(t)
@@ -63,7 +49,8 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
 				repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
 				repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(false, nil),
-				repositoryMock.EXPECT().StoreData(gomock.Any()).Return(nil),
+				repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil),
+				repositoryMock.EXPECT().CreateData(gomock.Any()).Return(nil),
 				repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
 			)
 
@@ -85,7 +72,8 @@ func TestAddServiceInstance(t *testing.T) {
 			gomock.InOrder(
 				repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
 				repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(false, nil),
-				repositoryMock.EXPECT().StoreData(gomock.Any()).Return(nil),
+				repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil),
+				repositoryMock.EXPECT().CreateData(gomock.Any()).Return(nil),
 				repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
 			)
 

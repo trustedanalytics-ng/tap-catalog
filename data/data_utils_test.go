@@ -18,6 +18,7 @@ package data
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -111,6 +112,36 @@ func TestGetFilteredInstances(t *testing.T) {
 			Convey("and returned array should resemble testAllApplicationsInstances", func() {
 				So(servicesInstances, ShouldResemble, testAllApplicationsInstances)
 			})
+		})
+	})
+}
+
+func TestGetOrCreateStructID(t *testing.T) {
+	Convey("testing getOrCreateStructID", t, func() {
+		Convey("When structure ID field is empty", func() {
+			entity := &models.Application{Id: ""}
+			input := reflect.ValueOf(entity)
+			input = unwrapPointer(input)
+
+			id := getOrCreateStructID(input)
+
+			Convey("returned ID should not be empty", func() {
+				So(len(id), ShouldBeGreaterThan, 0)
+			})
+		})
+
+		Convey("When structure ID field is not empty", func() {
+			sampleID := "123456"
+			entity := &models.Application{Id: sampleID}
+			input := reflect.ValueOf(entity)
+			input = unwrapPointer(input)
+
+			id := getOrCreateStructID(input)
+
+			Convey("returned ID should be equal to that from the structure", func() {
+				So(id, ShouldEqual, sampleID)
+			})
+
 		})
 	})
 }
