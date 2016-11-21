@@ -47,19 +47,24 @@ type Instance struct {
 type InstanceState string
 
 const (
-	InstanceStateRequested   InstanceState = "REQUESTED"
-	InstanceStateDeploying   InstanceState = "DEPLOYING"
-	InstanceStateFailure     InstanceState = "FAILURE"
-	InstanceStateStopped     InstanceState = "STOPPED"
-	InstanceStateStartReq    InstanceState = "START_REQ"
-	InstanceStateStarting    InstanceState = "STARTING"
-	InstanceStateRunning     InstanceState = "RUNNING"
-	InstanceStateStopReq     InstanceState = "STOP_REQ"
-	InstanceStateStopping    InstanceState = "STOPPING"
-	InstanceStateDestroyReq  InstanceState = "DESTROY_REQ"
-	InstanceStateDestroying  InstanceState = "DESTROYING"
-	InstanceStateUnavailable InstanceState = "UNAVAILABLE"
+	InstanceStateRequested       InstanceState = "REQUESTED"
+	InstanceStateDeploying       InstanceState = "DEPLOYING"
+	InstanceStateFailure         InstanceState = "FAILURE"
+	InstanceStateStopped         InstanceState = "STOPPED"
+	InstanceStateStartReq        InstanceState = "START_REQ"
+	InstanceStateStarting        InstanceState = "STARTING"
+	InstanceStateRunning         InstanceState = "RUNNING"
+	InstanceStateReconfiguration InstanceState = "RECONFIGURATION"
+	InstanceStateStopReq         InstanceState = "STOP_REQ"
+	InstanceStateStopping        InstanceState = "STOPPING"
+	InstanceStateDestroyReq      InstanceState = "DESTROY_REQ"
+	InstanceStateDestroying      InstanceState = "DESTROYING"
+	InstanceStateUnavailable     InstanceState = "UNAVAILABLE"
 )
+
+func (state InstanceState) String() string {
+	return string(state)
+}
 
 type InstanceBindings struct {
 	Id   string            `json:"id"`

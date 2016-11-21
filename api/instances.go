@@ -22,6 +22,7 @@ import (
 
 	"github.com/gocraft/web"
 	"github.com/looplab/fsm"
+
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	"github.com/trustedanalytics/tap-go-common/util"
@@ -328,17 +329,22 @@ func (c *Context) buildInstanceKey(instanceId string) string {
 func (c *Context) getInstancesFSM(initialState models.InstanceState) *fsm.FSM {
 	return fsm.NewFSM(string(initialState),
 		fsm.Events{
-			{Name: "DEPLOYING", Src: []string{"REQUESTED"}, Dst: "DEPLOYING"},
-			{Name: "FAILURE", Src: []string{"DEPLOYING", "STARTING", "RUNNING", "STOPPING", "DESTROYING"}, Dst: "FAILURE"},
-			{Name: "STOPPED", Src: []string{"DEPLOYING", "STOPPING", "UNAVAILABLE"}, Dst: "STOPPED"},
-			{Name: "START_REQ", Src: []string{"STOPPED"}, Dst: "START_REQ"},
-			{Name: "STARTING", Src: []string{"START_REQ", "STOPPED"}, Dst: "STARTING"},
-			{Name: "RUNNING", Src: []string{"STARTING"}, Dst: "RUNNING"},
-			{Name: "STOP_REQ", Src: []string{"RUNNING", "STARTING"}, Dst: "STOP_REQ"},
-			{Name: "STOPPING", Src: []string{"STOP_REQ"}, Dst: "STOPPING"},
-			{Name: "DESTROY_REQ", Src: []string{"STOPPED", "FAILURE", "UNAVAILABLE"}, Dst: "DESTROY_REQ"},
-			{Name: "DESTROYING", Src: []string{"DESTROY_REQ"}, Dst: "DESTROYING"},
-			{Name: "UNAVAILABLE", Src: []string{"STOPPED"}, Dst: "UNAVAILABLE"},
+			makeEventDesc(models.InstanceStateDeploying, models.InstanceStateRequested),
+			makeEventDesc(models.InstanceStateFailure, models.InstanceStateDeploying, models.InstanceStateStarting,
+				models.InstanceStateRunning, models.InstanceStateStopping, models.InstanceStateDestroying),
+			makeEventDesc(models.InstanceStateStopped, models.InstanceStateDeploying, models.InstanceStateStopping,
+				models.InstanceStateUnavailable),
+			makeEventDesc(models.InstanceStateStartReq, models.InstanceStateStopped),
+			makeEventDesc(models.InstanceStateStarting, models.InstanceStateStartReq, models.InstanceStateStopped,
+				models.InstanceStateReconfiguration),
+			makeEventDesc(models.InstanceStateRunning, models.InstanceStateStarting),
+			makeEventDesc(models.InstanceStateReconfiguration, models.InstanceStateRunning, models.InstanceStateStopped),
+			makeEventDesc(models.InstanceStateStopReq, models.InstanceStateRunning, models.InstanceStateStarting),
+			makeEventDesc(models.InstanceStateStopping, models.InstanceStateStopReq, models.InstanceStateReconfiguration),
+			makeEventDesc(models.InstanceStateDestroyReq, models.InstanceStateStopped, models.InstanceStateFailure,
+				models.InstanceStateUnavailable),
+			makeEventDesc(models.InstanceStateDestroying, models.InstanceStateDestroyReq),
+			makeEventDesc(models.InstanceStateUnavailable, models.InstanceStateStopped),
 		},
 		fsm.Callbacks{
 			"enter_state": func(e *fsm.Event) {
@@ -346,4 +352,17 @@ func (c *Context) getInstancesFSM(initialState models.InstanceState) *fsm.FSM {
 			},
 		},
 	)
+}
+
+func makeEventDesc(destination models.InstanceState, sources ...models.InstanceState) fsm.EventDesc {
+	sourceString := []string{}
+	for _, source := range sources {
+		sourceString = append(sourceString, source.String())
+	}
+
+	return fsm.EventDesc{
+		Name: destination.String(),
+		Src:  sourceString,
+		Dst:  destination.String(),
+	}
 }
