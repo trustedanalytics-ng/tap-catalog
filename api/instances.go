@@ -341,8 +341,9 @@ func (c *Context) getInstancesFSM(initialState models.InstanceState) *fsm.FSM {
 			makeEventDesc(models.InstanceStateReconfiguration, models.InstanceStateRunning, models.InstanceStateStopped),
 			makeEventDesc(models.InstanceStateStopReq, models.InstanceStateRunning, models.InstanceStateStarting),
 			makeEventDesc(models.InstanceStateStopping, models.InstanceStateStopReq, models.InstanceStateReconfiguration),
+			//TODO remove flow InstanceStateStopReq->InstanceStateRunning after DPNG-13140
 			makeEventDesc(models.InstanceStateDestroyReq, models.InstanceStateStopped, models.InstanceStateFailure,
-				models.InstanceStateUnavailable),
+				models.InstanceStateUnavailable, models.InstanceStateRunning),
 			makeEventDesc(models.InstanceStateDestroying, models.InstanceStateDestroyReq),
 			makeEventDesc(models.InstanceStateUnavailable, models.InstanceStateStopped),
 		},
