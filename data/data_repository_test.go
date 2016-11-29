@@ -44,10 +44,9 @@ func TestCreateData(t *testing.T) {
 
 	Convey("testing CreateData", t, func() {
 		Convey("When all data is created successfuly", func() {
-			gomock.InOrder(
-				etcdClientMock.EXPECT().Create(key1, data1).Return(nil),
-				etcdClientMock.EXPECT().Create(key2, data2).Return(nil),
-			)
+			etcdClientMock.EXPECT().Create(key1, data1).Return(nil)
+			etcdClientMock.EXPECT().Create(key2, data2).Return(nil)
+
 			input := map[string]interface{}{
 				key1: data1,
 				key2: data2,
@@ -58,15 +57,26 @@ func TestCreateData(t *testing.T) {
 			})
 		})
 
-		Convey("When one part of data is not created successfuly", func() {
+		Convey("State field should be saved last", func() {
 			gomock.InOrder(
 				etcdClientMock.EXPECT().Create(key1, data1).Return(nil),
-				etcdClientMock.EXPECT().Create(key2, data2).Return(errors.New("")),
+				etcdClientMock.EXPECT().Create(stateFieldName, data3).Return(nil),
 			)
 			input := map[string]interface{}{
+				stateFieldName: data3,
+				key1:           data1,
+			}
+			err := repository.CreateData(input)
+			Convey("response error should be nil", func() {
+				So(err, ShouldBeNil)
+			})
+		})
+
+		Convey("When data is not created successfuly", func() {
+			etcdClientMock.EXPECT().Create(key1, data1).Return(errors.New(""))
+
+			input := map[string]interface{}{
 				key1: data1,
-				key2: data2,
-				key3: data3,
 			}
 			err := repository.CreateData(input)
 			Convey("response error should not be nil", func() {

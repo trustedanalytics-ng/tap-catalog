@@ -18,6 +18,7 @@ package data
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/trustedanalytics/tap-catalog/etcd"
 )
@@ -46,14 +47,34 @@ func NewRepositoryAPI(etcdKVStore etcd.EtcdKVStore, dataMapper DataMapper) Repos
 	return &RepositoryConnector{etcdClient: etcdKVStore, mapper: dataMapper}
 }
 
+// TAP flow requires that the State field should be saved as last - when the rest of the object is ready
 func (t *RepositoryConnector) CreateData(keyStore map[string]interface{}) error {
+	stateKey, stateValue := getStateKeyValueAndRemoveItFromMap(keyStore)
+
 	for k, v := range keyStore {
 		err := t.etcdClient.Create(k, v)
 		if err != nil {
 			return err
 		}
 	}
+
+	if stateKey != "" {
+		err := t.etcdClient.Create(stateKey, stateValue)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func getStateKeyValueAndRemoveItFromMap(keyStore map[string]interface{}) (string, interface{}) {
+	for k, v := range keyStore {
+		if strings.HasSuffix(k, "/"+stateFieldName) {
+			delete(keyStore, k)
+			return k, v
+		}
+	}
+	return "", ""
 }
 
 func (t *RepositoryConnector) SetData(keyStore map[string]interface{}) error {

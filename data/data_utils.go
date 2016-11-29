@@ -32,6 +32,7 @@ const (
 	idFieldName       = "Id"
 	nameFieldName     = "Name"
 	bindingsFieldName = "Bindings"
+	stateFieldName    = "State"
 
 	RegexpDnsLabel          = "^[A-Za-z_][A-Za-z0-9_]*$"
 	RegexpDnsLabelLowercase = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"

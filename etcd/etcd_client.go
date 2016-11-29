@@ -93,11 +93,11 @@ func (c *EtcdConnector) GetKeyIntoStruct(key string, result interface{}) error {
 }
 
 func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {
-	return c.getKeyNodes(key, client.GetOptions{Recursive: false})
+	return c.getKeyNodes(key, client.GetOptions{Recursive: false, Sort: true})
 }
 
 func (c *EtcdConnector) GetKeyNodesRecursively(key string) (client.Node, error) {
-	return c.getKeyNodes(key, client.GetOptions{Recursive: true})
+	return c.getKeyNodes(key, client.GetOptions{Recursive: true, Sort: true})
 }
 
 func (c *EtcdConnector) Create(key string, value interface{}) error {
