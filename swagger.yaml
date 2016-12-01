@@ -504,6 +504,23 @@ paths:
               $ref: '#/definitions/Instance'
         500:
           description: unexpected error
+  /api/v1/instances/nextState:
+    get:
+      summary: Long poll for next isntance state change
+      parameters:
+        - name: afterIndex
+          in: query
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Next Instance state change
+          schema:
+            $ref: '#/definitions/StateChange'
+        400:
+          description: incorrect afterIndex provided
+        500:
+          description: unexpected error
   /api/v1/instances/{instanceId}:
     get:
       summary: Get instance object
@@ -550,6 +567,27 @@ paths:
       responses:
         204:
           description: Instance deleted
+        500:
+          description: unexpected error
+  /api/v1/images/{instanceId}/nextState:
+    get:
+      summary: Long poll for next Instance state change
+      parameters:
+        - name: afterIndex
+          in: query
+          required: true
+          type: integer
+        - name: instanceId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Next Instance state change
+          schema:
+            $ref: '#/definitions/StateChange'
+        400:
+          description: incorrect afterIndex provided
         500:
           description: unexpected error
   /api/v1/instances/{instanceId}/bindings:
@@ -675,6 +713,23 @@ paths:
           description: bad body or id provided
         500:
           description: unexpected error
+  /api/v1/images/nextState:
+    get:
+      summary: Long poll for next image state change
+      parameters:
+        - name: afterIndex
+          in: query
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Next Image state change
+          schema:
+            $ref: '#/definitions/StateChange'
+        400:
+          description: incorrect afterIndex provided
+        500:
+          description: unexpected error
   /api/v1/images/{imageId}:
     get:
       summary: Get image by ID
@@ -721,6 +776,27 @@ paths:
       responses:
         204:
           description: Image deleted
+        500:
+          description: unexpected error
+  /api/v1/images/{imageId}/nextState:
+    get:
+      summary: Long poll for next image state change
+      parameters:
+        - name: afterIndex
+          in: query
+          required: true
+          type: integer
+        - name: imageId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Next Image state change
+          schema:
+            $ref: '#/definitions/StateChange'
+        400:
+          description: incorrect afterIndex provided
         500:
           description: unexpected error
 definitions:
@@ -986,6 +1062,19 @@ definitions:
         type: string
       data:
         type: object
+  StateChange:
+    type: object
+    required:
+      - id
+      - state
+      - index
+    properties:
+      id:
+        type: string
+      state:
+        type: string
+      index:
+        type: integer
   AuditTrail:
     type: object
     properties:

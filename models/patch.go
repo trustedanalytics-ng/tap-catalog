@@ -41,3 +41,13 @@ type Patch struct {
 	PrevValue json.RawMessage `json:"prevValue,omitempty"`
 	Username  string          `json:"username"`
 }
+
+const (
+	WatchFromNow uint64 = 0
+)
+
+type StateChange struct {
+	Id    string
+	State string
+	Index uint64
+}

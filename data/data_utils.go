@@ -29,6 +29,8 @@ import (
 )
 
 const (
+	keySeparator = "/"
+
 	idFieldName       = "Id"
 	nameFieldName     = "Name"
 	bindingsFieldName = "Bindings"
@@ -144,9 +146,9 @@ func isObject(property reflect.Value) bool {
 
 func buildEtcdKey(dirKey string, fieldName, id string, addIdToKey bool) string {
 	if addIdToKey {
-		return dirKey + "/" + id + "/" + fieldName
+		return dirKey + keySeparator + id + keySeparator + fieldName
 	} else {
-		return dirKey + "/" + fieldName
+		return dirKey + keySeparator + fieldName
 	}
 }
 
@@ -157,7 +159,7 @@ func unmarshalJSON(value []byte, fieldName string, structType reflect.Type) (int
 }
 
 func getNodeName(key string) string {
-	nodeKeys := strings.Split(key, "/")
+	nodeKeys := strings.Split(key, keySeparator)
 	return nodeKeys[len(nodeKeys)-1]
 }
 
@@ -169,4 +171,14 @@ func getNewInstance(fieldName string, structType reflect.Type) reflect.Value {
 		v := reflect.New(structType)
 		return v
 	}
+}
+
+func isStateField(key string) bool {
+	return strings.HasSuffix(key, keySeparator+stateFieldName)
+}
+
+func getIdFromKey(key, prefix, suffix string) string {
+	result := strings.TrimPrefix(key, prefix)
+	result = strings.TrimSuffix(result, suffix)
+	return strings.Trim(result, keySeparator)
 }

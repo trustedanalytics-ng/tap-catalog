@@ -130,7 +130,7 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 			receivedElement := reflect.ValueOf(newValue).Elem()
 			if patch.Operation == models.OperationAdd {
 				if isCollection(originalField.Kind()) {
-					result.Add = MergeMap(result.Add, t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, true))
+					result.Add = MergeMap(result.Add, t.structToMap(mainStructDirKey+keySeparator+patchFieldName, receivedElement, true))
 					err := validatePatch(patchFieldName, patch, false)
 					if err != nil {
 						return result, err
@@ -140,7 +140,7 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 				}
 			} else if patch.Operation == models.OperationUpdate {
 				if isObject(originalField) {
-					result.Update = append(result.Update, mapToPatchSingleUpdates(t.structToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, isCollection(originalField.Kind())), nil)...)
+					result.Update = append(result.Update, mapToPatchSingleUpdates(t.structToMap(mainStructDirKey+keySeparator+patchFieldName, receivedElement, isCollection(originalField.Kind())), nil)...)
 				} else {
 					var receivedPreviousValueInterface interface{}
 					if len(patch.PrevValue) > 0 {
@@ -155,12 +155,12 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 					if err != nil {
 						return result, err
 					}
-					result.Update = append(result.Update, mapToPatchSingleUpdates(t.SingleFieldToMap(mainStructDirKey+"/"+patchFieldName, receivedElement, patchFieldName, ""), receivedPreviousValueInterface)...)
+					result.Update = append(result.Update, mapToPatchSingleUpdates(t.SingleFieldToMap(mainStructDirKey+keySeparator+patchFieldName, receivedElement, patchFieldName, ""), receivedPreviousValueInterface)...)
 				}
 			} else if patch.Operation == models.OperationDelete {
 				if isCollection(originalField.Kind()) {
 					if structId := getStructID(receivedElement); structId != "" {
-						result.Delete[mainStructDirKey+"/"+patchFieldName+"/"+structId] = nil
+						result.Delete[mainStructDirKey+keySeparator+patchFieldName+keySeparator+structId] = nil
 					} else {
 						return result, errors.New("Delete operation required NOT EMPPTY ID field!")
 					}
@@ -177,7 +177,7 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 
 	result.Update = append(
 		result.Update,
-		mapToPatchSingleUpdates(t.updateAuditTrail(mainStructDirKey+"/AuditTrail", true, models.AuditTrail{LastUpdateBy: username}), nil)...,
+		mapToPatchSingleUpdates(t.updateAuditTrail(mainStructDirKey+keySeparator+"AuditTrail", true, models.AuditTrail{LastUpdateBy: username}), nil)...,
 	)
 	return result, nil
 }
@@ -203,7 +203,7 @@ func validatePatch(patchFieldName string, patch models.Patch, isUpdateOp bool) e
 }
 
 func (t *DataMapper) ToKey(prefix string, key string) string {
-	return prefix + "/" + key
+	return prefix + keySeparator + key
 }
 
 func (t *DataMapper) structToMap(dirKey string, structObject reflect.Value, addIdToKey bool) map[string]interface{} {

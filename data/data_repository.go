@@ -20,7 +20,10 @@ import (
 	"reflect"
 	"strings"
 
+	"golang.org/x/net/context"
+
 	"github.com/trustedanalytics/tap-catalog/etcd"
+	"github.com/trustedanalytics/tap-catalog/models"
 )
 
 type RepositoryApi interface {
@@ -36,6 +39,7 @@ type RepositoryApi interface {
 	GetDataCounter(key string, model interface{}) (int, error)
 	CreateDirs(org string) error
 	IsExistByName(expectedName string, model interface{}, key string) (bool, error)
+	MonitorObjectsStates(key string, afterIndex uint64) (models.StateChange, error)
 }
 
 type RepositoryConnector struct {
@@ -69,7 +73,7 @@ func (t *RepositoryConnector) CreateData(keyStore map[string]interface{}) error 
 
 func getStateKeyValueAndRemoveItFromMap(keyStore map[string]interface{}) (string, interface{}) {
 	for k, v := range keyStore {
-		if strings.HasSuffix(k, "/"+stateFieldName) {
+		if isStateField(k) {
 			delete(keyStore, k)
 			return k, v
 		}
@@ -222,4 +226,29 @@ func (t *RepositoryConnector) IsExistByName(expectedName string, model interface
 	}
 
 	return false, nil
+}
+
+func (t *RepositoryConnector) MonitorObjectsStates(basePath string, afterIndex uint64) (models.StateChange, error) {
+	result := models.StateChange{}
+	watcher, err := t.etcdClient.GetLongPollWatcherForKey(basePath, true, afterIndex)
+	if err != nil {
+		return result, err
+	}
+
+	for {
+		resp, err := watcher.Next(context.Background())
+		if err != nil {
+			logger.Error("watcher.Next error:", err)
+			return result, err
+		} else {
+			if isStateField(resp.Node.Key) {
+				result = models.StateChange{
+					Id:    getIdFromKey(resp.Node.Key, basePath, stateFieldName),
+					State: strings.Trim(resp.Node.Value, `"`),
+					Index: resp.Node.ModifiedIndex,
+				}
+				return result, nil
+			}
+		}
+	}
 }

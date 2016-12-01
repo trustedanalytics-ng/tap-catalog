@@ -167,3 +167,14 @@ func (_m *MockEtcdKVStore) GetKeyNodesRecursively(key string) (client.Node, erro
 func (_mr *_MockEtcdKVStoreRecorder) GetKeyNodesRecursively(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetKeyNodesRecursively", arg0)
 }
+
+func (_m *MockEtcdKVStore) GetLongPollWatcherForKey(key string, monitorSubNodes bool, afterIndex uint64) (client.Watcher, error) {
+	ret := _m.ctrl.Call(_m, "GetLongPollWatcherForKey", key, monitorSubNodes, afterIndex)
+	ret0, _ := ret[0].(client.Watcher)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockEtcdKVStoreRecorder) GetLongPollWatcherForKey(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetLongPollWatcherForKey", arg0, arg1, arg2)
+}

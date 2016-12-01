@@ -39,6 +39,7 @@ type EtcdKVStore interface {
 	AddOrUpdateDir(key string) error
 	GetKeyNodes(key string) (client.Node, error)
 	GetKeyNodesRecursively(key string) (client.Node, error)
+	GetLongPollWatcherForKey(key string, monitorSubNodes bool, afterIndex uint64) (client.Watcher, error)
 }
 
 type EtcdConnector struct {
@@ -233,4 +234,18 @@ func (c *EtcdConnector) getKeyNodes(key string, getOptions client.GetOptions) (c
 	}
 
 	return *resp.Node, nil
+}
+
+func (c *EtcdConnector) GetLongPollWatcherForKey(key string, monitorSubNodes bool, afterIndex uint64) (client.Watcher, error) {
+	logger.Debug("Long pulling for key:", key)
+
+	if err := c.Connect(); err != nil {
+		return nil, fmt.Errorf("cannot connect with ETCD: %v", err)
+	}
+
+	opts := client.WatcherOptions{
+		Recursive:  monitorSubNodes,
+		AfterIndex: afterIndex, //0 is from currentTime, 1 from the beginning
+	}
+	return c.keysAPI.Watcher(key, &opts), nil
 }

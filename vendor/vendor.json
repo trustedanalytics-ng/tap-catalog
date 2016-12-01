@@ -158,10 +158,10 @@
 			"revisionTime": "2016-02-27T15:26:14Z"
 		},
 		{
-			"checksumSHA1": "9H+0+Dda7rNaMV6KxLERl5X1g3E=",
+			"checksumSHA1": "7z4MDK+gvStbukh5mwCL2nQNsNc=",
 			"path": "github.com/trustedanalytics/tap-catalog",
-			"revision": "c5d4bbe0dc95dde69ac1eea355b6d186489fff46",
-			"revisionTime": "2016-11-08T13:38:37Z"
+			"revision": "89ebef754a3e7ed723e770c2fab990ea1910b08f",
+			"revisionTime": "2016-11-30T09:30:32Z"
 		},
 		{
 			"checksumSHA1": "XlRuAJ79S/WN1F/zTsTCueUaGW4=",
@@ -170,64 +170,64 @@
 			"revisionTime": "2016-08-10T07:13:14Z"
 		},
 		{
-			"checksumSHA1": "AuTEUscpZOxC9iOZMFJxDjDS6jQ=",
+			"checksumSHA1": "FbNLGMUWGLpO3JTk0JX7URejYOE=",
 			"path": "github.com/trustedanalytics/tap-catalog/api",
-			"revision": "c5d4bbe0dc95dde69ac1eea355b6d186489fff46",
-			"revisionTime": "2016-11-08T13:38:37Z"
+			"revision": "89ebef754a3e7ed723e770c2fab990ea1910b08f",
+			"revisionTime": "2016-11-30T09:30:32Z"
 		},
 		{
-			"checksumSHA1": "5CTjv5jxj3beX8ujA5IxbiPl23k=",
+			"checksumSHA1": "LOOWrA4J8CRQNytOQR+JQbIu65Y=",
 			"path": "github.com/trustedanalytics/tap-catalog/builder",
-			"revision": "c5d4bbe0dc95dde69ac1eea355b6d186489fff46",
-			"revisionTime": "2016-11-08T13:38:37Z"
+			"revision": "89ebef754a3e7ed723e770c2fab990ea1910b08f",
+			"revisionTime": "2016-11-30T09:30:32Z"
 		},
 		{
-			"checksumSHA1": "hua7cz3WSRSvzCMxGNqg/9ikFB4=",
+			"checksumSHA1": "Wz2nEYpAgZnvng/FQqvXYv0HY9s=",
 			"path": "github.com/trustedanalytics/tap-catalog/client",
-			"revision": "c5d4bbe0dc95dde69ac1eea355b6d186489fff46",
-			"revisionTime": "2016-11-08T13:38:37Z"
+			"revision": "89ebef754a3e7ed723e770c2fab990ea1910b08f",
+			"revisionTime": "2016-11-30T09:30:32Z"
 		},
 		{
-			"checksumSHA1": "Hm0hfArSCng1k/6unRLIvEwfues=",
+			"checksumSHA1": "FCpn0Mw0ucAHy4BKeoNrQNhGCiQ=",
 			"path": "github.com/trustedanalytics/tap-catalog/data",
-			"revision": "c5d4bbe0dc95dde69ac1eea355b6d186489fff46",
-			"revisionTime": "2016-11-08T13:38:37Z"
+			"revision": "89ebef754a3e7ed723e770c2fab990ea1910b08f",
+			"revisionTime": "2016-11-30T09:30:32Z"
 		},
 		{
-			"checksumSHA1": "GmDypLz9D+jBtiTJg5RtS0XhB+U=",
+			"checksumSHA1": "w6QM6Gr2+wBZdU0UHSJxUX9fwtc=",
 			"path": "github.com/trustedanalytics/tap-catalog/etcd",
-			"revision": "c5d4bbe0dc95dde69ac1eea355b6d186489fff46",
-			"revisionTime": "2016-11-08T13:38:37Z"
+			"revision": "89ebef754a3e7ed723e770c2fab990ea1910b08f",
+			"revisionTime": "2016-11-30T09:30:32Z"
 		},
 		{
-			"checksumSHA1": "9/kYGBHi4/YbgVrY6dPqnnV0Tn8=",
+			"checksumSHA1": "wBm5xvRVu3HMcwam/KzA+TeOY7U=",
 			"path": "github.com/trustedanalytics/tap-catalog/metrics",
-			"revision": "c5d4bbe0dc95dde69ac1eea355b6d186489fff46",
-			"revisionTime": "2016-11-08T13:38:37Z"
+			"revision": "89ebef754a3e7ed723e770c2fab990ea1910b08f",
+			"revisionTime": "2016-11-30T09:30:32Z"
 		},
 		{
-			"checksumSHA1": "OhRcFPq1LkhYXr9ysBK/fgECMLw=",
+			"checksumSHA1": "PNntRUUHR7xWkQCANMTtxF6js58=",
 			"path": "github.com/trustedanalytics/tap-catalog/models",
-			"revision": "c5d4bbe0dc95dde69ac1eea355b6d186489fff46",
-			"revisionTime": "2016-11-08T13:38:37Z"
+			"revision": "89ebef754a3e7ed723e770c2fab990ea1910b08f",
+			"revisionTime": "2016-11-30T09:30:32Z"
 		},
 		{
-			"checksumSHA1": "ukXcanknqGE85PrDaHsU+ZkLYsM=",
+			"checksumSHA1": "aHh68nU3hi2RN3J6pHNbhuNNYzA=",
 			"path": "github.com/trustedanalytics/tap-go-common/http",
-			"revision": "ccbcea4f755e1d60b250e262031e37c550234d43",
-			"revisionTime": "2016-11-10T14:20:28Z"
+			"revision": "758d24859470e621b5564a4a12767c7d107b5053",
+			"revisionTime": "2016-12-01T08:07:06Z"
 		},
 		{
 			"checksumSHA1": "O4sIfCHeupMT91S+wt73AAfH4bQ=",
 			"path": "github.com/trustedanalytics/tap-go-common/logger",
-			"revision": "ccbcea4f755e1d60b250e262031e37c550234d43",
-			"revisionTime": "2016-11-10T14:20:28Z"
+			"revision": "758d24859470e621b5564a4a12767c7d107b5053",
+			"revisionTime": "2016-12-01T08:07:06Z"
 		},
 		{
 			"checksumSHA1": "y9R8xG1VoDQ+jLhovarwi5SPySY=",
 			"path": "github.com/trustedanalytics/tap-go-common/util",
-			"revision": "ccbcea4f755e1d60b250e262031e37c550234d43",
-			"revisionTime": "2016-11-10T14:20:28Z"
+			"revision": "758d24859470e621b5564a4a12767c7d107b5053",
+			"revisionTime": "2016-12-01T08:07:06Z"
 		},
 		{
 			"checksumSHA1": "zQuZ9XVON7JaukbNQBqYPQE9XwM=",

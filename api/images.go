@@ -111,6 +111,15 @@ func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 
+func (c *Context) MonitorImagesStates(rw web.ResponseWriter, req *web.Request) {
+	c.monitorSpecificState(rw, req, c.buildImagesKey(""))
+}
+
+func (c *Context) MonitorSpecificImageState(rw web.ResponseWriter, req *web.Request) {
+	imageId := req.PathParams["imageId"]
+	c.monitorSpecificState(rw, req, c.buildImagesKey(imageId))
+}
+
 func (c *Context) getImagesKey() string {
 	org := c.mapper.ToKey("", c.organization)
 	return c.mapper.ToKey(org, data.Images)

@@ -20,27 +20,21 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
 
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
 )
 
 const (
 	instanceId string = "test-instance-id"
 	serviceId  string = "test-service-id"
-
-	serviceIDWildcard      = ":serviceId"
-	urlPostServiceInstance = urlPrefix + "/services/" + serviceIDWildcard + "/instances"
 )
 
 func TestAddServiceInstance(t *testing.T) {
 	router, context, repositoryMock := prepareMocksAndRouter(t)
-	router.Post(urlPostServiceInstance, context.AddServiceInstance)
 
 	Convey("Test Add Service Instance", t, func() {
 		Convey("Adding instance ok, response status is 201", func() {
@@ -54,14 +48,11 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
 			)
 
-			byteBody := util.PrepareAndValidateRequest(instance, t)
-			requestPath := strings.Replace(urlPostServiceInstance, serviceIDWildcard, serviceId, 1)
-			response := util.SendRequest("POST", requestPath, byteBody, router)
-			util.AssertResponse(response, "", http.StatusCreated)
+			catalogClient := getCatalogClient(router, t)
+			responseInstance, status, err := catalogClient.AddServiceInstance(serviceId, instance)
 
-			responseInstance := models.Instance{}
-			err := util.ReadJsonFromByte(response.Body.Bytes(), &responseInstance)
 			So(err, ShouldBeNil)
+			So(status, ShouldEqual, http.StatusCreated)
 			So(responseInstance, ShouldResemble, instance)
 		})
 
@@ -77,14 +68,11 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
 			)
 
-			byteBody := util.PrepareAndValidateRequest(instance, t)
-			requestPath := strings.Replace(urlPostServiceInstance, serviceIDWildcard, serviceId, 1)
-			response := util.SendRequest("POST", requestPath+"?isServiceBroker=true", byteBody, router)
-			util.AssertResponse(response, "", http.StatusCreated)
+			catalogClient := getCatalogClient(router, t)
+			responseInstance, status, err := catalogClient.AddServiceBrokerInstance(serviceId, instance)
 
-			responseInstance := models.Instance{}
-			err := util.ReadJsonFromByte(response.Body.Bytes(), &responseInstance)
 			So(err, ShouldBeNil)
+			So(status, ShouldEqual, http.StatusCreated)
 			So(responseInstance, ShouldResemble, instance)
 		})
 
@@ -93,10 +81,12 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, errors.New("not exist")),
 			)
 
-			byteBody := util.PrepareAndValidateRequest(getSampleInstance(), t)
-			requestPath := strings.Replace(urlPostServiceInstance, serviceIDWildcard, serviceId, 1)
-			response := util.SendRequest("POST", requestPath, byteBody, router)
-			util.AssertResponse(response, "does not exists", http.StatusNotFound)
+			catalogClient := getCatalogClient(router, t)
+			_, status, err := catalogClient.AddServiceInstance(serviceId, models.Instance{})
+
+			So(err, ShouldNotBeNil)
+			So(status, ShouldEqual, http.StatusNotFound)
+			So(err.Error(), ShouldContainSubstring, "does not exists")
 		})
 
 		Convey("Id field not empty, response status is 400", func() {
@@ -106,10 +96,13 @@ func TestAddServiceInstance(t *testing.T) {
 
 			instance := getSampleInstance()
 			instance.Id = instanceId
-			byteBody := util.PrepareAndValidateRequest(instance, t)
-			requestPath := strings.Replace(urlPostServiceInstance, serviceIDWildcard, serviceId, 1)
-			response := util.SendRequest("POST", requestPath, byteBody, router)
-			util.AssertResponse(response, "Id field has to be empty!", http.StatusBadRequest)
+
+			catalogClient := getCatalogClient(router, t)
+			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
+
+			So(err, ShouldNotBeNil)
+			So(status, ShouldEqual, http.StatusBadRequest)
+			So(err.Error(), ShouldContainSubstring, "Id field has to be empty!")
 		})
 
 		Convey("Plan not found, response status is 400", func() {
@@ -119,10 +112,13 @@ func TestAddServiceInstance(t *testing.T) {
 
 			instance := getSampleInstance()
 			instance.Metadata = []models.Metadata{}
-			byteBody := util.PrepareAndValidateRequest(instance, t)
-			requestPath := strings.Replace(urlPostServiceInstance, serviceIDWildcard, serviceId, 1)
-			response := util.SendRequest("POST", requestPath, byteBody, router)
-			util.AssertResponse(response, fmt.Sprintf("key %s not found!", models.OFFERING_PLAN_ID), http.StatusBadRequest)
+
+			catalogClient := getCatalogClient(router, t)
+			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
+
+			So(err, ShouldNotBeNil)
+			So(status, ShouldEqual, http.StatusBadRequest)
+			So(err.Error(), ShouldContainSubstring, fmt.Sprintf("key %s not found!", models.OFFERING_PLAN_ID))
 		})
 
 		Convey("Instance name does not match lowercase DNS rule, response status is 400", func() {
@@ -132,10 +128,13 @@ func TestAddServiceInstance(t *testing.T) {
 
 			instance := getSampleInstance()
 			instance.Name = "NOT_DNS"
-			byteBody := util.PrepareAndValidateRequest(instance, t)
-			requestPath := strings.Replace(urlPostServiceInstance, serviceIDWildcard, serviceId, 1)
-			response := util.SendRequest("POST", requestPath, byteBody, router)
-			util.AssertResponse(response, "Field: Name has incorrect value: "+instance.Name, http.StatusBadRequest)
+
+			catalogClient := getCatalogClient(router, t)
+			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
+
+			So(err, ShouldNotBeNil)
+			So(status, ShouldEqual, http.StatusBadRequest)
+			So(err.Error(), ShouldContainSubstring, "Field: Name has incorrect value: "+instance.Name)
 		})
 
 		Convey("Instance already exist, response status is 409", func() {
@@ -146,10 +145,12 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(true, nil),
 			)
 
-			byteBody := util.PrepareAndValidateRequest(instance, t)
-			requestPath := strings.Replace(urlPostServiceInstance, serviceIDWildcard, serviceId, 1)
-			response := util.SendRequest("POST", requestPath, byteBody, router)
-			util.AssertResponse(response, "already exists!", http.StatusConflict)
+			catalogClient := getCatalogClient(router, t)
+			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
+
+			So(err, ShouldNotBeNil)
+			So(status, ShouldEqual, http.StatusConflict)
+			So(err.Error(), ShouldContainSubstring, "already exists!")
 		})
 
 		Convey("Binding data does not match envs validation rule, response status is 400", func() {
@@ -163,10 +164,12 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
 			)
 
-			byteBody := util.PrepareAndValidateRequest(instance, t)
-			requestPath := strings.Replace(urlPostServiceInstance, serviceIDWildcard, serviceId, 1)
-			response := util.SendRequest("POST", requestPath, byteBody, router)
-			util.AssertResponse(response, "Field: data has incorrect value:", http.StatusBadRequest)
+			catalogClient := getCatalogClient(router, t)
+			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
+
+			So(err, ShouldNotBeNil)
+			So(status, ShouldEqual, http.StatusBadRequest)
+			So(err.Error(), ShouldContainSubstring, "Field: data has incorrect value:")
 		})
 	})
 }

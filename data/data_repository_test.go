@@ -60,11 +60,11 @@ func TestCreateData(t *testing.T) {
 		Convey("State field should be saved last", func() {
 			gomock.InOrder(
 				etcdClientMock.EXPECT().Create(key1, data1).Return(nil),
-				etcdClientMock.EXPECT().Create(stateFieldName, data3).Return(nil),
+				etcdClientMock.EXPECT().Create(keySeparator+stateFieldName, data3).Return(nil),
 			)
 			input := map[string]interface{}{
-				stateFieldName: data3,
-				key1:           data1,
+				keySeparator + stateFieldName: data3,
+				key1: data1,
 			}
 			err := repository.CreateData(input)
 			Convey("response error should be nil", func() {

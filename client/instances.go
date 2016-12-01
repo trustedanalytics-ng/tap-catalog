@@ -105,3 +105,17 @@ func (c *TapCatalogApiConnector) DeleteInstance(instanceId string) (int, error) 
 	status, err := brokerHttp.DeleteModel(connector, http.StatusNoContent)
 	return status, err
 }
+
+func (c *TapCatalogApiConnector) WatchInstances(afterIndex uint64) (models.StateChange, int, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s?afterIndex=%d", c.Address, instances, nextState, afterIndex))
+	result := &models.StateChange{}
+	status, err := brokerHttp.GetModel(connector, http.StatusOK, result)
+	return *result, status, err
+}
+
+func (c *TapCatalogApiConnector) WatchInstance(instanceId string, afterIndex uint64) (models.StateChange, int, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s/%s?afterIndex=%d", c.Address, instances, instanceId, nextState, afterIndex))
+	result := &models.StateChange{}
+	status, err := brokerHttp.GetModel(connector, http.StatusOK, result)
+	return *result, status, err
+}

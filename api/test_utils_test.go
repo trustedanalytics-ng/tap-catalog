@@ -17,12 +17,24 @@
 package api
 
 import (
+	"net/http/httptest"
 	"testing"
 
 	"github.com/gocraft/web"
 	"github.com/golang/mock/gomock"
 
+	"github.com/trustedanalytics/tap-catalog/client"
 	"github.com/trustedanalytics/tap-catalog/data"
+)
+
+const (
+	urlPrefix                  = "/api/v1"
+	urlPostImage               = urlPrefix + "/images"
+	urlGetImageWatcher         = urlPostImage + "/nextState"
+	imageIDWildcard            = ":imageId"
+	urlGetSpecificImageWatcher = urlPostImage + "/" + imageIDWildcard + "/nextState"
+	serviceIDWildcard          = ":serviceId"
+	urlPostServiceInstance     = urlPrefix + "/services/" + serviceIDWildcard + "/instances"
 )
 
 func prepareMocksAndRouter(t *testing.T) (router *web.Router, c Context, repositoryMock *data.MockRepositoryApi) {
@@ -33,5 +45,20 @@ func prepareMocksAndRouter(t *testing.T) (router *web.Router, c Context, reposit
 		repository: repositoryMock,
 	}
 	router = web.New(c)
+
+	router.Post(urlPostImage, c.AddImage)
+	router.Post(urlPostServiceInstance, c.AddServiceInstance)
+	router.Get(urlGetImageWatcher, c.MonitorImagesStates)
+	router.Get(urlGetSpecificImageWatcher, c.MonitorSpecificImageState)
+
 	return
+}
+
+func getCatalogClient(router *web.Router, t *testing.T) *client.TapCatalogApiConnector {
+	testServer := httptest.NewServer(router)
+	cBroker, err := client.NewTapCatalogApiWithBasicAuth(testServer.URL, "user", "password")
+	if err != nil {
+		t.Fatal("Container broker error: ", err)
+	}
+	return cBroker
 }

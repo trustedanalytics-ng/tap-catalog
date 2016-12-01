@@ -17,7 +17,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -25,18 +24,10 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
-)
-
-const (
-	urlPrefix       = "/api/v1"
-	imageIDWildcard = ":imageId"
-	urlPostImage    = urlPrefix + "/images"
 )
 
 func TestAddImage(t *testing.T) {
-	router, context, repositoryMock := prepareMocksAndRouter(t)
-	router.Post(urlPostImage, context.AddImage)
+	router, _, repositoryMock := prepareMocksAndRouter(t)
 
 	Convey("Testing AddImage", t, func() {
 		Convey("When providing AddImage with proper Image", func() {
@@ -46,30 +37,61 @@ func TestAddImage(t *testing.T) {
 				repositoryMock.EXPECT().GetData(gomock.Any(), models.Image{}).Return(image, nil),
 			)
 
-			byteBody, err := json.Marshal(image)
-			if err != nil {
-				t.Fatalf("cannot marshal %v", image)
-			}
-
-			response := util.SendRequest("POST", urlPostImage, byteBody, router)
+			catalogClient := getCatalogClient(router, t)
+			responseImage, status, err := catalogClient.AddImage(image)
 
 			Convey("response should be proper", func() {
-				util.AssertResponse(response, "", http.StatusCreated)
+				So(err, ShouldBeNil)
 
 				Convey("status code should be proper", func() {
-					So(response.Code, ShouldEqual, http.StatusCreated)
+					So(status, ShouldEqual, http.StatusCreated)
 				})
 
-				responseImage := models.Image{}
-				err := util.ReadJsonFromByte(response.Body.Bytes(), &responseImage)
-				Convey("unmarshal error is nil", func() {
-					So(err, ShouldBeNil)
-
-					Convey("returned Image should be proper", func() {
-						So(responseImage, ShouldResemble, image)
-					})
+				Convey("returned Image should be proper", func() {
+					So(responseImage, ShouldResemble, image)
 				})
 			})
+		})
+	})
+}
+
+func TestMonitorImagesState(t *testing.T) {
+	router, context, repositoryMock := prepareMocksAndRouter(t)
+
+	stateChange := models.StateChange{
+		Id: "test",
+	}
+
+	Convey("Testing MonitorImagesState", t, func() {
+		Convey("Request correct, response status is 200", func() {
+			afterIndex := models.WatchFromNow
+			gomock.InOrder(
+				repositoryMock.EXPECT().MonitorObjectsStates(context.buildImagesKey(""), afterIndex).Return(stateChange, nil),
+			)
+
+			catalogClient := getCatalogClient(router, t)
+			response, status, err := catalogClient.WatchImages(afterIndex)
+
+			So(status, ShouldEqual, http.StatusOK)
+			So(err, ShouldBeNil)
+			So(response, ShouldResemble, stateChange)
+		})
+	})
+
+	Convey("Testing MonitorSpecificImageState", t, func() {
+		Convey("Request correct, response status is 200", func() {
+			afterIndex := models.WatchFromNow
+			imageId := "test-image"
+			gomock.InOrder(
+				repositoryMock.EXPECT().MonitorObjectsStates(context.buildImagesKey(imageId), afterIndex).Return(stateChange, nil),
+			)
+
+			catalogClient := getCatalogClient(router, t)
+			response, status, err := catalogClient.WatchImage(imageId, afterIndex)
+
+			So(status, ShouldEqual, http.StatusOK)
+			So(err, ShouldBeNil)
+			So(response, ShouldResemble, stateChange)
 		})
 	})
 }

@@ -55,6 +55,10 @@ type TapCatalogApi interface {
 	DeleteService(serviceId string) (int, error)
 	DeleteImage(imageId string) (int, error)
 	DeleteInstance(instanceId string) (int, error)
+	WatchInstances(afterIndex uint64) (models.StateChange, int, error)
+	WatchInstance(instanceId string, afterIndex uint64) (models.StateChange, int, error)
+	WatchImages(afterIndex uint64) (models.StateChange, int, error)
+	WatchImage(imageId string, afterIndex uint64) (models.StateChange, int, error)
 }
 
 type TapCatalogApiConnector struct {
@@ -72,13 +76,16 @@ const (
 	applications = apiPrefix + apiVersion + "/applications"
 	templates    = apiPrefix + apiVersion + "/templates"
 	images       = apiPrefix + apiVersion + "/images"
+	nextState    = "nextState"
 	healthz      = "healthz"
 	bindings     = "bindings"
 	plans        = "plans"
+
+	maxIdleConnectionPerHost = 100
 )
 
 func NewTapCatalogApiWithBasicAuth(address, username, password string) (*TapCatalogApiConnector, error) {
-	client, _, err := brokerHttp.GetHttpClient()
+	client, _, err := brokerHttp.GetHttpClientWithCustomConnectionLimit(maxIdleConnectionPerHost)
 	if err != nil {
 		return nil, err
 	}

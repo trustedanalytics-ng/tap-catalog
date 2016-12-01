@@ -55,3 +55,17 @@ func (c *TapCatalogApiConnector) DeleteImage(imageId string) (int, error) {
 	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s", c.Address, images, imageId))
 	return brokerHttp.DeleteModel(connector, http.StatusNoContent)
 }
+
+func (c *TapCatalogApiConnector) WatchImages(afterIndex uint64) (models.StateChange, int, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s?afterIndex=%d", c.Address, images, nextState, afterIndex))
+	result := &models.StateChange{}
+	status, err := brokerHttp.GetModel(connector, http.StatusOK, result)
+	return *result, status, err
+}
+
+func (c *TapCatalogApiConnector) WatchImage(imageId string, afterIndex uint64) (models.StateChange, int, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s/%s?afterIndex=%d", c.Address, images, imageId, nextState, afterIndex))
+	result := &models.StateChange{}
+	status, err := brokerHttp.GetModel(connector, http.StatusOK, result)
+	return *result, status, err
+}

@@ -21,6 +21,7 @@ package data
 
 import (
 	gomock "github.com/golang/mock/gomock"
+	models "github.com/trustedanalytics/tap-catalog/models"
 )
 
 // Mock of RepositoryApi interface
@@ -167,4 +168,15 @@ func (_m *MockRepositoryApi) IsExistByName(expectedName string, model interface{
 
 func (_mr *_MockRepositoryApiRecorder) IsExistByName(arg0, arg1, arg2 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsExistByName", arg0, arg1, arg2)
+}
+
+func (_m *MockRepositoryApi) MonitorObjectsStates(key string, afterIndex uint64) (models.StateChange, error) {
+	ret := _m.ctrl.Call(_m, "MonitorObjectsStates", key, afterIndex)
+	ret0, _ := ret[0].(models.StateChange)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockRepositoryApiRecorder) MonitorObjectsStates(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "MonitorObjectsStates", arg0, arg1)
 }

@@ -318,6 +318,15 @@ func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
 }
 
+func (c *Context) MonitorInstancesStates(rw web.ResponseWriter, req *web.Request) {
+	c.monitorSpecificState(rw, req, c.buildInstanceKey(""))
+}
+
+func (c *Context) MonitorSpecificInstanceState(rw web.ResponseWriter, req *web.Request) {
+	instanceId := req.PathParams["instanceId"]
+	c.monitorSpecificState(rw, req, c.buildInstanceKey(instanceId))
+}
+
 func (c *Context) getInstanceKey() string {
 	return data.GetEntityKey(c.organization, data.Instances)
 }

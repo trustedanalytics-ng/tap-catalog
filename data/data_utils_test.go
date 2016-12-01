@@ -145,3 +145,34 @@ func TestGetOrCreateStructID(t *testing.T) {
 		})
 	})
 }
+
+func TestIsStateField(t *testing.T) {
+	Convey("testing isStateField", t, func() {
+		goodExample := isStateField("/Instance/State")
+		wrongExample1 := isStateField("/Instance/Statex")
+		wrongExample2 := isStateField("/Instance/XState")
+
+		So(goodExample, ShouldBeTrue)
+		So(wrongExample1, ShouldBeFalse)
+		So(wrongExample2, ShouldBeFalse)
+	})
+}
+
+func TestGetIdFromKey(t *testing.T) {
+	Convey("testing getIdFromKey", t, func() {
+		id := "test-id"
+		prefix := "/prefix/"
+		suffix := "/suffix/"
+		key := prefix + id + suffix
+
+		goodExample := getIdFromKey(key, prefix, suffix)
+		So(goodExample, ShouldEqual, id)
+
+		goodExample = getIdFromKey(id, "", "")
+		So(goodExample, ShouldEqual, id)
+
+		key = prefix + keySeparator + id + keySeparator + suffix
+		goodExample = getIdFromKey(key, prefix, suffix)
+		So(goodExample, ShouldEqual, id)
+	})
+}
