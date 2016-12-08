@@ -16,13 +16,13 @@
 package client
 
 import (
-	"testing"
 	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestNewTapCatalogApiWithBasicAuth(t *testing.T) {
 	Convey("Test DeleteOffering should return nil error", t, func() {
-		client, err := NewTapCatalogApiWithBasicAuth("adress","token","tokenType")
+		client, err := NewTapCatalogApiWithBasicAuth("adress", "token", "tokenType")
 		So(err, ShouldNotBeNil)
 		So(client.Address, ShouldEqual, "address")
 	})

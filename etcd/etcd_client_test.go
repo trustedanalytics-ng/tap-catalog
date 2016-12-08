@@ -16,8 +16,8 @@
 package etcd
 
 import (
-	"testing"
 	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestNewEtcdKVStore(t *testing.T) {

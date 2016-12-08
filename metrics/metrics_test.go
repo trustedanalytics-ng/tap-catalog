@@ -16,13 +16,13 @@
 package metrics
 
 import (
-	"testing"
 	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestGetAllOrgs(t *testing.T) {
 	Convey("Test getAllOrgs should return error for not defined env value", t, func() {
 		_, err := getAllOrgs()
-		So(err.Error(), ShouldEqual,"CORE_ORGANIZATION env is empty")
+		So(err.Error(), ShouldEqual, "CORE_ORGANIZATION env is empty")
 	})
 }

@@ -16,19 +16,19 @@
 package models
 
 import (
-	"testing"
 	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestGetValueFromMetadata(t *testing.T) {
 	Convey("Test GetValueFromMetadata should return value for existing key", t, func() {
-		metadatas := []Metadata{{Id:"mykey", Value:"myvalue"}}
+		metadatas := []Metadata{{Id: "mykey", Value: "myvalue"}}
 		value := GetValueFromMetadata(metadatas, "mykey")
 		So(value, ShouldEqual, "myvalue")
 	})
 
 	Convey("Test GetValueFromMetadata should return empty string for not existing key", t, func() {
-		metadatas := []Metadata{{Id:"mykey", Value:"myvalue"}}
+		metadatas := []Metadata{{Id: "mykey", Value: "myvalue"}}
 		value := GetValueFromMetadata(metadatas, "nokey")
 		So(value, ShouldEqual, "")
 	})
