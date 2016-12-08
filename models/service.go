@@ -20,6 +20,7 @@ import "reflect"
 func init() {
 	RegisterType("Plans", reflect.TypeOf(ServicePlan{}))
 	RegisterType("Dependencies", reflect.TypeOf(ServiceDependency{}))
+	RegisterType("Metadata", reflect.TypeOf(Metadata{}))
 }
 
 type Service struct {

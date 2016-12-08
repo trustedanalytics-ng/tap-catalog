@@ -1004,6 +1004,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/InstanceDependency'
+      metadata:
+          $ref: '#/definitions/Metadata'
       auditTrail:
         $ref: '#/definitions/AuditTrail'
   InstanceDependency:

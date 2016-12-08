@@ -19,6 +19,7 @@ import "reflect"
 
 func init() {
 	RegisterType("InstanceDependencies", reflect.TypeOf(InstanceDependency{}))
+	RegisterType("Metadata", reflect.TypeOf(Metadata{}))
 }
 
 type InstanceDependency struct {
@@ -34,4 +35,5 @@ type Application struct {
 	TemplateId           string               `json:"templateId"`
 	AuditTrail           AuditTrail           `json:"auditTrail"`
 	InstanceDependencies []InstanceDependency `json:"instanceDependencies"`
+	Metadata             []Metadata           `json:"metadata"`
 }
