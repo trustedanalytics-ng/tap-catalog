@@ -20,10 +20,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 )
 
-func GetConnectionHostAndPortFromEnvs(componentName string) (string, int, error) {
+func GetConnectionAddressFromEnvs(componentName string) (address string, err error) {
 	hostEnvName := componentName + "_HOST"
 	portEnvName := componentName + "_PORT"
 
@@ -34,32 +33,17 @@ func GetConnectionHostAndPortFromEnvs(componentName string) (string, int, error)
 		errorArray = append(errorArray, err)
 	}
 
-	portStr, err := GetEnvOrError(portEnvName)
+	port, err := GetEnvOrError(portEnvName)
 	if err != nil {
 		errorArray = append(errorArray, err)
 	}
 
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		errorArray = append(errorArray, fmt.Errorf("port has incorrect value %s: %v", portStr, err))
-	}
+	address = fmt.Sprintf("%s:%s", host, port)
 
 	if len(errorArray) > 0 {
-		return "", -1, sumErrors(errorArray)
+		err = sumErrors(errorArray)
 	}
-
-	return host, port, nil
-}
-
-func GetConnectionAddressFromEnvs(componentName string) (string, error) {
-	host, port, err := GetConnectionHostAndPortFromEnvs(componentName)
-	if err != nil {
-		return "", err
-	}
-
-	address := fmt.Sprintf("%s:%d", host, port)
-
-	return address, nil
+	return
 }
 
 func GetConnectionCredentialsFromEnvs(componentName string) (username, password string, err error) {
