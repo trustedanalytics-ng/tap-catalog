@@ -40,6 +40,10 @@ const (
 	RegexpDnsLabelLowercase = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
 )
 
+var (
+	runningStates = []models.InstanceState{models.InstanceStateRunning, models.InstanceStateStopReq}
+)
+
 func MergeMap(map1 map[string]interface{}, map2 map[string]interface{}) map[string]interface{} {
 	result := map[string]interface{}{}
 	for k, v := range map1 {
@@ -83,7 +87,6 @@ func GetFilteredInstances(expectedInstanceType models.InstanceType, expectedClas
 	}
 
 	for _, el := range result {
-
 		instance, ok := el.(models.Instance)
 		if !ok {
 			return filteredInstances, errors.New("Cannot convert element to models.Instance")
@@ -91,11 +94,31 @@ func GetFilteredInstances(expectedInstanceType models.InstanceType, expectedClas
 
 		if instance.Type == expectedInstanceType &&
 			(expectedClassId == "" || instance.ClassId == expectedClassId) {
-
 			filteredInstances = append(filteredInstances, instance)
 		}
 	}
 	return filteredInstances, nil
+}
+
+func IsApplicationInstance(instance models.Instance) bool {
+	return instance.Type == models.InstanceTypeApplication
+}
+
+func IsRunnungApplication(instance models.Instance) bool {
+	return IsApplicationInstance(instance) && isInstanceInState(instance, runningStates)
+}
+
+func isInstanceInState(instance models.Instance, states []models.InstanceState) bool {
+	return len(states) > 0 && isStateInSlice(instance.State, states)
+}
+
+func isStateInSlice(a models.InstanceState, list []models.InstanceState) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }
 
 func getStructID(structObject reflect.Value) string {

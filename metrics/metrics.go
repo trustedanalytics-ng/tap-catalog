@@ -18,6 +18,7 @@ package metrics
 import (
 	"errors"
 	"os"
+	"reflect"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -25,12 +26,15 @@ import (
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	mutils "github.com/trustedanalytics/tap-metrics/utils"
+	"fmt"
 )
 
 const (
-	applicationsMetricName      = "applications"
-	servicesMetricName          = "services"
-	servicesInstancesMetricName = "serviceInstances"
+	applicationsMetricName        = "applications"
+	servicesMetricName            = "services"
+	servicesInstancesMetricName   = "serviceInstances"
+	applicationsRunningMetricName = "applicationsRunning"
+	applicationsDownMetricName    = "applicationsDown"
 )
 
 var tapCounts = prometheus.NewGaugeVec(
@@ -43,12 +47,33 @@ var tapCounts = prometheus.NewGaugeVec(
 
 var repository data.RepositoryApi
 
-func collectApplicationsCount(org string) (string, float64, error) {
-	applicationsCount, err := repository.GetDataCounter(data.GetEntityKey(org, data.Applications), models.Application{})
+func collectApplicationsCount(org string) (runningApplications float64, downApplications float64, err error) {
+	runningApplications = float64(0)
+	downApplications = float64(0)
+
+	result, err := repository.GetListOfData(data.GetEntityKey(org, data.Instances), models.Instance{})
 	if err != nil {
-		return "", 0, err
+		return
 	}
-	return applicationsMetricName, float64(applicationsCount), nil
+	for _, el := range result {
+		instance, ok := el.(models.Instance)
+		if !ok {
+			elementType := reflect.TypeOf(el).String()
+			err = fmt.Errorf("Cannot convert element to models.Instance, element type was: %v", elementType)
+			return
+		}
+
+		if data.IsApplicationInstance(instance) {
+			if data.IsRunnungApplication(instance) {
+				runningApplications = runningApplications + 1
+			} else {
+				downApplications = downApplications + 1
+			}
+		}
+	}
+
+
+	return
 }
 
 func collectServicesCount(org string) (string, float64, error) {
@@ -73,13 +98,15 @@ func collectCount() error {
 		return err
 	}
 	for _, org := range organizations {
-		metricName, metricValue, err := collectApplicationsCount(org)
+		runningApplications, downApplications, err := collectApplicationsCount(org)
 		if err != nil {
 			return err
 		}
-		tapCounts.WithLabelValues(metricName, org).Set(metricValue)
+		tapCounts.WithLabelValues(applicationsMetricName, org).Set(float64(runningApplications + downApplications))
+		tapCounts.WithLabelValues(applicationsRunningMetricName, org).Set(runningApplications)
+		tapCounts.WithLabelValues(applicationsDownMetricName, org).Set(downApplications)
 
-		metricName, metricValue, err = collectServicesCount(org)
+		metricName, metricValue, err := collectServicesCount(org)
 		if err != nil {
 			return err
 		}
