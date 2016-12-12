@@ -28,13 +28,15 @@ import (
 )
 
 const (
-	key1      string = "key1"
-	data1     string = "data1"
-	key2      string = "key2"
-	data2     string = "data2"
-	key3      string = "key3"
-	data3     string = "data3"
-	prevData3 string = "prevData3"
+	key1           string = "key1"
+	data1          string = "data1"
+	key2           string = "key2"
+	data2          string = "data2"
+	key3           string = "key3"
+	data3          string = "data3"
+	auditTrailPath        = "/" + auditTrailKey + "/data"
+	auditTrailData string = "auditTrailData"
+	prevData3      string = "prevData3"
 
 	modifiedIndex uint64 = 17
 )
@@ -112,15 +114,29 @@ func TestApplyPatchedValues(t *testing.T) {
 				Value:         data3,
 				PreviousValue: prevData3,
 			},
+			PatchSingleUpdate{
+				Key:           auditTrailPath,
+				Value:         auditTrailData,
+				PreviousValue: prevData3,
+			},
 		}
 		input.Delete = map[string]interface{}{
 			key3: nil,
 		}
 
-		etcdClientMock.EXPECT().Set(key1, data1, gomock.Any(), uint64(0)).Return(nil)
-		etcdClientMock.EXPECT().Set(key2, data2, gomock.Any(), uint64(0)).Return(nil)
+		etcdClientMock.EXPECT().GetKeyNodesRecursively(key1).Return(client.Node{Key: ""}, errors.New("key not found"))
+		etcdClientMock.EXPECT().Create(key1, data1).Return(nil)
+
+		etcdClientMock.EXPECT().GetKeyNodesRecursively(key2).Return(client.Node{Key: key1, ModifiedIndex: modifiedIndex}, nil)
+		etcdClientMock.EXPECT().Update(key2, data2, nil, modifiedIndex).Return(nil)
+
 		etcdClientMock.EXPECT().GetKeyNodesRecursively(key3).Return(client.Node{ModifiedIndex: modifiedIndex}, nil)
-		etcdClientMock.EXPECT().Set(key3, data3, prevData3, modifiedIndex).Return(nil)
+
+		etcdClientMock.EXPECT().GetKeyNodesRecursively(key3).Return(client.Node{ModifiedIndex: modifiedIndex}, nil)
+		etcdClientMock.EXPECT().Update(key3, data3, prevData3, modifiedIndex).Return(nil)
+		etcdClientMock.EXPECT().GetKeyNodesRecursively(auditTrailPath).Return(client.Node{ModifiedIndex: modifiedIndex}, nil)
+		etcdClientMock.EXPECT().Set(auditTrailPath, auditTrailData).Return(nil)
+
 		etcdClientMock.EXPECT().DeleteDir(key3).Return(nil)
 
 		err := repository.ApplyPatchedValues(input)

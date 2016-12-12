@@ -83,7 +83,12 @@ func getStateKeyValueAndRemoveItFromMap(keyStore map[string]interface{}) (string
 
 func (t *RepositoryConnector) SetData(keyStore map[string]interface{}) error {
 	for k, v := range keyStore {
-		err := t.etcdClient.Set(k, v, nil, 0)
+		node, err := t.etcdClient.GetKeyNodesRecursively(k)
+		if node.Key == "" {
+			err = t.etcdClient.Create(k, v)
+		} else {
+			err = t.etcdClient.Update(k, v, nil, node.ModifiedIndex)
+		}
 		if err != nil {
 			return err
 		}
@@ -103,9 +108,14 @@ func (t *RepositoryConnector) UpdateData(updates []PatchSingleUpdate) error {
 			return fmt.Errorf("updateData in etcd error: cannnot get key %q: %v", update.Key, err)
 		}
 
-		err = t.etcdClient.Set(update.Key, update.Value, update.PreviousValue, node.ModifiedIndex)
-		if err != nil {
-			return fmt.Errorf("updateData in etcd error: key %q: %s", update.Key, err)
+		if isAuditTrailKey(update.Key) {
+			if err = t.etcdClient.Set(update.Key, update.Value); err != nil {
+				return fmt.Errorf("updateData in etcd for AuditTrail error: key %q: %v", update.Key, err)
+			}
+		} else {
+			if err = t.etcdClient.Update(update.Key, update.Value, update.PreviousValue, node.ModifiedIndex); err != nil {
+				return fmt.Errorf("updateData in etcd error: key %q: %v", update.Key, err)
+			}
 		}
 	}
 	return err

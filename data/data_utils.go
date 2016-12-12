@@ -38,6 +38,8 @@ const (
 
 	RegexpDnsLabel          = "^[A-Za-z_][A-Za-z0-9_]*$"
 	RegexpDnsLabelLowercase = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+
+	auditTrailKey = "AuditTrail"
 )
 
 var (
@@ -204,4 +206,14 @@ func getIdFromKey(key, prefix, suffix string) string {
 	result := strings.TrimPrefix(key, prefix)
 	result = strings.TrimSuffix(result, suffix)
 	return strings.Trim(result, keySeparator)
+}
+
+func isAuditTrailKey(key string) bool {
+	keys := strings.Split(key, "/")
+	if len(keys) >= 2 {
+		if keys[len(keys)-2] == auditTrailKey {
+			return true
+		}
+	}
+	return false
 }

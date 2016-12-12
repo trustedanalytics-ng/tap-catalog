@@ -32,7 +32,7 @@ type EtcdKVStore interface {
 	GetKeyIntoStruct(key string, result interface{}) error
 	Create(key string, value interface{}) error
 	CreateDir(key string) error
-	Set(key string, value, prevValue interface{}, prevIndex uint64) error
+	Set(key string, value interface{}) error
 	Update(key string, value, prevValue interface{}, prevIndex uint64) error
 	Delete(key string, prevIndex uint64) error
 	DeleteDir(key string) error
@@ -117,14 +117,10 @@ func (c *EtcdConnector) CreateDir(key string) error {
 	return c.set(key, "", options)
 }
 
-func (c *EtcdConnector) Set(key string, value, prevValue interface{}, prevIndex uint64) error {
+func (c *EtcdConnector) Set(key string, value interface{}) error {
 	logger.Debug("Setting value of key: ", key)
 
-	options := &client.SetOptions{PrevIndex: prevIndex}
-
-	if err := addPrevValueToOptions(prevValue, options); err != nil {
-		return err
-	}
+	options := &client.SetOptions{}
 
 	return c.set(key, value, options)
 }
@@ -132,7 +128,7 @@ func (c *EtcdConnector) Set(key string, value, prevValue interface{}, prevIndex 
 func (c *EtcdConnector) Update(key string, value, prevValue interface{}, prevIndex uint64) error {
 	logger.Debug("Updating value of key: ", key)
 
-	options := &client.SetOptions{PrevIndex: prevIndex, PrevExist: client.PrevNoExist}
+	options := &client.SetOptions{PrevIndex: prevIndex, PrevExist: client.PrevExist}
 
 	if err := addPrevValueToOptions(prevValue, options); err != nil {
 		return err

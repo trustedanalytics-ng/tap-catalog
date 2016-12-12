@@ -254,3 +254,27 @@ func TestIsRunnungApplication(t *testing.T) {
 		})
 	})
 }
+
+func TestIsAuditTrailKey(t *testing.T) {
+	testCases := []struct {
+		path   string
+		result bool
+	}{
+		{path: "", result: false},
+		{path: "/", result: false},
+		{path: "//", result: false},
+		{path: "/asfd/dsg", result: false},
+		{path: "/AuditTrail", result: false},
+		{path: "/AuditTrail/LastUpdate", result: true},
+		{path: "/org/AuditTrail/LastUpdate", result: true},
+	}
+
+	Convey("For set of test cases, IsAuditTrail should return proper response", t, func() {
+		for _, tc := range testCases {
+			Convey(fmt.Sprintf("For path %q result should be proper", tc.path), func() {
+				result := isAuditTrailKey(tc.path)
+				So(result, ShouldEqual, tc.result)
+			})
+		}
+	})
+}

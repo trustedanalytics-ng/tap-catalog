@@ -13,18 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package client
-
-import (
-	"testing"
-
-	. "github.com/smartystreets/goconvey/convey"
-)
-
-func TestNewTapCatalogApiWithBasicAuth(t *testing.T) {
-	Convey("Test DeleteOffering should return nil error", t, func() {
-		client, err := NewTapCatalogApiWithBasicAuth("address", "token", "tokenType")
-		So(err, ShouldBeNil)
-		So(client.Address, ShouldEqual, "address")
-	})
-}
