@@ -58,7 +58,7 @@ func NewEtcdKVStore(address string, port int) (EtcdKVStore, error) {
 
 func (c *EtcdConnector) Connect() error {
 	cfg := client.Config{
-		Endpoints: []string{fmt.Sprintf("http://%s:%d", c.address, c.port)},
+		Endpoints: []string{fmt.Sprintf("https://%s:%d", c.address, c.port)},
 		Transport: client.DefaultTransport,
 		// set timeout per request to fail fast when the target endpoint is unavailable
 		HeaderTimeoutPerRequest: time.Second,

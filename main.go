@@ -34,11 +34,6 @@ import (
 	mutils "github.com/trustedanalytics/tap-metrics/utils"
 )
 
-const (
-	etcdAddress = "localhost"
-	etcdPort    = 2379
-)
-
 var waitGroup = &sync.WaitGroup{}
 var logger, _ = commonLogger.InitLogger("main")
 
@@ -85,9 +80,13 @@ func setupContext(repository data.RepositoryApi) api.Context {
 }
 
 func setupRepository() data.RepositoryApi {
+	etcdAddress, etcdPort, err := util.GetConnectionHostAndPortFromEnvs("ETCD")
+	if err != nil {
+		logger.Fatalf("Cannot get ETCD address and port: %v", err)
+	}
 	etcdKVStore, err := etcd.NewEtcdKVStore(etcdAddress, etcdPort)
 	if err != nil {
-		logger.Fatalf("Cannnot connect to ETCD on %s:%d: %v", etcdAddress, etcdPort, err)
+		logger.Fatalf("Cannot connect to ETCD on %s:%d: %v", etcdAddress, etcdPort, err)
 	}
 	return data.NewRepositoryAPI(etcdKVStore, data.DataMapper{})
 }
