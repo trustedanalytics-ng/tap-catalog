@@ -75,6 +75,28 @@ func (_mr *_MockEtcdKVStoreRecorder) GetKeyIntoStruct(arg0, arg1 interface{}) *g
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetKeyIntoStruct", arg0, arg1)
 }
 
+func (_m *MockEtcdKVStore) GetKeyNodes(key string) (client.Node, error) {
+	ret := _m.ctrl.Call(_m, "GetKeyNodes", key)
+	ret0, _ := ret[0].(client.Node)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockEtcdKVStoreRecorder) GetKeyNodes(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetKeyNodes", arg0)
+}
+
+func (_m *MockEtcdKVStore) GetKeyNodesRecursively(key string) (client.Node, error) {
+	ret := _m.ctrl.Call(_m, "GetKeyNodesRecursively", key)
+	ret0, _ := ret[0].(client.Node)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockEtcdKVStoreRecorder) GetKeyNodesRecursively(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetKeyNodesRecursively", arg0)
+}
+
 func (_m *MockEtcdKVStore) Create(key string, value interface{}) error {
 	ret := _m.ctrl.Call(_m, "Create", key, value)
 	ret0, _ := ret[0].(error)
@@ -95,14 +117,24 @@ func (_mr *_MockEtcdKVStoreRecorder) CreateDir(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "CreateDir", arg0)
 }
 
-func (_m *MockEtcdKVStore) Set(key string, value interface{}) error {
-	ret := _m.ctrl.Call(_m, "Set", key, value)
+func (_m *MockEtcdKVStore) AddOrUpdate(key string, value interface{}) error {
+	ret := _m.ctrl.Call(_m, "AddOrUpdate", key, value)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-func (_mr *_MockEtcdKVStoreRecorder) Set(arg0, arg1 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Set", arg0, arg1)
+func (_mr *_MockEtcdKVStoreRecorder) AddOrUpdate(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "AddOrUpdate", arg0, arg1)
+}
+
+func (_m *MockEtcdKVStore) AddOrUpdateDir(key string) error {
+	ret := _m.ctrl.Call(_m, "AddOrUpdateDir", key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockEtcdKVStoreRecorder) AddOrUpdateDir(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "AddOrUpdateDir", arg0)
 }
 
 func (_m *MockEtcdKVStore) Update(key string, value interface{}, prevValue interface{}, prevIndex uint64) error {
@@ -133,38 +165,6 @@ func (_m *MockEtcdKVStore) DeleteDir(key string) error {
 
 func (_mr *_MockEtcdKVStoreRecorder) DeleteDir(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "DeleteDir", arg0)
-}
-
-func (_m *MockEtcdKVStore) AddOrUpdateDir(key string) error {
-	ret := _m.ctrl.Call(_m, "AddOrUpdateDir", key)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-func (_mr *_MockEtcdKVStoreRecorder) AddOrUpdateDir(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "AddOrUpdateDir", arg0)
-}
-
-func (_m *MockEtcdKVStore) GetKeyNodes(key string) (client.Node, error) {
-	ret := _m.ctrl.Call(_m, "GetKeyNodes", key)
-	ret0, _ := ret[0].(client.Node)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-func (_mr *_MockEtcdKVStoreRecorder) GetKeyNodes(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetKeyNodes", arg0)
-}
-
-func (_m *MockEtcdKVStore) GetKeyNodesRecursively(key string) (client.Node, error) {
-	ret := _m.ctrl.Call(_m, "GetKeyNodesRecursively", key)
-	ret0, _ := ret[0].(client.Node)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-func (_mr *_MockEtcdKVStoreRecorder) GetKeyNodesRecursively(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetKeyNodesRecursively", arg0)
 }
 
 func (_m *MockEtcdKVStore) GetLongPollWatcherForKey(key string, monitorSubNodes bool, afterIndex uint64) (client.Watcher, error) {

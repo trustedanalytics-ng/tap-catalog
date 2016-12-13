@@ -109,7 +109,7 @@ func (t *RepositoryConnector) UpdateData(updates []PatchSingleUpdate) error {
 		}
 
 		if isAuditTrailKey(update.Key) {
-			if err = t.etcdClient.Set(update.Key, update.Value); err != nil {
+			if err = t.etcdClient.AddOrUpdate(update.Key, update.Value); err != nil {
 				return fmt.Errorf("updateData in etcd for AuditTrail error: key %q: %v", update.Key, err)
 			}
 		} else {

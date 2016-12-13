@@ -135,7 +135,7 @@ func TestApplyPatchedValues(t *testing.T) {
 		etcdClientMock.EXPECT().GetKeyNodesRecursively(key3).Return(client.Node{ModifiedIndex: modifiedIndex}, nil)
 		etcdClientMock.EXPECT().Update(key3, data3, prevData3, modifiedIndex).Return(nil)
 		etcdClientMock.EXPECT().GetKeyNodesRecursively(auditTrailPath).Return(client.Node{ModifiedIndex: modifiedIndex}, nil)
-		etcdClientMock.EXPECT().Set(auditTrailPath, auditTrailData).Return(nil)
+		etcdClientMock.EXPECT().AddOrUpdate(auditTrailPath, auditTrailData).Return(nil)
 
 		etcdClientMock.EXPECT().DeleteDir(key3).Return(nil)
 

@@ -30,15 +30,15 @@ type EtcdKVStore interface {
 	Connect() error
 	GetKeyValue(key string) (string, error)
 	GetKeyIntoStruct(key string, result interface{}) error
+	GetKeyNodes(key string) (client.Node, error)
+	GetKeyNodesRecursively(key string) (client.Node, error)
 	Create(key string, value interface{}) error
 	CreateDir(key string) error
-	Set(key string, value interface{}) error
+	AddOrUpdate(key string, value interface{}) error
+	AddOrUpdateDir(key string) error
 	Update(key string, value, prevValue interface{}, prevIndex uint64) error
 	Delete(key string, prevIndex uint64) error
 	DeleteDir(key string) error
-	AddOrUpdateDir(key string) error
-	GetKeyNodes(key string) (client.Node, error)
-	GetKeyNodesRecursively(key string) (client.Node, error)
 	GetLongPollWatcherForKey(key string, monitorSubNodes bool, afterIndex uint64) (client.Watcher, error)
 }
 
@@ -81,10 +81,6 @@ func (c *EtcdConnector) GetKeyValue(key string) (string, error) {
 
 func (c *EtcdConnector) GetKeyIntoStruct(key string, result interface{}) error {
 	logger.Debug("Getting value of key:", key)
-	err := c.Connect()
-	if err != nil {
-		return fmt.Errorf("cannot connect with ETCD: %v", err)
-	}
 
 	resp, err := c.keysAPI.Get(context.Background(), key, nil)
 	if err != nil {
@@ -117,10 +113,10 @@ func (c *EtcdConnector) CreateDir(key string) error {
 	return c.set(key, "", options)
 }
 
-func (c *EtcdConnector) Set(key string, value interface{}) error {
+func (c *EtcdConnector) AddOrUpdate(key string, value interface{}) error {
 	logger.Debug("Setting value of key: ", key)
 
-	options := &client.SetOptions{}
+	options := &client.SetOptions{PrevExist: client.PrevIgnore}
 
 	return c.set(key, value, options)
 }
@@ -159,10 +155,6 @@ func (c *EtcdConnector) set(key string, value interface{}, options *client.SetOp
 		return err
 	}
 
-	if err = c.Connect(); err != nil {
-		return fmt.Errorf("cannot connect with ETCD: %v", err)
-	}
-
 	_, err = c.keysAPI.Set(context.Background(), key, string(valueByte), options)
 	if err != nil {
 		err = fmt.Errorf("setting key %s error: %v", key, err)
@@ -191,12 +183,7 @@ func (c *EtcdConnector) DeleteDir(key string) error {
 func (c *EtcdConnector) AddOrUpdateDir(key string) error {
 	logger.Debugf("Adding or updating directory of key %s", key)
 
-	if err := c.Connect(); err != nil {
-		return fmt.Errorf("cannot connect with ETCD: %v", err)
-	}
-
-	_, err := c.keysAPI.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevIgnore})
-	if err != nil {
+	if _, err := c.keysAPI.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevIgnore}); err != nil {
 		return fmt.Errorf("setting key value error: %v", err)
 	}
 	return nil
@@ -204,10 +191,6 @@ func (c *EtcdConnector) AddOrUpdateDir(key string) error {
 
 func (c *EtcdConnector) delete(key string, options *client.DeleteOptions) error {
 	logger.Debug("Deleting value of key:", key)
-
-	if err := c.Connect(); err != nil {
-		return fmt.Errorf("cannot connect with ETCD: %v", err)
-	}
 
 	_, err := c.keysAPI.Delete(context.Background(), key, options)
 	if err != nil {
@@ -220,10 +203,6 @@ func (c *EtcdConnector) getKeyNodes(key string, getOptions client.GetOptions) (c
 	logger.Debug("Getting nodes of key:", key)
 
 	resultNode := client.Node{}
-	if err := c.Connect(); err != nil {
-		return resultNode, fmt.Errorf("cannot connect with ETCD: %v", err)
-	}
-
 	resp, err := c.keysAPI.Get(context.Background(), key, &getOptions)
 	if err != nil {
 		return resultNode, fmt.Errorf("getting key %q error: %v", key, err)
@@ -234,10 +213,6 @@ func (c *EtcdConnector) getKeyNodes(key string, getOptions client.GetOptions) (c
 
 func (c *EtcdConnector) GetLongPollWatcherForKey(key string, monitorSubNodes bool, afterIndex uint64) (client.Watcher, error) {
 	logger.Debug("Long pulling for key:", key)
-
-	if err := c.Connect(); err != nil {
-		return nil, fmt.Errorf("cannot connect with ETCD: %v", err)
-	}
 
 	opts := client.WatcherOptions{
 		Recursive:  monitorSubNodes,

@@ -83,4 +83,5 @@ build_anywhere: prepare_dirs
 mock_update:
 	$(GOBIN)/mockgen -source=data/data_repository.go -package=data -destination=data/data_repository_mock.go
 	$(GOBIN)/mockgen -source=etcd/etcd_client.go -package=etcd -destination=etcd/etcd_client_mock.go
+	$(GOBIN)/mockgen -source=vendor/github.com/coreos/etcd/client/keys.go -package=client -destination=vendor/github.com/coreos/etcd/client/keys_mock.go
 	./add_license.sh
