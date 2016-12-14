@@ -75,6 +75,17 @@ func (_mr *_MockEtcdKVStoreRecorder) GetKeyIntoStruct(arg0, arg1 interface{}) *g
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetKeyIntoStruct", arg0, arg1)
 }
 
+func (_m *MockEtcdKVStore) GetKeyRawResponse(key string) (*client.Response, error) {
+	ret := _m.ctrl.Call(_m, "GetKeyRawResponse", key)
+	ret0, _ := ret[0].(*client.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockEtcdKVStoreRecorder) GetKeyRawResponse(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetKeyRawResponse", arg0)
+}
+
 func (_m *MockEtcdKVStore) GetKeyNodes(key string) (client.Node, error) {
 	ret := _m.ctrl.Call(_m, "GetKeyNodes", key)
 	ret0, _ := ret[0].(client.Node)

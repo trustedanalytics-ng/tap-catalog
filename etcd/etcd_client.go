@@ -30,6 +30,7 @@ type EtcdKVStore interface {
 	Connect() error
 	GetKeyValue(key string) (string, error)
 	GetKeyIntoStruct(key string, result interface{}) error
+	GetKeyRawResponse(key string) (*client.Response, error)
 	GetKeyNodes(key string) (client.Node, error)
 	GetKeyNodesRecursively(key string) (client.Node, error)
 	Create(key string, value interface{}) error
@@ -87,6 +88,11 @@ func (c *EtcdConnector) GetKeyIntoStruct(key string, result interface{}) error {
 		return fmt.Errorf("getting key %q error: %v", key, err)
 	}
 	return json.Unmarshal([]byte(resp.Node.Value), result)
+}
+
+func (c *EtcdConnector) GetKeyRawResponse(key string) (*client.Response, error) {
+	options := client.GetOptions{Recursive: false, Sort: true}
+	return c.keysAPI.Get(context.Background(), key, &options)
 }
 
 func (c *EtcdConnector) GetKeyNodes(key string) (client.Node, error) {

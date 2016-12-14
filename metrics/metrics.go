@@ -17,6 +17,7 @@ package metrics
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"time"
@@ -26,7 +27,6 @@ import (
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	mutils "github.com/trustedanalytics/tap-metrics/utils"
-	"fmt"
 )
 
 const (
@@ -71,7 +71,6 @@ func collectApplicationsCount(org string) (runningApplications float64, downAppl
 			}
 		}
 	}
-
 
 	return
 }

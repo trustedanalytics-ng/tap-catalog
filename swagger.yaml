@@ -18,6 +18,17 @@ paths:
           description: OK
         500:
           description: Unexpected error
+  /api/v1/latestIndex:
+    get:
+      responses:
+        200:
+          description: Latest etcd index value
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Index'
+        500:
+          description: unexpected error
   /api/v1/services:
     get:
       summary: Services List
@@ -1064,6 +1075,11 @@ definitions:
         type: string
       data:
         type: object
+  Index:
+    type: object
+    properties:
+      latest:
+        type: integer
   StateChange:
     type: object
     required:

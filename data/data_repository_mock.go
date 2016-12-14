@@ -104,6 +104,17 @@ func (_mr *_MockRepositoryApiRecorder) CreateDir(arg0 interface{}) *gomock.Call 
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "CreateDir", arg0)
 }
 
+func (_m *MockRepositoryApi) GetLatestIndex(key string) (uint64, error) {
+	ret := _m.ctrl.Call(_m, "GetLatestIndex", key)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockRepositoryApiRecorder) GetLatestIndex(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetLatestIndex", arg0)
+}
+
 func (_m *MockRepositoryApi) GetData(key string, model interface{}) (interface{}, error) {
 	ret := _m.ctrl.Call(_m, "GetData", key, model)
 	ret0, _ := ret[0].(interface{})

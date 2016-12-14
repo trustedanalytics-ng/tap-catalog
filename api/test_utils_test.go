@@ -35,6 +35,7 @@ const (
 	urlGetSpecificImageWatcher = urlPostImage + "/" + imageIDWildcard + "/nextState"
 	serviceIDWildcard          = ":serviceId"
 	urlPostServiceInstance     = urlPrefix + "/services/" + serviceIDWildcard + "/instances"
+	urlGetLatestIndex          = urlPrefix + "/latestIndex"
 )
 
 func prepareMocksAndRouter(t *testing.T) (router *web.Router, c Context, repositoryMock *data.MockRepositoryApi) {
@@ -50,6 +51,7 @@ func prepareMocksAndRouter(t *testing.T) (router *web.Router, c Context, reposit
 	router.Post(urlPostServiceInstance, c.AddServiceInstance)
 	router.Get(urlGetImageWatcher, c.MonitorImagesStates)
 	router.Get(urlGetSpecificImageWatcher, c.MonitorSpecificImageState)
+	router.Get(urlGetLatestIndex, c.LatestIndex)
 
 	return
 }

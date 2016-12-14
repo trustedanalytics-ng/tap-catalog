@@ -78,3 +78,13 @@ curl http://127.0.0.1/api/v1/services/instances --user admin:password
 ```
 curl -XDELETE "http://127.0.0.1/api/v1/instances/b1e18756-fc55-486b-5c7b-9a7b7ef30d10" --user admin:password
 ```
+
+#### Fetching instance state change using long poll
+```
+curl -XGET "http://127.0.0.1/api/v1/instances/b1e18756-fc55-486b-5c7b-9a7b7ef30d10/nextState?afterIndex=10" --user admin:password
+```
+
+#### Fetching latest ETCD index value
+```
+curl -XGET "http://127.0.0.1/api/v1/latestIndex" --user admin:password
+```

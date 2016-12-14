@@ -64,6 +64,32 @@ func TestGetKeyValue(t *testing.T) {
 	})
 }
 
+func TestGetKeyRawResponse(t *testing.T) {
+	etcdKVStore, keysAPI := prepareEtcdKVStoreAndKeysAPIMock(t)
+	Convey("Test GetKeyRawResponse provided with proper key", t, func() {
+		keysAPI.EXPECT().Get(gomock.Any(), key1, gomock.Any()).Return(createClientResponse(value1), nil)
+
+		result, err := etcdKVStore.GetKeyValue(key1)
+
+		Convey("err should be nil", func() {
+			So(err, ShouldBeNil)
+		})
+		Convey("result should be proper", func() {
+			So(result, ShouldEqual, value1)
+		})
+	})
+
+	Convey("Test GetKeyRawResponse in case etcd returns get error", t, func() {
+		keysAPI.EXPECT().Get(gomock.Any(), key1, gomock.Any()).Return(nil, fmt.Errorf(""))
+
+		_, err := etcdKVStore.GetKeyValue(key1)
+
+		Convey("err should not be nil", func() {
+			So(err, ShouldNotBeNil)
+		})
+	})
+}
+
 func TestGetKeyIntoStruct(t *testing.T) {
 	etcdKVStore, keysAPI := prepareEtcdKVStoreAndKeysAPIMock(t)
 	Convey("Test GetKeyIntoStruct provided with proper key", t, func() {

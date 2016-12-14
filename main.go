@@ -169,4 +169,6 @@ func route(router *web.Router, context *api.Context) {
 	router.Get("/templates/:templateId", context.GetTemplate)
 	router.Delete("/templates/:templateId", context.DeleteTemplate)
 	router.Patch("/templates/:templateId", context.PatchTemplate)
+
+	router.Get("/latestIndex", context.LatestIndex)
 }

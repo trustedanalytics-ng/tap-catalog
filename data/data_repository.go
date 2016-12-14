@@ -33,6 +33,7 @@ type RepositoryApi interface {
 	ApplyPatchedValues(patchedKeyValues PatchedKeyValues) error
 	DeleteData(key string) error
 	CreateDir(key string) error
+	GetLatestIndex(key string) (uint64, error)
 	GetData(key string, model interface{}) (interface{}, error)
 	GetListOfData(key string, model interface{}) ([]interface{}, error)
 	GetListOfDataFlat(key string, model interface{}) ([]interface{}, error)
@@ -143,6 +144,15 @@ func (t *RepositoryConnector) ApplyPatchedValues(patchedKeyValues PatchedKeyValu
 
 func (t *RepositoryConnector) DeleteData(key string) error {
 	return t.etcdClient.DeleteDir(key)
+}
+
+func (t *RepositoryConnector) GetLatestIndex(key string) (uint64, error) {
+	response, err := t.etcdClient.GetKeyRawResponse(key)
+	if err != nil {
+		logger.Errorf("Cannot get latest index, error: %v", err)
+		return 0, err
+	}
+	return response.Index, nil
 }
 
 func (t *RepositoryConnector) GetData(key string, model interface{}) (interface{}, error) {

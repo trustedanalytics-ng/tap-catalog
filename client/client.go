@@ -16,6 +16,7 @@
 package client
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/trustedanalytics/tap-catalog/models"
@@ -38,6 +39,7 @@ type TapCatalogApi interface {
 	GetServicePlan(serviceId, planId string) (models.ServicePlan, int, error)
 	GetService(serviceId string) (models.Service, int, error)
 	GetServices() ([]models.Service, int, error)
+	GetLatestIndex() (models.Index, int, error)
 	ListApplications() ([]models.Application, int, error)
 	ListApplicationsInstances() ([]models.Instance, int, error)
 	ListInstances() ([]models.Instance, int, error)
@@ -76,6 +78,7 @@ const (
 	applications = apiPrefix + apiVersion + "/applications"
 	templates    = apiPrefix + apiVersion + "/templates"
 	images       = apiPrefix + apiVersion + "/images"
+	latestIndex  = apiPrefix + apiVersion + "/latestIndex"
 	nextState    = "nextState"
 	healthz      = "healthz"
 	bindings     = "bindings"
@@ -98,4 +101,11 @@ func (c *TapCatalogApiConnector) getApiConnector(url string) brokerHttp.ApiConne
 		Client:    c.Client,
 		Url:       url,
 	}
+}
+
+func (c *TapCatalogApiConnector) GetLatestIndex() (models.Index, int, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s", c.Address, latestIndex))
+	result := &models.Index{}
+	status, err := brokerHttp.GetModel(connector, http.StatusOK, result)
+	return *result, status, err
 }
