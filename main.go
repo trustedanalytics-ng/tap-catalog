@@ -34,6 +34,8 @@ import (
 	mutils "github.com/trustedanalytics/tap-metrics/utils"
 )
 
+const EtcdComponentName = "ETCD_CATALOG"
+
 var waitGroup = &sync.WaitGroup{}
 var logger, _ = commonLogger.InitLogger("main")
 
@@ -80,7 +82,7 @@ func setupContext(repository data.RepositoryApi) api.Context {
 }
 
 func setupRepository() data.RepositoryApi {
-	etcdAddress, etcdPort, err := util.GetConnectionHostAndPortFromEnvs("ETCD")
+	etcdAddress, etcdPort, err := util.GetConnectionHostAndPortFromEnvs(EtcdComponentName)
 	if err != nil {
 		logger.Fatalf("Cannot get ETCD address and port: %v", err)
 	}
