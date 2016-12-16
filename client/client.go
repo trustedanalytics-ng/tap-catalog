@@ -87,7 +87,7 @@ const (
 	maxIdleConnectionPerHost = 100
 )
 
-func NewTapCatalogApiWithBasicAuth(address, username, password string) (*TapCatalogApiConnector, error) {
+func NewTapCatalogApiWithBasicAuth(address, username, password string) (TapCatalogApi, error) {
 	client, _, err := brokerHttp.GetHttpClientWithCustomConnectionLimit(maxIdleConnectionPerHost)
 	if err != nil {
 		return nil, err

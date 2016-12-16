@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gocraft/web"
 	"github.com/looplab/fsm"
@@ -28,8 +29,30 @@ import (
 	"github.com/trustedanalytics/tap-go-common/util"
 )
 
+func (c *Context) getServices() ([]models.Service, error) {
+	result := []models.Service{}
+	entities, err := c.repository.GetListOfData(c.getServiceKey(), models.Service{})
+	if err != nil {
+		err = fmt.Errorf("services retrieval failed: %v", err)
+		logger.Warning(err)
+		return []models.Service{}, err
+	}
+
+	for _, entity := range entities {
+		service, ok := entity.(models.Service)
+		if !ok {
+			err = fmt.Errorf("type assertion for service failed: object from database: %v", entity)
+			logger.Error(err)
+			return []models.Service{}, err
+		}
+		result = append(result, service)
+	}
+
+	return result, nil
+}
+
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(c.getServiceKey(), models.Service{})
+	result, err := c.getServices()
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
 }
 
@@ -151,8 +174,78 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
+
+	if status, err := c.assureOfferingCanBeDeleted(serviceId); err != nil {
+		err := fmt.Errorf("cannot remove offering %q: %v", serviceId, err)
+		util.GenericRespond(status, rw, err)
+		return
+	}
+
 	err := c.repository.DeleteData(c.buildServiceKey(serviceId))
 	util.WriteJsonOrError(rw, serviceId, getHttpStatusOrStatusError(http.StatusNoContent, err), err)
+}
+
+func (c *Context) assureOfferingCanBeDeleted(serviceID string) (int, error) {
+	instances, err := c.getInstances()
+	if err != nil {
+		return getHttpStatusOrStatusError(http.StatusInternalServerError, err), err
+	}
+
+	if instanceExists, message := serviceInstanceExists(serviceID, instances); instanceExists {
+		err := fmt.Errorf("offering instance exists: %v", message)
+		return http.StatusForbidden, err
+	}
+
+	services, err := c.getServices()
+	if err != nil {
+		return getHttpStatusOrStatusError(http.StatusInternalServerError, err), err
+	}
+
+	if isDependence, message := isOfferingDependence(serviceID, services); isDependence {
+		err := fmt.Errorf("dependent offerings detected: %v", message)
+		return http.StatusForbidden, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func serviceInstanceExists(serviceID string, instances []models.Instance) (bool, error) {
+	instanceNames := []string{}
+	for _, instance := range instances {
+		if instance.ClassId == serviceID {
+			instanceNames = append(instanceNames, instance.Name)
+		}
+	}
+
+	if len(instanceNames) > 0 {
+		joinedInstances := strings.Join(instanceNames, ", ")
+		return true, fmt.Errorf("service %q has existing instances: %s", serviceID, joinedInstances)
+	}
+
+	return false, nil
+}
+
+func isOfferingDependence(serviceID string, services []models.Service) (bool, error) {
+	dependentOfferingNames := []string{}
+	for _, service := range services {
+		if service.Id == serviceID {
+			continue
+		}
+		for _, plan := range service.Plans {
+			for _, dependency := range plan.Dependencies {
+				if dependency.ServiceId == serviceID {
+					dependentOfferingNames = append(dependentOfferingNames, service.Name)
+				}
+			}
+		}
+	}
+
+	if len(dependentOfferingNames) > 0 {
+		joinedServices := strings.Join(dependentOfferingNames, ", ")
+		return true, fmt.Errorf("service %q is a dependence for following offerings: %s", serviceID, joinedServices)
+	}
+
+	return false, nil
 }
 
 func (c *Context) getServiceKey() string {

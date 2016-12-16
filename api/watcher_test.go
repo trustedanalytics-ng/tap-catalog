@@ -27,9 +27,9 @@ import (
 )
 
 func TestLatestIndex(t *testing.T) {
-	router, _, repositoryMock := prepareMocksAndRouter(t)
-
 	Convey("Testing LatestIndex", t, func() {
+		mockCtrl, _, repositoryMock, catalogClient := prepareMocksAndClient(t)
+
 		Convey("When making request", func() {
 			latestIndex := uint64(5)
 			index := models.Index{Latest: latestIndex}
@@ -37,7 +37,6 @@ func TestLatestIndex(t *testing.T) {
 				repositoryMock.EXPECT().GetLatestIndex(gomock.Any()).Return(latestIndex, nil),
 			)
 
-			catalogClient := getCatalogClient(router, t)
 			responseIndex, status, err := catalogClient.GetLatestIndex()
 
 			Convey("response should be proper", func() {
@@ -51,6 +50,10 @@ func TestLatestIndex(t *testing.T) {
 					So(responseIndex, ShouldResemble, index)
 				})
 			})
+		})
+
+		Reset(func() {
+			mockCtrl.Finish()
 		})
 	})
 }

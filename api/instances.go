@@ -29,8 +29,30 @@ import (
 )
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(c.getInstanceKey(), models.Instance{})
+	result, err := c.getInstances()
 	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
+}
+
+func (c *Context) getInstances() ([]models.Instance, error) {
+	result := []models.Instance{}
+	entities, err := c.repository.GetListOfData(c.getInstanceKey(), models.Instance{})
+	if err != nil {
+		err = fmt.Errorf("instances retrieval failed: %v", err)
+		logger.Warning(err)
+		return []models.Instance{}, err
+	}
+
+	for _, entity := range entities {
+		instance, ok := entity.(models.Instance)
+		if !ok {
+			err = fmt.Errorf("type assertion for instance failed: object from database: %v", entity)
+			logger.Error(err)
+			return []models.Instance{}, err
+		}
+		result = append(result, instance)
+	}
+
+	return result, nil
 }
 
 func (c *Context) ServicesInstances(rw web.ResponseWriter, req *web.Request) {

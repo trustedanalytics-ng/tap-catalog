@@ -57,15 +57,6 @@ func (c *Context) initDB(org string) error {
 	return nil
 }
 
-func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {
-	util.WriteJson(rw, "I'm OK", http.StatusOK)
-}
-
-func (c *Context) Error(rw web.ResponseWriter, r *web.Request, err interface{}) {
-	logger.Errorf("Respond500: reason: %v", err)
-	rw.WriteHeader(http.StatusInternalServerError)
-}
-
 func (c *Context) enterState(e *fsm.Event) {
 	logger.Debugf("State changed from %s to %s", e.Src, e.Dst)
 }

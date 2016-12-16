@@ -34,9 +34,9 @@ const (
 )
 
 func TestAddServiceInstance(t *testing.T) {
-	router, context, repositoryMock := prepareMocksAndRouter(t)
-
 	Convey("Test Add Service Instance", t, func() {
+		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+
 		Convey("Adding instance ok, response status is 201", func() {
 			instance := getSampleInstance()
 			gomock.InOrder(
@@ -48,7 +48,6 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
 			)
 
-			catalogClient := getCatalogClient(router, t)
 			responseInstance, status, err := catalogClient.AddServiceInstance(serviceId, instance)
 
 			So(err, ShouldBeNil)
@@ -68,7 +67,6 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
 			)
 
-			catalogClient := getCatalogClient(router, t)
 			responseInstance, status, err := catalogClient.AddServiceBrokerInstance(serviceId, instance)
 
 			So(err, ShouldBeNil)
@@ -81,7 +79,6 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, errors.New("not exist")),
 			)
 
-			catalogClient := getCatalogClient(router, t)
 			_, status, err := catalogClient.AddServiceInstance(serviceId, models.Instance{})
 
 			So(err, ShouldNotBeNil)
@@ -97,7 +94,6 @@ func TestAddServiceInstance(t *testing.T) {
 			instance := getSampleInstance()
 			instance.Id = instanceId
 
-			catalogClient := getCatalogClient(router, t)
 			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
 
 			So(err, ShouldNotBeNil)
@@ -113,7 +109,6 @@ func TestAddServiceInstance(t *testing.T) {
 			instance := getSampleInstance()
 			instance.Metadata = []models.Metadata{}
 
-			catalogClient := getCatalogClient(router, t)
 			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
 
 			So(err, ShouldNotBeNil)
@@ -129,7 +124,6 @@ func TestAddServiceInstance(t *testing.T) {
 			instance := getSampleInstance()
 			instance.Name = "NOT_DNS"
 
-			catalogClient := getCatalogClient(router, t)
 			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
 
 			So(err, ShouldNotBeNil)
@@ -145,7 +139,6 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(true, nil),
 			)
 
-			catalogClient := getCatalogClient(router, t)
 			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
 
 			So(err, ShouldNotBeNil)
@@ -164,12 +157,15 @@ func TestAddServiceInstance(t *testing.T) {
 				repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
 			)
 
-			catalogClient := getCatalogClient(router, t)
 			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
 
 			So(err, ShouldNotBeNil)
 			So(status, ShouldEqual, http.StatusBadRequest)
 			So(err.Error(), ShouldContainSubstring, "Field: data has incorrect value:")
+		})
+
+		Reset(func() {
+			mockCtrl.Finish()
 		})
 	})
 }

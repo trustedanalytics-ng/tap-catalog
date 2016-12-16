@@ -106,6 +106,8 @@ paths:
       responses:
         204:
           description: Service deleted
+        403:
+          description: Service cannot be deleted
         500:
           description: unexpected error
   /api/v1/services/{serviceId}/plans:

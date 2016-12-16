@@ -18,6 +18,7 @@ package api
 
 import (
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gocraft/web"
@@ -38,29 +39,31 @@ const (
 	urlGetLatestIndex          = urlPrefix + "/latestIndex"
 )
 
-func prepareMocksAndRouter(t *testing.T) (router *web.Router, c Context, repositoryMock *data.MockRepositoryApi) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
+func prepareMocksAndClient(t *testing.T) (mockCtrl *gomock.Controller, c Context, repositoryMock *data.MockRepositoryApi, catalogClient client.TapCatalogApi) {
+	mockCtrl = gomock.NewController(t)
 	repositoryMock = data.NewMockRepositoryApi(mockCtrl)
 	c = Context{
 		repository: repositoryMock,
 	}
-	router = web.New(c)
 
-	router.Post(urlPostImage, c.AddImage)
-	router.Post(urlPostServiceInstance, c.AddServiceInstance)
-	router.Get(urlGetImageWatcher, c.MonitorImagesStates)
-	router.Get(urlGetSpecificImageWatcher, c.MonitorSpecificImageState)
-	router.Get(urlGetLatestIndex, c.LatestIndex)
+	router := SetupRouter(c)
+
+	catalogClient = getCatalogClient(router, t)
 
 	return
 }
 
-func getCatalogClient(router *web.Router, t *testing.T) *client.TapCatalogApiConnector {
+func getCatalogClient(router *web.Router, t *testing.T) client.TapCatalogApi {
+	const user = "user"
+	const password = "password"
+
+	os.Setenv("CATALOG_USER", user)
+	os.Setenv("CATALOG_PASS", password)
+
 	testServer := httptest.NewServer(router)
-	cBroker, err := client.NewTapCatalogApiWithBasicAuth(testServer.URL, "user", "password")
+	catalogClient, err := client.NewTapCatalogApiWithBasicAuth(testServer.URL, user, password)
 	if err != nil {
-		t.Fatal("Container broker error: ", err)
+		t.Fatal("Catalog client error: ", err)
 	}
-	return cBroker
+	return catalogClient
 }

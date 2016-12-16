@@ -27,9 +27,9 @@ import (
 )
 
 func TestAddImage(t *testing.T) {
-	router, _, repositoryMock := prepareMocksAndRouter(t)
-
 	Convey("Testing AddImage", t, func() {
+		mockCtrl, _, repositoryMock, catalogClient := prepareMocksAndClient(t)
+
 		Convey("When providing AddImage with proper Image", func() {
 			image := getSampleImage()
 			gomock.InOrder(
@@ -37,7 +37,6 @@ func TestAddImage(t *testing.T) {
 				repositoryMock.EXPECT().GetData(gomock.Any(), models.Image{}).Return(image, nil),
 			)
 
-			catalogClient := getCatalogClient(router, t)
 			responseImage, status, err := catalogClient.AddImage(image)
 
 			Convey("response should be proper", func() {
@@ -52,33 +51,42 @@ func TestAddImage(t *testing.T) {
 				})
 			})
 		})
+
+		Reset(func() {
+			mockCtrl.Finish()
+		})
 	})
 }
 
 func TestMonitorImagesState(t *testing.T) {
-	router, context, repositoryMock := prepareMocksAndRouter(t)
-
 	stateChange := models.StateChange{
 		Id: "test",
 	}
 
 	Convey("Testing MonitorImagesState", t, func() {
+		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+
 		Convey("Request correct, response status is 200", func() {
 			afterIndex := models.WatchFromNow
 			gomock.InOrder(
 				repositoryMock.EXPECT().MonitorObjectsStates(context.buildImagesKey(""), afterIndex).Return(stateChange, nil),
 			)
 
-			catalogClient := getCatalogClient(router, t)
 			response, status, err := catalogClient.WatchImages(afterIndex)
 
 			So(status, ShouldEqual, http.StatusOK)
 			So(err, ShouldBeNil)
 			So(response, ShouldResemble, stateChange)
 		})
+
+		Reset(func() {
+			mockCtrl.Finish()
+		})
 	})
 
 	Convey("Testing MonitorSpecificImageState", t, func() {
+		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+
 		Convey("Request correct, response status is 200", func() {
 			afterIndex := models.WatchFromNow
 			imageId := "test-image"
@@ -86,12 +94,15 @@ func TestMonitorImagesState(t *testing.T) {
 				repositoryMock.EXPECT().MonitorObjectsStates(context.buildImagesKey(imageId), afterIndex).Return(stateChange, nil),
 			)
 
-			catalogClient := getCatalogClient(router, t)
 			response, status, err := catalogClient.WatchImage(imageId, afterIndex)
 
 			So(status, ShouldEqual, http.StatusOK)
 			So(err, ShouldBeNil)
 			So(response, ShouldResemble, stateChange)
+		})
+
+		Reset(func() {
+			mockCtrl.Finish()
 		})
 	})
 }

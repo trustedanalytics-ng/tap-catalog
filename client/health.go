@@ -20,8 +20,9 @@ import (
 	"fmt"
 	"net/http"
 
-	brokerHttp "github.com/trustedanalytics/tap-go-common/http"
 	"strconv"
+
+	brokerHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *TapCatalogApiConnector) GetCatalogHealth() (int, error) {

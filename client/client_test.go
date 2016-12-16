@@ -25,6 +25,6 @@ func TestNewTapCatalogApiWithBasicAuth(t *testing.T) {
 	Convey("Test DeleteOffering should return nil error", t, func() {
 		client, err := NewTapCatalogApiWithBasicAuth("address", "token", "tokenType")
 		So(err, ShouldBeNil)
-		So(client.Address, ShouldEqual, "address")
+		So(client, ShouldNotBeNil)
 	})
 }
