@@ -73,6 +73,10 @@ paths:
           description: Service object
           schema:
               $ref: '#/definitions/Service'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     patch:
@@ -94,6 +98,10 @@ paths:
               $ref: '#/definitions/Service'
         400:
           description: provided wrong patch
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     delete:
@@ -108,6 +116,10 @@ paths:
           description: Service deleted
         403:
           description: Service cannot be deleted
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/services/{serviceId}/plans:
@@ -125,6 +137,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Plan'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     post:
@@ -146,6 +162,10 @@ paths:
               $ref: '#/definitions/Plan'
         400:
           description: bad body or provided id field
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/services/{serviceId}/plans/{planId}:
@@ -165,6 +185,10 @@ paths:
           description: Plan object
           schema:
               $ref: '#/definitions/Plan'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     patch:
@@ -190,6 +214,10 @@ paths:
               $ref: '#/definitions/Plan'
         400:
           description: bad patch defined
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     delete:
@@ -206,6 +234,10 @@ paths:
       responses:
         204:
           description: Plan deleted
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/services/instances:
@@ -235,6 +267,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Instance'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected response
     post:
@@ -256,6 +292,10 @@ paths:
               $ref: '#/definitions/Instance'
         400:
           description: bad body or id provided
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/services/{serviceId}/instances/{instanceId}:
@@ -275,6 +315,10 @@ paths:
           description: Instance object
           schema:
               $ref: '#/definitions/Instance'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     patch:
@@ -300,6 +344,10 @@ paths:
               $ref: '#/definitions/Instance'
         400:
           description: bad patch
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     delete:
@@ -316,6 +364,10 @@ paths:
       responses:
         204:
           description: Instance deleted
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/applications:
@@ -360,6 +412,10 @@ paths:
           description: Application object
           schema:
               $ref: '#/definitions/Application'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     patch:
@@ -381,6 +437,10 @@ paths:
               $ref: '#/definitions/Application'
         400:
           description: bad patch
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     delete:
@@ -393,6 +453,10 @@ paths:
       responses:
         204:
           description: Application deleted
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/applications/instances:
@@ -422,6 +486,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Instance'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     post:
@@ -443,6 +511,10 @@ paths:
               $ref: '#/definitions/Instance'
         400:
           description: bad body or id present
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/applications/{applicationId}/instances/{instanceId}:
@@ -462,6 +534,10 @@ paths:
           description: Instance object
           schema:
               $ref: '#/definitions/Instance'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     patch:
@@ -487,6 +563,10 @@ paths:
               $ref: '#/definitions/Instance'
         400:
           description: bad patch defined
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     delete:
@@ -503,6 +583,10 @@ paths:
       responses:
         204:
           description: Instance deleted
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/instances:
@@ -547,6 +631,10 @@ paths:
           description: Instance object
           schema:
             $ref: '#/definitions/Instance'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     patch:
@@ -568,6 +656,10 @@ paths:
             $ref: '#/definitions/Instance'
         400:
           description: bad patch
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     delete:
@@ -580,6 +672,10 @@ paths:
       responses:
         204:
           description: Instance deleted
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/images/{instanceId}/nextState:
@@ -601,6 +697,10 @@ paths:
             $ref: '#/definitions/StateChange'
         400:
           description: incorrect afterIndex provided
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/instances/{instanceId}/bindings:
@@ -618,6 +718,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Instance'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/templates:
@@ -662,6 +766,10 @@ paths:
           description: Template object
           schema:
             $ref: '#/definitions/Template'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     patch:
@@ -683,6 +791,10 @@ paths:
             $ref: '#/definitions/Template'
         400:
           description: wrong patch body
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     delete:
@@ -695,6 +807,10 @@ paths:
       responses:
         204:
           description: Template deleted
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/images:
@@ -756,6 +872,10 @@ paths:
           description: Image object
           schema:
               $ref: '#/definitions/Image'
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     patch:
@@ -777,6 +897,10 @@ paths:
               $ref: '#/definitions/Image'
         400:
           description: bad patch defined
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
     delete:
@@ -789,6 +913,10 @@ paths:
       responses:
         204:
           description: Image deleted
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
   /api/v1/images/{imageId}/nextState:
@@ -810,6 +938,10 @@ paths:
             $ref: '#/definitions/StateChange'
         400:
           description: incorrect afterIndex provided
+        404:
+          description: Not exist. Provided not existing id.
+          schema:
+            type: string
         500:
           description: unexpected error
 definitions:
