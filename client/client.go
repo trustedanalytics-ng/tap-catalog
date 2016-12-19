@@ -61,6 +61,7 @@ type TapCatalogApi interface {
 	WatchInstance(instanceId string, afterIndex uint64) (models.StateChange, int, error)
 	WatchImages(afterIndex uint64) (models.StateChange, int, error)
 	WatchImage(imageId string, afterIndex uint64) (models.StateChange, int, error)
+	CheckStateStability() (models.StateStability, int, error)
 }
 
 type TapCatalogApiConnector struct {
@@ -79,6 +80,7 @@ const (
 	templates    = apiPrefix + apiVersion + "/templates"
 	images       = apiPrefix + apiVersion + "/images"
 	latestIndex  = apiPrefix + apiVersion + "/latestIndex"
+	stableState  = apiPrefix + apiVersion + "/stable-state"
 	nextState    = "nextState"
 	healthz      = "healthz"
 	bindings     = "bindings"

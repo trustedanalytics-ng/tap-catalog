@@ -29,6 +29,15 @@ paths:
               $ref: '#/definitions/Index'
         500:
           description: unexpected error
+  /api/v1/stable-state:
+    get:
+      responses:
+        200:
+          description: response telling if all catalog instances are in stable state
+          schema:
+              $ref: "#/definitions/StateStability"
+        500:
+          description: unexpected error
   /api/v1/services:
     get:
       summary: Services List
@@ -678,7 +687,7 @@ paths:
             type: string
         500:
           description: unexpected error
-  /api/v1/images/{instanceId}/nextState:
+  /api/v1/instances/{instanceId}/nextState:
     get:
       summary: Long poll for next Instance state change
       parameters:
@@ -1239,4 +1248,11 @@ definitions:
         type: integer
         format: int64
       lastUpdateBy:
+        type: string
+  StateStability:
+    type: object
+    properties:
+      stable:
+        type: boolean
+      message:
         type: string

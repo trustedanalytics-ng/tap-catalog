@@ -99,6 +99,7 @@ func route(router *web.Router, context *Context) {
 	router.Patch("/templates/:templateId", context.PatchTemplate)
 
 	router.Get("/latestIndex", context.LatestIndex)
+	router.Get("/stable-state", context.CheckStateStability)
 }
 
 func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {

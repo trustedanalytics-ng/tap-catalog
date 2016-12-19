@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
+
 	"github.com/trustedanalytics/tap-catalog/models"
 )
 
