@@ -47,19 +47,40 @@ func TestMakePatch(t *testing.T) {
 	})
 }
 
-func TestMakePatchesForInstanceStateAndLastStateMetadata(t *testing.T) {
-	Convey("Test MakePatchesForInstanceStateAndLastStateMetadata", t, func() {
-		Convey("Should return one patch without set PrevValue", func() {
-			byteValue, err := json.Marshal(models.InstanceStateStarting)
+func TestMakePatchWithPreviousValue(t *testing.T) {
+	field := "metadata"
+	operation := models.OperationUpdate
+	value := models.Metadata{Id: "id", Value: "value"}
+	previousValue := models.Metadata{Id: "id", Value: "old"}
+
+	Convey("Test MakePatchWithPreviousValue", t, func() {
+		Convey("Should return proper response", func() {
+			byteValue, err := json.Marshal(value)
 			So(err, ShouldBeNil)
 
-			patches, err := MakePatchesForInstanceStateAndLastStateMetadata("", "", models.InstanceStateStarting)
+			bytePreviousValue, err := json.Marshal(previousValue)
 			So(err, ShouldBeNil)
-			So(len(patches), ShouldEqual, 1)
-			So(patches[0].Field, ShouldEqual, "State")
-			So(patches[0].Operation, ShouldEqual, models.OperationUpdate)
-			So(patches[0].Value, ShouldResemble, json.RawMessage(byteValue))
-			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(nil))
+
+			expectedPatch := models.Patch{
+				Operation: operation,
+				Field:     field,
+				Value:     byteValue,
+				PrevValue: bytePreviousValue,
+			}
+
+			patch, err := MakePatchWithPreviousValue(field, value, previousValue, operation)
+			So(err, ShouldBeNil)
+			So(patch, ShouldResemble, expectedPatch)
+		})
+	})
+}
+
+func TestMakePatchesForInstanceStateAndLastStateMetadata(t *testing.T) {
+	Convey("Test MakePatchesForInstanceStateAndLastStateMetadata", t, func() {
+		Convey("Should return error if PrevValue not set", func() {
+			_, err := MakePatchesForInstanceStateAndLastStateMetadata("", "", models.InstanceStateStarting)
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "currentState and stateToSet cannot be empty!")
 		})
 
 		Convey("Should return one patch with set PrevValue", func() {
@@ -85,23 +106,55 @@ func TestMakePatchesForInstanceStateAndLastStateMetadata(t *testing.T) {
 			byteStateValue, err := json.Marshal(state)
 			So(err, ShouldBeNil)
 
+			oldState := models.InstanceStateStopped
+			byteOldValue, err := json.Marshal(oldState)
+			So(err, ShouldBeNil)
+
 			message := "test-message"
 			byteMessageValue, err := json.Marshal(models.Metadata{
 				Id: models.LAST_STATE_CHANGE_REASON, Value: message,
 			})
 			So(err, ShouldBeNil)
 
-			patches, err := MakePatchesForInstanceStateAndLastStateMetadata(message, "", state)
+			patches, err := MakePatchesForInstanceStateAndLastStateMetadata(message, oldState, state)
 			So(err, ShouldBeNil)
 			So(len(patches), ShouldEqual, 2)
 			So(patches[0].Field, ShouldEqual, "State")
 			So(patches[0].Operation, ShouldEqual, models.OperationUpdate)
 			So(patches[0].Value, ShouldResemble, json.RawMessage(byteStateValue))
-			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(nil))
+			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(byteOldValue))
 			So(patches[1].Field, ShouldEqual, "Metadata")
 			So(patches[1].Operation, ShouldEqual, models.OperationAdd)
 			So(patches[1].Value, ShouldResemble, json.RawMessage(byteMessageValue))
 			So(patches[1].PrevValue, ShouldResemble, json.RawMessage(nil))
+		})
+	})
+}
+
+func TestMakePatchesForOfferingStateUpdate(t *testing.T) {
+	Convey("Test MakePatchesForOfferingStateUpdate", t, func() {
+		Convey("Should return error if PrevValue not set", func() {
+			_, err := MakePatchesForOfferingStateUpdate("", "")
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "currentState and stateToSet cannot be empty!")
+		})
+
+		Convey("Should return one patch with set PrevValue", func() {
+			newState := models.ServiceStateReady
+			byteNewValue, err := json.Marshal(newState)
+			So(err, ShouldBeNil)
+
+			oldState := models.ServiceStateDeploying
+			byteOldValue, err := json.Marshal(oldState)
+			So(err, ShouldBeNil)
+
+			patches, err := MakePatchesForOfferingStateUpdate(oldState, newState)
+			So(err, ShouldBeNil)
+			So(len(patches), ShouldEqual, 1)
+			So(patches[0].Field, ShouldEqual, "State")
+			So(patches[0].Operation, ShouldEqual, models.OperationUpdate)
+			So(patches[0].Value, ShouldResemble, json.RawMessage(byteNewValue))
+			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(byteOldValue))
 		})
 	})
 }

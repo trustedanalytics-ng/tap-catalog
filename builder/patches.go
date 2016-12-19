@@ -17,6 +17,7 @@ package builder
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/trustedanalytics/tap-catalog/models"
 	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
@@ -24,24 +25,12 @@ import (
 
 var logger, _ = commonLogger.InitLogger("builder")
 
-// currentState is optional, if passed then CAS will be used
 // message is optional, if pass then LAST_STATE_CHANGE_REASON key will be added/updated in Instance Metadata
 func MakePatchesForInstanceStateAndLastStateMetadata(message string, currentState, stateToSet models.InstanceState) ([]models.Patch, error) {
-	patches := []models.Patch{}
-
-	statePatch, err := MakePatch("State", stateToSet, models.OperationUpdate)
+	patches, err := makePatchesForStateUpdate(currentState.String(), stateToSet.String())
 	if err != nil {
 		return patches, err
 	}
-
-	if currentState != "" {
-		statePatch.PrevValue, err = json.Marshal(currentState)
-		if err != nil {
-			logger.Error("previousState marshal error:", err)
-			return patches, err
-		}
-	}
-	patches = append(patches, statePatch)
 
 	if message != "" {
 		lastStateChangeReasonMetadata := models.Metadata{
@@ -56,17 +45,53 @@ func MakePatchesForInstanceStateAndLastStateMetadata(message string, currentStat
 	return patches, nil
 }
 
-func MakePatch(field string, valueToUpdate interface{}, operation models.PatchOperation) (models.Patch, error) {
-	instanceBindingByte, err := json.Marshal(valueToUpdate)
+func MakePatchesForOfferingStateUpdate(currentState, stateToSet models.ServiceState) ([]models.Patch, error) {
+	return makePatchesForStateUpdate(string(currentState), string(stateToSet))
+}
+
+func makePatchesForStateUpdate(currentState, stateToSet string) ([]models.Patch, error) {
+	if currentState == "" || stateToSet == "" {
+		return nil, errors.New("currentState and stateToSet cannot be empty!")
+	}
+
+	patches := []models.Patch{}
+
+	statePatch, err := MakePatchWithPreviousValue("State", stateToSet, currentState, models.OperationUpdate)
 	if err != nil {
-		logger.Errorf("marshal filed %s error: %v", field, err)
+		return patches, err
+	}
+	patches = append(patches, statePatch)
+	return patches, nil
+}
+
+func MakePatch(field string, newValue interface{}, operation models.PatchOperation) (models.Patch, error) {
+	newValueByte, err := json.Marshal(newValue)
+	if err != nil {
+		logger.Errorf("marshal field new value %s error: %v", field, err)
 		return models.Patch{}, err
 	}
 
 	patch := models.Patch{
 		Operation: operation,
 		Field:     field,
-		Value:     instanceBindingByte,
+		Value:     newValueByte,
 	}
+	return patch, nil
+}
+
+func MakePatchWithPreviousValue(field string, valueToUpdate interface{}, currentValue interface{}, operation models.PatchOperation) (models.Patch, error) {
+	patch, err := MakePatch(field, valueToUpdate, operation)
+	if err != nil {
+		return patch, err
+	}
+
+	currentValueByte, err := json.Marshal(currentValue)
+	if err != nil {
+		logger.Errorf("marshal field current value %s error: %v", field, err)
+		return models.Patch{}, err
+	}
+
+	patch.PrevValue = currentValueByte
+
 	return patch, nil
 }
