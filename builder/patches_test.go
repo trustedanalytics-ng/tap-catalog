@@ -36,8 +36,8 @@ func TestMakePatch(t *testing.T) {
 
 			expectedPatch := models.Patch{
 				Operation: operation,
-				Field:     field,
-				Value:     byteValue,
+				Field:     &field,
+				Value:     (*json.RawMessage)(&byteValue),
 			}
 
 			patch, err := MakePatch(field, value, operation)
@@ -63,8 +63,8 @@ func TestMakePatchWithPreviousValue(t *testing.T) {
 
 			expectedPatch := models.Patch{
 				Operation: operation,
-				Field:     field,
-				Value:     byteValue,
+				Field:     &field,
+				Value:     (*json.RawMessage)(&byteValue),
 				PrevValue: bytePreviousValue,
 			}
 
@@ -95,9 +95,9 @@ func TestMakePatchesForInstanceStateAndLastStateMetadata(t *testing.T) {
 			patches, err := MakePatchesForInstanceStateAndLastStateMetadata("", oldState, newState)
 			So(err, ShouldBeNil)
 			So(len(patches), ShouldEqual, 1)
-			So(patches[0].Field, ShouldEqual, "State")
+			So(*patches[0].Field, ShouldEqual, "State")
 			So(patches[0].Operation, ShouldEqual, models.OperationUpdate)
-			So(patches[0].Value, ShouldResemble, json.RawMessage(byteNewValue))
+			So(*patches[0].Value, ShouldResemble, json.RawMessage(byteNewValue))
 			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(byteOldValue))
 		})
 
@@ -119,13 +119,15 @@ func TestMakePatchesForInstanceStateAndLastStateMetadata(t *testing.T) {
 			patches, err := MakePatchesForInstanceStateAndLastStateMetadata(message, oldState, state)
 			So(err, ShouldBeNil)
 			So(len(patches), ShouldEqual, 2)
-			So(patches[0].Field, ShouldEqual, "State")
+			So(*patches[0].Field, ShouldEqual, "State")
 			So(patches[0].Operation, ShouldEqual, models.OperationUpdate)
-			So(patches[0].Value, ShouldResemble, json.RawMessage(byteStateValue))
+
+			So(*patches[0].Value, ShouldResemble, json.RawMessage(byteStateValue))
 			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(byteOldValue))
-			So(patches[1].Field, ShouldEqual, "Metadata")
+			So(*patches[1].Field, ShouldEqual, "Metadata")
+
 			So(patches[1].Operation, ShouldEqual, models.OperationAdd)
-			So(patches[1].Value, ShouldResemble, json.RawMessage(byteMessageValue))
+			So(*patches[1].Value, ShouldResemble, json.RawMessage(byteMessageValue))
 			So(patches[1].PrevValue, ShouldResemble, json.RawMessage(nil))
 		})
 	})
@@ -151,9 +153,9 @@ func TestMakePatchesForOfferingStateUpdate(t *testing.T) {
 			patches, err := MakePatchesForOfferingStateUpdate(oldState, newState)
 			So(err, ShouldBeNil)
 			So(len(patches), ShouldEqual, 1)
-			So(patches[0].Field, ShouldEqual, "State")
+			So(*patches[0].Field, ShouldEqual, "State")
 			So(patches[0].Operation, ShouldEqual, models.OperationUpdate)
-			So(patches[0].Value, ShouldResemble, json.RawMessage(byteNewValue))
+			So(*patches[0].Value, ShouldResemble, json.RawMessage(byteNewValue))
 			So(patches[0].PrevValue, ShouldResemble, json.RawMessage(byteOldValue))
 		})
 	})

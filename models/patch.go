@@ -17,6 +17,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 )
 
@@ -35,11 +36,20 @@ const (
 )
 
 type Patch struct {
-	Operation PatchOperation  `json:"op"`
-	Field     string          `json:"field"`
-	Value     json.RawMessage `json:"value"`
-	PrevValue json.RawMessage `json:"prevValue,omitempty"`
-	Username  string          `json:"username"`
+	Operation PatchOperation   `json:"op"`
+	Field     *string          `json:"field"`
+	Value     *json.RawMessage `json:"value"`
+	PrevValue json.RawMessage  `json:"prevValue,omitempty"`
+	Username  string           `json:"username"`
+}
+
+func ValidatePatchStructure(patch Patch) error {
+	if patch.Value == nil {
+		return errors.New("field value is empty!")
+	} else if patch.Field == nil || *patch.Field == "" {
+		return errors.New("field field is empty!")
+	}
+	return nil
 }
 
 const (

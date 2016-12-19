@@ -30,14 +30,14 @@ import (
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getImagesKey(), models.Image{})
-	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 
 	result, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
-	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
@@ -54,25 +54,25 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 
 	err = c.repository.CreateData(imageKeyStore)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	image, err := c.repository.GetData(c.buildImagesKey(reqImage.Id), models.Image{})
-	util.WriteJsonOrError(rw, image, getHttpStatusOrStatusError(http.StatusCreated, err), err)
+	util.WriteJsonOrError(rw, image, http.StatusCreated, err)
 }
 
 func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	imageInt, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
-		handleGetDataError(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	image, ok := imageInt.(models.Image)
 	if !ok {
-		util.Respond500(rw, errors.New("Image retrieved is in wrong format"))
+		util.HandleError(rw, errors.New("Image retrieved is in wrong format"))
 		return
 	}
 
@@ -83,32 +83,33 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = c.allowStateChange(patches, c.getImagesFSM(image.State))
-	if err != nil {
-		util.Respond500(rw, err)
+	fsmFunc := func() *fsm.FSM {
+		return c.getImagesFSM(image.State)
+	}
+	if err = c.handleFsm(rw, req, patches, fsmFunc); err != nil {
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildImagesKey(imageId), models.Image{}, patches)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	imageInt, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
-	util.WriteJsonOrError(rw, imageInt, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, imageInt, http.StatusOK, err)
 }
 
 func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	err := c.repository.DeleteData(c.buildImagesKey(imageId))
-	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
+	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
 }
 
 func (c *Context) MonitorImagesStates(rw web.ResponseWriter, req *web.Request) {

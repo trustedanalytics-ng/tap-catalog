@@ -126,11 +126,16 @@ func RespondUnauthorized(rw web.ResponseWriter) {
 	rw.Write([]byte("401 Unauthorized\n"))
 }
 
+//In order to get rid of reapeting 'return' statement all cases has to be handled in if{}else{}
 func HandleError(rw web.ResponseWriter, err error) {
+	logger.Debug("handling error", err)
 	if commonHttp.IsNotFoundError(err) {
 		Respond404(rw, err)
-	} else if commonHttp.IsAlreadyExistsError(err) {
+	} else if commonHttp.IsAlreadyExistsError(err) || commonHttp.IsConflictError(err)  {
 		Respond409(rw, err)
+	} else if commonHttp.IsBadRequestError(err){
+		Respond400(rw, err)
+	} else {
+		Respond500(rw, err)
 	}
-	Respond500(rw, err)
 }

@@ -29,13 +29,13 @@ import (
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getTemplateKey(), models.Template{})
-	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 	result, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
-	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
@@ -67,27 +67,27 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	template, err := c.repository.GetData(c.buildTemplateKey(reqTemplate.Id), models.Template{})
-	util.WriteJsonOrError(rw, template, getHttpStatusOrStatusError(http.StatusCreated, err), err)
+	util.WriteJsonOrError(rw, template, http.StatusCreated, err)
 }
 
 func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 
 	err := c.repository.DeleteData(c.buildTemplateKey(templateId))
-	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
+	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
 }
 
 func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 	templateInt, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
-		handleGetDataError(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	template, ok := templateInt.(models.Template)
 	if !ok {
-		util.Respond500(rw, errors.New("template retrieved is in wrong format"))
+		util.HandleError(rw, errors.New("template retrieved is in wrong format"))
 		return
 	}
 
@@ -98,26 +98,27 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = c.allowStateChange(patches, c.getTemplatesFSM(template.State))
-	if err != nil {
-		util.Respond500(rw, err)
+	fsmFunc := func() *fsm.FSM {
+		return c.getTemplatesFSM(template.State)
+	}
+	if err = c.handleFsm(rw, req, patches, fsmFunc); err != nil {
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildTemplateKey(templateId), models.Template{}, patches)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	templateInt, err = c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
-	util.WriteJsonOrError(rw, templateInt, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, templateInt, http.StatusOK, err)
 }
 
 func (c *Context) getTemplateKey() string {

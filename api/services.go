@@ -53,7 +53,7 @@ func (c *Context) getServices() ([]models.Service, error) {
 
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.getServices()
-	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) getService(id string) (models.Service, error) {
@@ -78,7 +78,7 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
 	service, err := c.getService(serviceId)
-	util.WriteJsonOrError(rw, service, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, service, http.StatusOK, err)
 }
 
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
@@ -126,20 +126,20 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	service, err := c.repository.GetData(c.buildServiceKey(reqService.Id), models.Service{})
-	util.WriteJsonOrError(rw, service, getHttpStatusOrStatusError(http.StatusCreated, err), err)
+	util.WriteJsonOrError(rw, service, http.StatusCreated, err)
 }
 
 func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	serviceInt, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		handleGetDataError(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	service, ok := serviceInt.(models.Service)
 	if !ok {
-		util.Respond500(rw, errors.New("Service retrieved is in wrong format"))
+		util.HandleError(rw, errors.New("Service retrieved is in wrong format"))
 		return
 	}
 
@@ -150,26 +150,27 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = c.allowStateChange(patches, c.getServicesFSM(service.State))
-	if err != nil {
-		util.Respond500(rw, err)
+	fsmFunc := func() *fsm.FSM {
+		return c.getServicesFSM(service.State)
+	}
+	if err = c.handleFsm(rw, req, patches, fsmFunc); err != nil {
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildServiceKey(serviceId), models.Service{}, patches)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	serviceInt, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
-	util.WriteJsonOrError(rw, serviceInt, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, serviceInt, http.StatusOK, err)
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
@@ -182,7 +183,7 @@ func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	err := c.repository.DeleteData(c.buildServiceKey(serviceId))
-	util.WriteJsonOrError(rw, serviceId, getHttpStatusOrStatusError(http.StatusNoContent, err), err)
+	util.WriteJsonOrError(rw, serviceId, http.StatusNoContent, err)
 }
 
 func (c *Context) assureOfferingCanBeDeleted(serviceID string) (int, error) {

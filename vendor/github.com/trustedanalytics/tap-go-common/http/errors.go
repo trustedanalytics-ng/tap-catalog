@@ -26,7 +26,11 @@ const (
 	NotFound      string = "not found"
 	AlreadyExists string = "already exists"
 	NotFoundEtcd  string = "cannnot get key"
-	ConflictEtcd  string = "Compare failed"
+	ConflictCompareEtcd  string = "Compare failed"
+	ConflictError string = "conflict"
+	EmptyField    string = "is empty!"
+	CannotUnmarshal string = "cannot unmarshal"
+	CanNotBeChanged string = "can not be changed!"
 )
 
 func translateHttpErrorStatus(status int) int {
@@ -37,12 +41,20 @@ func translateHttpErrorStatus(status int) int {
 	}
 }
 
+func IsBadRequestError(err error) bool {
+	return isErrorTypeStringInErrorMessage(EmptyField, err) ||
+		isErrorTypeStringInErrorMessage(ConflictCompareEtcd, err) ||
+		isErrorTypeStringInErrorMessage(CannotUnmarshal, err) ||
+		isErrorTypeStringInErrorMessage(CanNotBeChanged, err)
+
+}
+
 func IsNotFoundError(err error) bool {
 	return isErrorTypeStringInErrorMessage(NotFound, err) || isErrorTypeStringInErrorMessage(NotFoundEtcd, err)
 }
 
 func IsConflictError(err error) bool {
-	return isErrorTypeStringInErrorMessage(ConflictEtcd, err)
+	return isErrorTypeStringInErrorMessage(ConflictError, err)
 }
 
 func IsAlreadyExistsError(err error) bool {
@@ -78,10 +90,10 @@ func GetHttpStatusOrStatusError(status int, err error) int {
 	if err != nil {
 		if IsNotFoundError(err) {
 			return http.StatusNotFound
-		} else if IsAlreadyExistsError(err) {
+		} else if IsAlreadyExistsError(err) || IsConflictError(err) {
 			return http.StatusConflict
-		} else if IsConflictError(err){
-			return http.StatusConflict
+		} else if IsBadRequestError(err){
+			return http.StatusBadRequest
 		}
 		return http.StatusInternalServerError
 	}

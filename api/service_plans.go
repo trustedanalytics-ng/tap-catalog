@@ -29,7 +29,7 @@ func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	services, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		handleGetDataError(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 	plans := []models.ServicePlan{}
@@ -46,7 +46,7 @@ func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 	key := c.mapper.ToKey(c.getServicePlansDir(serviceId), planId)
 
 	result, err := c.repository.GetData(key, models.ServicePlan{})
-	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
@@ -54,7 +54,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 
 	_, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		handleGetDataError(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	plan, err := c.repository.GetData(c.getServicedPlanIDKey(serviceId, reqPlan.Id), models.ServicePlan{})
-	util.WriteJsonOrError(rw, plan, getHttpStatusOrStatusError(http.StatusCreated, err), err)
+	util.WriteJsonOrError(rw, plan, http.StatusCreated, err)
 }
 
 func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
@@ -93,7 +93,7 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 
 	plan, err := c.repository.GetData(c.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{})
 	if err != nil {
-		handleGetDataError(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
@@ -117,14 +117,14 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	plan, err = c.repository.GetData(c.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{})
-	util.WriteJsonOrError(rw, plan, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, plan, http.StatusOK, err)
 }
 
 func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
 	err := c.repository.DeleteData(c.getServicedPlanIDKey(serviceId, planId))
-	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
+	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
 }
 
 func (c *Context) getServicedPlanIDKey(serviceId, planId string) string {

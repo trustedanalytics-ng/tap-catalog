@@ -25,6 +25,7 @@ import (
 
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
 	"github.com/trustedanalytics/tap-go-common/util"
 )
@@ -61,12 +62,42 @@ func (c *Context) enterState(e *fsm.Event) {
 	logger.Debugf("State changed from %s to %s", e.Src, e.Dst)
 }
 
-func (c *Context) allowStateChange(patches []models.Patch, stateMachine *fsm.FSM) error {
+func (c *Context) getStateChange(patches []models.Patch) (string, error) {
 	for _, patch := range patches {
-		if strings.EqualFold(patch.Field, "state") {
-			value := c.removeQuotes(string(patch.Value))
-			return stateMachine.Event(value)
+		if err := models.ValidatePatchStructure(patch); err != nil {
+			return "", err
+		} else if strings.EqualFold(*patch.Field, "state") {
+			value := c.removeQuotes(string(*patch.Value))
+			return value, nil
 		}
+	}
+	return "", nil
+}
+
+func (c *Context) allowStateChange(newState string, stateMachine *fsm.FSM) error {
+	if newState != "" {
+		return stateMachine.Event(newState)
+	}
+	return nil
+}
+
+type FsmFunc func() *fsm.FSM
+
+func (c *Context) handleFsm(rw web.ResponseWriter, req *web.Request, patches []models.Patch, fsmFunc FsmFunc) error {
+	newState, err := c.getStateChange(patches)
+	if err != nil {
+		util.Respond400(rw, err)
+		return err
+	}
+	fsm := fsmFunc()
+	err = c.allowStateChange(newState, fsm)
+	if err != nil {
+		if fsm.Current() == newState {
+			util.Respond409(rw, err)
+		} else {
+			util.Respond400(rw, err)
+		}
+		return err
 	}
 	return nil
 }
@@ -99,20 +130,12 @@ func (c *Context) reserveID(path string) (string, error) {
 
 func getHttpStatusOrStatusError(status int, err error) int {
 	if err != nil {
-		if strings.Contains(err.Error(), keyNotFoundMessage) {
+		if commonHttp.IsNotFoundError(err) {
 			return http.StatusNotFound
+		} else if commonHttp.IsAlreadyExistsError(err) {
+			return http.StatusConflict
 		}
 		return http.StatusInternalServerError
 	}
 	return status
-}
-
-func handleGetDataError(rw web.ResponseWriter, err error) {
-	if err != nil {
-		if strings.Contains(err.Error(), keyNotFoundMessage) {
-			util.Respond404(rw, err)
-		} else {
-			util.Respond500(rw, err)
-		}
-	}
 }

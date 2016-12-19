@@ -40,7 +40,7 @@ func (c *Context) monitorSpecificState(rw web.ResponseWriter, req *web.Request, 
 
 	result, err := c.repository.MonitorObjectsStates(key, afterIndex)
 	if err != nil {
-		handleGetDataError(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 	util.WriteJson(rw, result, http.StatusOK)

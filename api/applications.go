@@ -26,11 +26,9 @@ import (
 	"github.com/trustedanalytics/tap-go-common/util"
 )
 
-const keyNotFoundMessage = "Key not found"
-
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getApplicationKey(), models.Application{})
-	util.WriteJsonOrError(rw, result, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) getApplication(id string) (models.Application, error) {
@@ -55,7 +53,7 @@ func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 
 	app, err := c.getApplication(applicationId)
-	util.WriteJsonOrError(rw, app, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, app, http.StatusOK, err)
 }
 
 func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
@@ -102,14 +100,14 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 	}
 
 	application, err := c.repository.GetData(c.buildApplicationKey(reqApplication.Id), models.Application{})
-	util.WriteJsonOrError(rw, application, getHttpStatusOrStatusError(http.StatusCreated, err), err)
+	util.WriteJsonOrError(rw, application, http.StatusCreated, err)
 }
 
 func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 	application, err := c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
-		handleGetDataError(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
@@ -122,24 +120,24 @@ func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildApplicationKey(applicationId), models.Application{}, patches)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.Respond500(rw, err)
+		util.HandleError(rw, err)
 		return
 	}
 
 	application, err = c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
-	util.WriteJsonOrError(rw, application, getHttpStatusOrStatusError(http.StatusOK, err), err)
+	util.WriteJsonOrError(rw, application, http.StatusOK, err)
 }
 
 func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 	err := c.repository.DeleteData(c.buildApplicationKey(applicationId))
-	util.WriteJsonOrError(rw, "", getHttpStatusOrStatusError(http.StatusNoContent, err), err)
+	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
 }
 
 func (c *Context) getApplicationKey() string {

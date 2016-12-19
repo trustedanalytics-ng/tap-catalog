@@ -117,12 +117,14 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 	username := ""
 	for _, patch := range patches {
 		username = patch.Username
-		patchFieldName := strings.Title(patch.Field)
 
-		if patch.Field == "" {
-			return result, errors.New("field value is empty!")
-		} else if originalField := reflect.ValueOf(inputStruct).FieldByName(patchFieldName); originalField.IsValid() {
-			newValue, err := unmarshalJSON(patch.Value, patchFieldName, originalField.Type())
+		if err := models.ValidatePatchStructure(patch); err != nil {
+			return result, err
+		}
+
+		patchFieldName := strings.Title(*patch.Field)
+		if originalField := reflect.ValueOf(inputStruct).FieldByName(patchFieldName); originalField.IsValid() {
+			newValue, err := unmarshalJSON(*patch.Value, patchFieldName, originalField.Type())
 			if err != nil {
 				return result, err
 			}
@@ -186,11 +188,13 @@ func validatePatch(patchFieldName string, patch models.Patch, isUpdateOp bool) e
 	if isUpdateOp {
 		if patchFieldName == idFieldName || patchFieldName == nameFieldName {
 			return errors.New("ID and Name fields can not be changed!")
+		} else if patchFieldName == classIdFieldName {
+			return errors.New("ClassID fields can not be changed!")
 		}
 	}
 	if patchFieldName == bindingsFieldName {
 		instanceBinding := models.InstanceBindings{}
-		if err := json.Unmarshal([]byte(patch.Value), &instanceBinding); err != nil {
+		if err := json.Unmarshal([]byte(*patch.Value), &instanceBinding); err != nil {
 			return err
 		}
 		for k, _ := range instanceBinding.Data {

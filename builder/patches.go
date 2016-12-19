@@ -73,8 +73,9 @@ func MakePatch(field string, newValue interface{}, operation models.PatchOperati
 
 	patch := models.Patch{
 		Operation: operation,
-		Field:     field,
-		Value:     newValueByte,
+		Field:     &field,
+		Value:     (*json.RawMessage)(&newValueByte),
+
 	}
 	return patch, nil
 }
