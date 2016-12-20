@@ -31,6 +31,7 @@ import (
 const (
 	instanceId string = "test-instance-id"
 	serviceId  string = "test-service-id"
+	planId     string = "test-plan-id"
 )
 
 func TestAddServiceInstance(t *testing.T) {

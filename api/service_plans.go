@@ -16,6 +16,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gocraft/web"
@@ -123,8 +124,35 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	planId := req.PathParams["planId"]
-	err := c.repository.DeleteData(c.getServicedPlanIDKey(serviceId, planId))
+
+	if _, err := c.repository.GetData(c.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{}); err != nil {
+		util.HandleError(rw, err)
+		return
+	}
+
+	instances, err := c.getFilteredInstances(models.InstanceTypeService, serviceId)
+	if err != nil {
+		util.HandleError(rw, err)
+		return
+	}
+
+	if err = checkIfPlanIsNotUsedByInstance(planId, instances); err != nil {
+		util.Respond400(rw, err)
+		return
+	}
+
+	err = c.repository.DeleteData(c.getServicedPlanIDKey(serviceId, planId))
 	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
+}
+
+func checkIfPlanIsNotUsedByInstance(planId string, instances []models.Instance) error {
+	for _, instance := range instances {
+		instancePlanId := models.GetValueFromMetadata(instance.Metadata, models.OFFERING_PLAN_ID)
+		if planId == instancePlanId {
+			return fmt.Errorf("plan with id: %s can not be deleted - is in use by instance: %s, instanceId: %s", planId, instance.Name, instance.Id)
+		}
+	}
+	return nil
 }
 
 func (c *Context) getServicedPlanIDKey(serviceId, planId string) string {

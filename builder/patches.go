@@ -75,7 +75,6 @@ func MakePatch(field string, newValue interface{}, operation models.PatchOperati
 		Operation: operation,
 		Field:     &field,
 		Value:     (*json.RawMessage)(&newValueByte),
-
 	}
 	return patch, nil
 }

@@ -223,8 +223,8 @@ func getSampleServicesWithDependency() []models.Service {
 
 func getSampleInstances() []models.Instance {
 	return []models.Instance{
-		{Id: sampleID1, Name: sampleName1},
-		{Id: sampleID2, Name: sampleName2},
+		{Id: sampleID1, Name: sampleName1, Type: models.InstanceTypeService, ClassId: serviceId},
+		{Id: sampleID2, Name: sampleName2, Type: models.InstanceTypeService, ClassId: serviceId},
 	}
 }
 

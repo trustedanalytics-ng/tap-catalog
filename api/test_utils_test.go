@@ -28,17 +28,6 @@ import (
 	"github.com/trustedanalytics/tap-catalog/data"
 )
 
-const (
-	urlPrefix                  = "/api/v1"
-	urlPostImage               = urlPrefix + "/images"
-	urlGetImageWatcher         = urlPostImage + "/nextState"
-	imageIDWildcard            = ":imageId"
-	urlGetSpecificImageWatcher = urlPostImage + "/" + imageIDWildcard + "/nextState"
-	serviceIDWildcard          = ":serviceId"
-	urlPostServiceInstance     = urlPrefix + "/services/" + serviceIDWildcard + "/instances"
-	urlGetLatestIndex          = urlPrefix + "/latestIndex"
-)
-
 func prepareMocksAndClient(t *testing.T) (mockCtrl *gomock.Controller, c Context, repositoryMock *data.MockRepositoryApi, catalogClient client.TapCatalogApi) {
 	mockCtrl = gomock.NewController(t)
 	repositoryMock = data.NewMockRepositoryApi(mockCtrl)
@@ -47,9 +36,7 @@ func prepareMocksAndClient(t *testing.T) (mockCtrl *gomock.Controller, c Context
 	}
 
 	router := SetupRouter(c)
-
 	catalogClient = getCatalogClient(router, t)
-
 	return
 }
 

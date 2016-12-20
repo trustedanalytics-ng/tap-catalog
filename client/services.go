@@ -70,3 +70,9 @@ func (c *TapCatalogApiConnector) DeleteService(serviceId string) (int, error) {
 	status, err := brokerHttp.DeleteModel(connector, http.StatusNoContent)
 	return status, err
 }
+
+func (c *TapCatalogApiConnector) DeleteServicePlan(serviceId, planId string) (int, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s/%s/%s/%s", c.Address, services, serviceId, plans, planId))
+	status, err := brokerHttp.DeleteModel(connector, http.StatusNoContent)
+	return status, err
+}

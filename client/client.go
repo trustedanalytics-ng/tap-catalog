@@ -55,6 +55,7 @@ type TapCatalogApi interface {
 	UpdateTemplate(templateId string, patches []models.Patch) (models.Template, int, error)
 	DeleteApplication(applicationId string) (int, error)
 	DeleteService(serviceId string) (int, error)
+	DeleteServicePlan(serviceId, planId string) (int, error)
 	DeleteImage(imageId string) (int, error)
 	DeleteInstance(instanceId string) (int, error)
 	WatchInstances(afterIndex uint64) (models.StateChange, int, error)
