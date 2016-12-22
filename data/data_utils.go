@@ -103,12 +103,12 @@ func GetFilteredInstances(expectedInstanceType models.InstanceType, expectedClas
 	return filteredInstances, nil
 }
 
-func IsApplicationInstance(instance models.Instance) bool {
-	return instance.Type == models.InstanceTypeApplication
+func IsInstanceTypeOf(instance models.Instance, instanceType models.InstanceType) bool {
+	return instance.Type == instanceType
 }
 
-func IsRunnungApplication(instance models.Instance) bool {
-	return IsApplicationInstance(instance) && isInstanceInState(instance, runningStates)
+func IsRunningInstance(instance models.Instance) bool {
+	return isInstanceInState(instance, runningStates)
 }
 
 func isInstanceInState(instance models.Instance, states []models.InstanceState) bool {

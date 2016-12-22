@@ -177,7 +177,7 @@ func TestGetIdFromKey(t *testing.T) {
 	})
 }
 
-func TestIsApplicationInstance(t *testing.T) {
+func TestIsInstanceTypeOf(t *testing.T) {
 	testApplicationInstance1 := models.Instance{
 		Id:   "1",
 		Name: "app-1",
@@ -193,24 +193,49 @@ func TestIsApplicationInstance(t *testing.T) {
 		Name: "service-broker-1",
 		Type: models.InstanceTypeServiceBroker,
 	}
-	Convey("testing IsApplicationInstance", t, func() {
-		Convey("For application instance should return true", func() {
-			isApplication := IsApplicationInstance(testApplicationInstance1)
+	Convey("testing IsIsInstanceTypeOf", t, func() {
+		Convey("For application instance and expected type application should return true", func() {
+			isApplication := IsInstanceTypeOf(testApplicationInstance1, models.InstanceTypeApplication)
 			So(isApplication, ShouldBeTrue)
 		})
-		Convey("For service instance should return false", func() {
-			isApplication := IsApplicationInstance(testServiceInstance1)
+		Convey("For application instance and expected type service should return false", func() {
+			isApplication := IsInstanceTypeOf(testApplicationInstance1, models.InstanceTypeService)
 			So(isApplication, ShouldBeFalse)
 		})
-		Convey("For service broker instance should return false", func() {
-			isApplication := IsApplicationInstance(testServiceBrokerInstance1)
+		Convey("For application instance and expected type service broker should return false", func() {
+			isApplication := IsInstanceTypeOf(testApplicationInstance1, models.InstanceTypeServiceBroker)
 			So(isApplication, ShouldBeFalse)
 		})
 
+		Convey("For service instance and expected type application should return false", func() {
+			isApplication := IsInstanceTypeOf(testServiceInstance1, models.InstanceTypeApplication)
+			So(isApplication, ShouldBeFalse)
+		})
+		Convey("For service instance and expected type service should return true", func() {
+			isApplication := IsInstanceTypeOf(testServiceInstance1, models.InstanceTypeService)
+			So(isApplication, ShouldBeTrue)
+		})
+		Convey("For service instance and expected type service broker should return false", func() {
+			isApplication := IsInstanceTypeOf(testServiceInstance1, models.InstanceTypeServiceBroker)
+			So(isApplication, ShouldBeFalse)
+		})
+
+		Convey("For service broker instance and expected type application should return false", func() {
+			isApplication := IsInstanceTypeOf(testServiceBrokerInstance1, models.InstanceTypeApplication)
+			So(isApplication, ShouldBeFalse)
+		})
+		Convey("For service broker instance and expected type service should return false", func() {
+			isApplication := IsInstanceTypeOf(testServiceBrokerInstance1, models.InstanceTypeService)
+			So(isApplication, ShouldBeFalse)
+		})
+		Convey("For service broker instance and expected type service broker should return true", func() {
+			isApplication := IsInstanceTypeOf(testServiceBrokerInstance1, models.InstanceTypeServiceBroker)
+			So(isApplication, ShouldBeTrue)
+		})
 	})
 }
 
-func TestIsRunnungApplication(t *testing.T) {
+func TestIsRunnungInstance(t *testing.T) {
 	testApplicationInstance1 := models.Instance{
 		Id:    "1",
 		Name:  "app-1",
@@ -235,22 +260,32 @@ func TestIsRunnungApplication(t *testing.T) {
 		Type:  models.InstanceTypeService,
 		State: models.InstanceStateRunning,
 	}
+	testServiceBrokerInstance1 := models.Instance{
+		Id:    "2",
+		Name:  "service-1",
+		Type:  models.InstanceTypeServiceBroker,
+		State: models.InstanceStateRunning,
+	}
 	Convey("testing IsApplicationInstance", t, func() {
 		Convey("For application instance in state RUNNING should return true", func() {
-			isRunningApplication := IsRunnungApplication(testApplicationInstance1)
-			So(isRunningApplication, ShouldBeTrue)
+			isRunningInstance := IsRunningInstance(testApplicationInstance1)
+			So(isRunningInstance, ShouldBeTrue)
 		})
 		Convey("For application instance in state STOP_REQ should return true", func() {
-			isRunningApplication := IsRunnungApplication(testApplicationInstance2)
-			So(isRunningApplication, ShouldBeTrue)
+			isRunningInstance := IsRunningInstance(testApplicationInstance2)
+			So(isRunningInstance, ShouldBeTrue)
 		})
 		Convey("For application instance in state FAILURE should return false", func() {
-			isRunningApplication := IsRunnungApplication(testApplicationInstance3)
-			So(isRunningApplication, ShouldBeFalse)
+			isRunningInstance := IsRunningInstance(testApplicationInstance3)
+			So(isRunningInstance, ShouldBeFalse)
 		})
 		Convey("For service instance in state RUNNING should return false", func() {
-			isRunningApplication := IsRunnungApplication(testServiceInstance1)
-			So(isRunningApplication, ShouldBeFalse)
+			isRunningInstance := IsRunningInstance(testServiceInstance1)
+			So(isRunningInstance, ShouldBeTrue)
+		})
+		Convey("For service broker in state RUNNING should return false", func() {
+			isRunningInstance := IsRunningInstance(testServiceBrokerInstance1)
+			So(isRunningInstance, ShouldBeTrue)
 		})
 	})
 }

@@ -30,11 +30,13 @@ import (
 )
 
 const (
-	applicationsMetricName        = "applications"
-	servicesMetricName            = "services"
-	servicesInstancesMetricName   = "serviceInstances"
-	applicationsRunningMetricName = "applicationsRunning"
-	applicationsDownMetricName    = "applicationsDown"
+	applicationsMetricName             = "applications"
+	servicesMetricName                 = "services"
+	servicesInstancesMetricName        = "serviceInstances"
+	servicesInstancesRunningMetricName = "serviceInstancesRunning"
+	servicesInstancesDownMetricName    = "serviceInstancesDown"
+	applicationsRunningMetricName      = "applicationsRunning"
+	applicationsDownMetricName         = "applicationsDown"
 )
 
 var tapCounts = prometheus.NewGaugeVec(
@@ -47,9 +49,12 @@ var tapCounts = prometheus.NewGaugeVec(
 
 var repository data.RepositoryApi
 
-func collectApplicationsCount(org string) (runningApplications float64, downApplications float64, err error) {
+func collectInstancesCount(org string) (runningApplications float64, downApplications float64,
+						runningServiceInstances float64, downServiceInstances float64, err error) {
 	runningApplications = float64(0)
 	downApplications = float64(0)
+	runningServiceInstances = float64(0)
+	downServiceInstances = float64(0)
 
 	result, err := repository.GetListOfData(data.GetEntityKey(org, data.Instances), models.Instance{})
 	if err != nil {
@@ -63,11 +68,17 @@ func collectApplicationsCount(org string) (runningApplications float64, downAppl
 			return
 		}
 
-		if data.IsApplicationInstance(instance) {
-			if data.IsRunnungApplication(instance) {
+		if data.IsInstanceTypeOf(instance, models.InstanceTypeApplication) {
+			if data.IsRunningInstance(instance) {
 				runningApplications = runningApplications + 1
 			} else {
 				downApplications = downApplications + 1
+			}
+		} else if data.IsInstanceTypeOf(instance, models.InstanceTypeService) {
+			if data.IsRunningInstance(instance) {
+				runningServiceInstances = runningServiceInstances + 1
+			} else {
+				downServiceInstances = downServiceInstances + 1
 			}
 		}
 	}
@@ -83,21 +94,13 @@ func collectServicesCount(org string) (string, float64, error) {
 	return servicesMetricName, float64(servicesCount), nil
 }
 
-func collectServiceInstancesCount(org string) (string, float64, error) {
-	serviceInstances, err := data.GetFilteredInstances(models.InstanceTypeService, "", org, repository)
-	if err != nil {
-		return "", 0, err
-	}
-	return servicesInstancesMetricName, float64(len(serviceInstances)), nil
-}
-
 func collectCount() error {
 	organizations, err := getAllOrgs()
 	if err != nil {
 		return err
 	}
 	for _, org := range organizations {
-		runningApplications, downApplications, err := collectApplicationsCount(org)
+		runningApplications, downApplications, runningServiceInstances, downServiceInstances, err := collectInstancesCount(org)
 		if err != nil {
 			return err
 		}
@@ -105,13 +108,11 @@ func collectCount() error {
 		tapCounts.WithLabelValues(applicationsRunningMetricName, org).Set(runningApplications)
 		tapCounts.WithLabelValues(applicationsDownMetricName, org).Set(downApplications)
 
-		metricName, metricValue, err := collectServicesCount(org)
-		if err != nil {
-			return err
-		}
-		tapCounts.WithLabelValues(metricName, org).Set(metricValue)
+		tapCounts.WithLabelValues(servicesInstancesMetricName, org).Set(float64(runningServiceInstances + downServiceInstances))
+		tapCounts.WithLabelValues(servicesInstancesRunningMetricName, org).Set(runningServiceInstances)
+		tapCounts.WithLabelValues(servicesInstancesDownMetricName, org).Set(downServiceInstances)
 
-		metricName, metricValue, err = collectServiceInstancesCount(org)
+		metricName, metricValue, err := collectServicesCount(org)
 		if err != nil {
 			return err
 		}
