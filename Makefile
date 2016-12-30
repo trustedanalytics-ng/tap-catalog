@@ -18,7 +18,7 @@ APP_NAME=tap-catalog
 
 build: verify_gopath
 	go fmt $(APP_DIR_LIST)
-	CGO_ENABLED=0 go install -tags netgo $(APP_DIR_LIST)
+	CGO_ENABLED=0 go install -tags netgo .
 	mkdir -p application && cp -f $(GOBIN)/$(APP_NAME) ./application/$(APP_NAME)
 
 run: build_anywhere
@@ -67,7 +67,7 @@ verify_gopath:
 	fi
 
 test: verify_gopath
-	go test --cover $(APP_DIR_LIST)
+	CGO_ENABLED=0 go test --cover -tags netgo $(APP_DIR_LIST)
 	
 prepare_dirs:
 	mkdir -p ./temp/src/github.com/trustedanalytics/tap-catalog

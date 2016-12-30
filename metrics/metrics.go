@@ -50,7 +50,7 @@ var tapCounts = prometheus.NewGaugeVec(
 var repository data.RepositoryApi
 
 func collectInstancesCount(org string) (runningApplications float64, downApplications float64,
-runningServiceInstances float64, downServiceInstances float64, err error) {
+	runningServiceInstances float64, downServiceInstances float64, err error) {
 	runningApplications = float64(0)
 	downApplications = float64(0)
 	runningServiceInstances = float64(0)

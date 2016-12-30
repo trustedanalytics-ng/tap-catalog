@@ -33,6 +33,8 @@ const (
 	LAST_STATE_CHANGE_REASON  = "LAST_STATE_CHANGE_REASON"
 )
 
+const ReasonDeleteFailure = "Instance was in FAILURE state. Removing..."
+
 type Instance struct {
 	Id         string             `json:"id"`
 	Name       string             `json:"name"`

@@ -27,6 +27,10 @@ var logger, _ = commonLogger.InitLogger("builder")
 
 // message is optional, if pass then LAST_STATE_CHANGE_REASON key will be added/updated in Instance Metadata
 func MakePatchesForInstanceStateAndLastStateMetadata(message string, currentState, stateToSet models.InstanceState) ([]models.Patch, error) {
+	if stateToSet == models.InstanceStateFailure {
+		message = models.ReasonDeleteFailure
+	}
+
 	patches, err := makePatchesForStateUpdate(currentState.String(), stateToSet.String())
 	if err != nil {
 		return patches, err
