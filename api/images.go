@@ -137,6 +137,7 @@ func (c *Context) getImagesFSM(initialState models.ImageState) *fsm.FSM {
 			{Name: "BUILDING", Src: []string{"PENDING"}, Dst: "BUILDING"},
 			{Name: "ERROR", Src: []string{"BUILDING"}, Dst: "ERROR"},
 			{Name: "READY", Src: []string{"BUILDING"}, Dst: "READY"},
+			{Name: "REMOVING", Src: []string{"READY"}, Dst: "REMOVING"},
 		},
 		fsm.Callbacks{
 			"enter_state": func(e *fsm.Event) {

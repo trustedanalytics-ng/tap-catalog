@@ -54,6 +54,7 @@ const (
 	ImageStatePending   ImageState = "PENDING"
 	ImageStateReady     ImageState = "READY"
 	ImageStateRequested ImageState = "REQUESTED"
+	ImageStateRemoving  ImageState = "REMOVING"
 )
 
 func IsApplicationInstance(imageId string) bool {

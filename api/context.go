@@ -32,7 +32,7 @@ import (
 
 const (
 	maxUUIDGenerationTrials = 10
-	maxUUIDLength = 63
+	maxUUIDLength           = 63
 )
 
 var logger, _ = commonLogger.InitLogger("api")
