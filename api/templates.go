@@ -53,7 +53,7 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	if reqTemplate.Id, err = c.reserveID(c.getTemplateKey()); err != nil {
+	if reqTemplate.Id, err = c.reserveID(c.getTemplateKey(), ""); err != nil {
 		util.Respond500(rw, err)
 		return
 	}

@@ -112,7 +112,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	if reqService.Id, err = c.reserveID(c.getServiceKey()); err != nil {
+	if reqService.Id, err = c.reserveID(c.getServiceKey(), reqService.Name); err != nil {
 		util.Respond500(rw, err)
 		return
 	}
