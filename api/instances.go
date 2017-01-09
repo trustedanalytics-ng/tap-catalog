@@ -376,7 +376,7 @@ func (c *Context) getInstancesFSM(initialState models.InstanceState) *fsm.FSM {
 			makeEventDesc(models.InstanceStateDestroyReq, models.InstanceStateStopped, models.InstanceStateFailure,
 				models.InstanceStateUnavailable),
 			makeEventDesc(models.InstanceStateDestroying, models.InstanceStateDestroyReq),
-			makeEventDesc(models.InstanceStateUnavailable, models.InstanceStateStopped),
+			makeEventDesc(models.InstanceStateUnavailable, models.InstanceStateStopped, models.InstanceStateRunning),
 		},
 		fsm.Callbacks{
 			"enter_state": func(e *fsm.Event) {
