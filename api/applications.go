@@ -87,7 +87,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	if reqApplication.Id, err = c.reserveID(c.getApplicationKey(), reqApplication.Name); err != nil {
+	if reqApplication.Id, err = c.reserveID(c.getApplicationKey()); err != nil {
 		util.Respond500(rw, err)
 		return
 	}

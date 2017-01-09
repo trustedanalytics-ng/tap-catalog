@@ -72,7 +72,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	if reqPlan.Id, err = c.reserveID(c.getServicePlansDir(serviceId), reqPlan.Name); err != nil {
+	if reqPlan.Id, err = c.reserveID(c.getServicePlansDir(serviceId)); err != nil {
 		util.Respond500(rw, err)
 		return
 	}

@@ -49,7 +49,6 @@ func TestInitDB(t *testing.T) {
 
 func TestReserveID(t *testing.T) {
 	const samplePath = "application"
-	const sampleName = "appname"
 
 	Convey("Testing reserveID", t, func() {
 		mockCtrl, context, repositoryMock, _ := prepareMocksAndClient(t)
@@ -57,7 +56,7 @@ func TestReserveID(t *testing.T) {
 		Convey("when first UUID generation trial is successful", func() {
 			repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil)
 
-			retUUID, err := context.reserveID(samplePath, sampleName)
+			retUUID, err := context.reserveID(samplePath)
 
 			Convey("ReserveID response is proper", func() {
 				Convey("Err is proper", func() {
@@ -75,7 +74,7 @@ func TestReserveID(t *testing.T) {
 				repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil),
 			)
 
-			retUUID, err := context.reserveID(samplePath, sampleName)
+			retUUID, err := context.reserveID(samplePath)
 
 			Convey("ReserveID response is proper", func() {
 				Convey("Err is proper", func() {
@@ -90,7 +89,7 @@ func TestReserveID(t *testing.T) {
 		Convey(fmt.Sprintf("When maxUUIDGenerationTrials=%d generation trials are not successful", maxUUIDGenerationTrials), func() {
 			repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(errors.New("")).AnyTimes()
 
-			_, err := context.reserveID(samplePath, sampleName)
+			_, err := context.reserveID(samplePath)
 
 			Convey("Response err is not nil", func() {
 				So(err, ShouldNotBeNil)

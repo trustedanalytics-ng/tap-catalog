@@ -220,7 +220,7 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
-	if reqInstance.Id, err = c.reserveID(c.getInstanceKey(), reqInstance.Name); err != nil {
+	if reqInstance.Id, err = c.reserveID(c.getInstanceKey()); err != nil {
 		util.Respond500(rw, err)
 		return
 	}

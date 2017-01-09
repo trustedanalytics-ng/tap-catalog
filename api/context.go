@@ -32,7 +32,6 @@ import (
 
 const (
 	maxUUIDGenerationTrials = 10
-	maxUUIDLength           = 63
 )
 
 var logger, _ = commonLogger.InitLogger("api")
@@ -107,18 +106,12 @@ func (c *Context) removeQuotes(value string) string {
 	return value[1 : len(value)-1]
 }
 
-func (c *Context) reserveID(path, applicationName string) (string, error) {
+func (c *Context) reserveID(path string) (string, error) {
 	id := ""
 	var err error
 	idCreated := false
 	for i := 0; i < maxUUIDGenerationTrials; i++ {
 		id, err = data.GenerateID()
-		id = fmt.Sprintf("%s-%s-%s", c.organization, applicationName, id)
-
-		if len(id) > maxUUIDLength {
-			id = id[:maxUUIDLength-1]
-		}
-
 		if err != nil {
 			return "", fmt.Errorf("generation ID failed: %v", err)
 		}
