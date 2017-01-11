@@ -18,7 +18,6 @@ package etcd
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
@@ -62,7 +61,7 @@ func (c *EtcdConnector) Connect() error {
 		Endpoints: []string{fmt.Sprintf("https://%s:%d", c.address, c.port)},
 		Transport: client.DefaultTransport,
 		// set timeout per request to fail fast when the target endpoint is unavailable
-		HeaderTimeoutPerRequest: time.Second,
+		HeaderTimeoutPerRequest: 0,
 	}
 	newClient, err := client.New(cfg)
 	if err != nil {
