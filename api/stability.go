@@ -23,7 +23,7 @@ import (
 	"github.com/gocraft/web"
 
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 var stableStates = []models.InstanceState{
@@ -35,17 +35,17 @@ var stableStates = []models.InstanceState{
 func (c *Context) CheckStateStability(rw web.ResponseWriter, req *web.Request) {
 	instances, err := c.getInstances()
 	if err != nil {
-		util.WriteJson(rw, err.Error(), getHttpStatusOrStatusError(http.StatusOK, err))
+		commonHttp.WriteJson(rw, err.Error(), getHttpStatusOrStatusError(http.StatusOK, err))
 		return
 	}
 
 	err = assureInstanceStatesAreStable(instances)
 	if err != nil {
-		util.WriteJson(rw, models.StateStability{Stable: false, Message: err.Error()}, http.StatusOK)
+		commonHttp.WriteJson(rw, models.StateStability{Stable: false, Message: err.Error()}, http.StatusOK)
 		return
 	}
 
-	util.WriteJson(rw, models.StateStability{Stable: true}, http.StatusOK)
+	commonHttp.WriteJson(rw, models.StateStability{Stable: true}, http.StatusOK)
 }
 
 func assureInstanceStatesAreStable(instances []models.Instance) error {

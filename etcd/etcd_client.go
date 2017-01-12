@@ -18,11 +18,13 @@ package etcd
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
 
 	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
+	"github.com/trustedanalytics/tap-go-common/util"
 )
 
 type EtcdKVStore interface {
@@ -57,11 +59,13 @@ func NewEtcdKVStore(address string, port int) (EtcdKVStore, error) {
 }
 
 func (c *EtcdConnector) Connect() error {
+	headerTimeoutFromEnv, _ := util.GetInt64EnvValueOrDefault(EtcdConnectionHeaderTimeout, EtcdConnectionHeaderTimeoutDefault)
+	headerTimeout := time.Duration(headerTimeoutFromEnv) * time.Millisecond
+
 	cfg := client.Config{
-		Endpoints: []string{fmt.Sprintf("https://%s:%d", c.address, c.port)},
-		Transport: client.DefaultTransport,
-		// set timeout per request to fail fast when the target endpoint is unavailable
-		HeaderTimeoutPerRequest: 0,
+		Endpoints:               []string{fmt.Sprintf("https://%s:%d", c.address, c.port)},
+		Transport:               client.DefaultTransport,
+		HeaderTimeoutPerRequest: headerTimeout,
 	}
 	newClient, err := client.New(cfg)
 	if err != nil {

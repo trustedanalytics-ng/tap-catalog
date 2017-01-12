@@ -25,27 +25,27 @@ import (
 	"github.com/looplab/fsm"
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getImagesKey(), models.Image{})
-	util.WriteJsonOrError(rw, result, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) GetImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 
 	result, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
-	util.WriteJsonOrError(rw, result, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 	reqImage := &models.Image{}
 
-	err := util.ReadJson(req, reqImage)
+	err := commonHttp.ReadJson(req, reqImage)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
@@ -54,32 +54,32 @@ func (c *Context) AddImage(rw web.ResponseWriter, req *web.Request) {
 
 	err = c.repository.CreateData(imageKeyStore)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	image, err := c.repository.GetData(c.buildImagesKey(reqImage.Id), models.Image{})
-	util.WriteJsonOrError(rw, image, http.StatusCreated, err)
+	commonHttp.WriteJsonOrError(rw, image, http.StatusCreated, err)
 }
 
 func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	imageInt, err := c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	image, ok := imageInt.(models.Image)
 	if !ok {
-		util.HandleError(rw, errors.New("Image retrieved is in wrong format"))
+		commonHttp.HandleError(rw, errors.New("Image retrieved is in wrong format"))
 		return
 	}
 
 	patches := []models.Patch{}
-	err = util.ReadJson(req, &patches)
+	err = commonHttp.ReadJson(req, &patches)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
@@ -92,24 +92,24 @@ func (c *Context) PatchImage(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildImagesKey(imageId), models.Image{}, patches)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	imageInt, err = c.repository.GetData(c.buildImagesKey(imageId), models.Image{})
-	util.WriteJsonOrError(rw, imageInt, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, imageInt, http.StatusOK, err)
 }
 
 func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	err := c.repository.DeleteData(c.buildImagesKey(imageId))
-	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
+	commonHttp.WriteJsonOrError(rw, "", http.StatusNoContent, err)
 }
 
 func (c *Context) MonitorImagesStates(rw web.ResponseWriter, req *web.Request) {

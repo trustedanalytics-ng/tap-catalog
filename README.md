@@ -88,3 +88,10 @@ curl -XGET "http://127.0.0.1/api/v1/instances/b1e18756-fc55-486b-5c7b-9a7b7ef30d
 ```
 curl -XGET "http://127.0.0.1/api/v1/latestIndex" --user admin:password
 ```
+
+## Configuration
+Following environment variables configure Catalog:
+
+| Variable | Description |
+| --- | --- |
+| ETCD_CONNECTION_HEADER_TIMEOUT | ETCD connection header timeout per request in ms. Default value is 60000 (1 minute). |

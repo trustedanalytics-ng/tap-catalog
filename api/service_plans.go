@@ -23,21 +23,21 @@ import (
 
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *Context) Plans(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	services, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 	plans := []models.ServicePlan{}
 	if services.(models.Service).Plans != nil {
 		plans = services.(models.Service).Plans
 	}
-	util.WriteJson(rw, plans, http.StatusOK)
+	commonHttp.WriteJson(rw, plans, http.StatusOK)
 }
 
 func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
@@ -47,7 +47,7 @@ func (c *Context) GetPlan(rw web.ResponseWriter, req *web.Request) {
 	key := c.mapper.ToKey(c.getServicePlansDir(serviceId), planId)
 
 	result, err := c.repository.GetData(key, models.ServicePlan{})
-	util.WriteJsonOrError(rw, result, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
@@ -55,37 +55,37 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 
 	_, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	reqPlan := &models.ServicePlan{}
-	err = util.ReadJson(req, reqPlan)
+	err = commonHttp.ReadJson(req, reqPlan)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	err = data.CheckIfIdFieldIsEmpty(reqPlan)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	if reqPlan.Id, err = c.reserveID(c.getServicePlansDir(serviceId)); err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
 	planKeyStore := c.mapper.ToKeyValue(c.getServicePlansDir(serviceId), reqPlan, true)
 	err = c.repository.CreateData(planKeyStore)
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
 	plan, err := c.repository.GetData(c.getServicedPlanIDKey(serviceId, reqPlan.Id), models.ServicePlan{})
-	util.WriteJsonOrError(rw, plan, http.StatusCreated, err)
+	commonHttp.WriteJsonOrError(rw, plan, http.StatusCreated, err)
 }
 
 func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
@@ -94,31 +94,31 @@ func (c *Context) PatchPlan(rw web.ResponseWriter, req *web.Request) {
 
 	plan, err := c.repository.GetData(c.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	patches := []models.Patch{}
-	err = util.ReadJson(req, &patches)
+	err = commonHttp.ReadJson(req, &patches)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{}, patches)
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
 	plan, err = c.repository.GetData(c.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{})
-	util.WriteJsonOrError(rw, plan, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, plan, http.StatusOK, err)
 }
 
 func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
@@ -126,23 +126,23 @@ func (c *Context) DeletePlan(rw web.ResponseWriter, req *web.Request) {
 	planId := req.PathParams["planId"]
 
 	if _, err := c.repository.GetData(c.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{}); err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	instances, err := c.getFilteredInstances(models.InstanceTypeService, serviceId)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	if err = checkIfPlanIsNotUsedByInstance(planId, instances); err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	err = c.repository.DeleteData(c.getServicedPlanIDKey(serviceId, planId))
-	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
+	commonHttp.WriteJsonOrError(rw, "", http.StatusNoContent, err)
 }
 
 func checkIfPlanIsNotUsedByInstance(planId string, instances []models.Instance) error {

@@ -23,12 +23,12 @@ import (
 
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getApplicationKey(), models.Application{})
-	util.WriteJsonOrError(rw, result, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) getApplication(id string) (models.Application, error) {
@@ -53,91 +53,91 @@ func (c *Context) GetApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 
 	app, err := c.getApplication(applicationId)
-	util.WriteJsonOrError(rw, app, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, app, http.StatusOK, err)
 }
 
 func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 	reqApplication := &models.Application{}
 
-	err := util.ReadJson(req, reqApplication)
+	err := commonHttp.ReadJson(req, reqApplication)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	err = data.CheckIfIdFieldIsEmpty(reqApplication)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	err = data.CheckIfMatchingRegexp(reqApplication.Name, data.RegexpDnsLabelLowercase)
 	if err != nil {
-		util.Respond400(rw, fmt.Errorf("field Name has incorrect value: %v", reqApplication.Name))
+		commonHttp.Respond400(rw, fmt.Errorf("field Name has incorrect value: %v", reqApplication.Name))
 		return
 	}
 
 	exists, err := c.repository.IsExistByName(reqApplication.Name, models.Application{}, c.getApplicationKey())
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 	if exists {
-		util.Respond409(rw, fmt.Errorf("application %q already exists", reqApplication.Name))
+		commonHttp.Respond409(rw, fmt.Errorf("application %q already exists", reqApplication.Name))
 		return
 	}
 
 	if reqApplication.Id, err = c.reserveID(c.getApplicationKey()); err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
 	applicationKeyStore := c.mapper.ToKeyValue(c.getApplicationKey(), reqApplication, true)
 	err = c.repository.CreateData(applicationKeyStore)
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
 	application, err := c.repository.GetData(c.buildApplicationKey(reqApplication.Id), models.Application{})
-	util.WriteJsonOrError(rw, application, http.StatusCreated, err)
+	commonHttp.WriteJsonOrError(rw, application, http.StatusCreated, err)
 }
 
 func (c *Context) PatchApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 	application, err := c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	patches := []models.Patch{}
-	err = util.ReadJson(req, &patches)
+	err = commonHttp.ReadJson(req, &patches)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildApplicationKey(applicationId), models.Application{}, patches)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	application, err = c.repository.GetData(c.buildApplicationKey(applicationId), models.Application{})
-	util.WriteJsonOrError(rw, application, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, application, http.StatusOK, err)
 }
 
 func (c *Context) DeleteApplication(rw web.ResponseWriter, req *web.Request) {
 	applicationId := req.PathParams["applicationId"]
 	err := c.repository.DeleteData(c.buildApplicationKey(applicationId))
-	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
+	commonHttp.WriteJsonOrError(rw, "", http.StatusNoContent, err)
 }
 
 func (c *Context) getApplicationKey() string {

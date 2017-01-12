@@ -14,22 +14,9 @@
  * limitations under the License.
  */
 
-package api
+package etcd
 
-import (
-	"os"
-
-	"github.com/gocraft/web"
-
-	commonHttp "github.com/trustedanalytics/tap-go-common/http"
+const (
+	EtcdConnectionHeaderTimeout        = "ETCD_CONNECTION_HEADER_TIMEOUT"
+	EtcdConnectionHeaderTimeoutDefault = 60 * 1000 // 1min
 )
-
-func (c *Context) BasicAuthorizeMiddleware(rw web.ResponseWriter, req *web.Request, next web.NextMiddlewareFunc) {
-	username, password, is_ok := req.BasicAuth()
-	if !is_ok || username != os.Getenv("CATALOG_USER") || password != os.Getenv("CATALOG_PASS") {
-		commonHttp.RespondUnauthorized(rw)
-		return
-	}
-	c.mapper.Username = username
-	next(rw, req)
-}

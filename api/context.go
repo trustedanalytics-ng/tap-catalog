@@ -27,7 +27,6 @@ import (
 	"github.com/trustedanalytics/tap-catalog/models"
 	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
-	"github.com/trustedanalytics/tap-go-common/util"
 )
 
 const (
@@ -86,16 +85,16 @@ type FsmFunc func() *fsm.FSM
 func (c *Context) handleFsm(rw web.ResponseWriter, req *web.Request, patches []models.Patch, fsmFunc FsmFunc) error {
 	newState, err := c.getStateChange(patches)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return err
 	}
 	fsm := fsmFunc()
 	err = c.allowStateChange(newState, fsm)
 	if err != nil {
 		if fsm.Current() == newState {
-			util.Respond409(rw, err)
+			commonHttp.Respond409(rw, err)
 		} else {
-			util.Respond400(rw, err)
+			commonHttp.Respond400(rw, err)
 		}
 		return err
 	}

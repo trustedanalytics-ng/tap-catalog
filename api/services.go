@@ -26,7 +26,7 @@ import (
 
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *Context) getServices() ([]models.Service, error) {
@@ -53,7 +53,7 @@ func (c *Context) getServices() ([]models.Service, error) {
 
 func (c *Context) Services(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.getServices()
-	util.WriteJsonOrError(rw, result, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) getService(id string) (models.Service, error) {
@@ -78,42 +78,42 @@ func (c *Context) GetService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
 	service, err := c.getService(serviceId)
-	util.WriteJsonOrError(rw, service, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, service, http.StatusOK, err)
 }
 
 func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	reqService := &models.Service{}
 
-	err := util.ReadJson(req, reqService)
+	err := commonHttp.ReadJson(req, reqService)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	err = data.CheckIfIdFieldIsEmpty(reqService)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	err = data.CheckIfMatchingRegexp(reqService.Name, data.RegexpDnsLabelLowercase)
 	if err != nil {
-		util.Respond400(rw, errors.New("Field: Name has incorrect value: "+reqService.Name))
+		commonHttp.Respond400(rw, errors.New("Field: Name has incorrect value: "+reqService.Name))
 		return
 	}
 
 	exists, err := c.repository.IsExistByName(reqService.Name, models.Service{}, c.getServiceKey())
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 	if exists {
-		util.Respond409(rw, errors.New("service with name: "+reqService.Name+" already exists!"))
+		commonHttp.Respond409(rw, errors.New("service with name: "+reqService.Name+" already exists!"))
 		return
 	}
 
 	if reqService.Id, err = c.reserveID(c.getServiceKey()); err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
@@ -121,32 +121,32 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 	serviceKeyStore := c.mapper.ToKeyValue(c.getServiceKey(), reqService, true)
 	err = c.repository.CreateData(serviceKeyStore)
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
 	service, err := c.repository.GetData(c.buildServiceKey(reqService.Id), models.Service{})
-	util.WriteJsonOrError(rw, service, http.StatusCreated, err)
+	commonHttp.WriteJsonOrError(rw, service, http.StatusCreated, err)
 }
 
 func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 	serviceInt, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	service, ok := serviceInt.(models.Service)
 	if !ok {
-		util.HandleError(rw, errors.New("Service retrieved is in wrong format"))
+		commonHttp.HandleError(rw, errors.New("Service retrieved is in wrong format"))
 		return
 	}
 
 	patches := []models.Patch{}
-	err = util.ReadJson(req, &patches)
+	err = commonHttp.ReadJson(req, &patches)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
@@ -156,7 +156,7 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 		if status, err := c.assureOfferingIsNotUsed(serviceId); err != nil {
 			err := fmt.Errorf("cannot change offering state from %q to %q: %v", service.State, newState, err)
 			logger.Error(err.Error())
-			util.GenericRespond(status, rw, err)
+			commonHttp.GenericRespond(status, rw, err)
 			return
 		}
 	}
@@ -170,18 +170,18 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildServiceKey(serviceId), models.Service{}, patches)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	serviceInt, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
-	util.WriteJsonOrError(rw, serviceInt, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, serviceInt, http.StatusOK, err)
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
@@ -189,12 +189,12 @@ func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 
 	if status, err := c.assureOfferingIsNotUsed(serviceId); err != nil {
 		err := fmt.Errorf("cannot remove offering %q: %v", serviceId, err)
-		util.GenericRespond(status, rw, err)
+		commonHttp.GenericRespond(status, rw, err)
 		return
 	}
 
 	err := c.repository.DeleteData(c.buildServiceKey(serviceId))
-	util.WriteJsonOrError(rw, serviceId, http.StatusNoContent, err)
+	commonHttp.WriteJsonOrError(rw, serviceId, http.StatusNoContent, err)
 }
 
 func (c *Context) assureOfferingIsNotUsed(serviceID string) (int, error) {

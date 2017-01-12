@@ -21,10 +21,10 @@ import (
 	"github.com/gocraft/web"
 
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *Context) GetCatalogHealth(rw web.ResponseWriter, req *web.Request) {
 	_, err := c.repository.GetListOfData(c.getServiceKey(), models.Service{})
-	util.WriteJsonOrError(rw, "", http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, "", http.StatusOK, err)
 }

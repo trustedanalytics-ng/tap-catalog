@@ -25,12 +25,12 @@ import (
 
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *Context) Instances(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.getInstances()
-	util.WriteJsonOrError(rw, result, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) getInstances() ([]models.Instance, error) {
@@ -57,36 +57,36 @@ func (c *Context) getInstances() ([]models.Instance, error) {
 
 func (c *Context) ServicesInstances(rw web.ResponseWriter, req *web.Request) {
 	instances, err := c.getFilteredInstances(models.InstanceTypeService, "")
-	util.WriteJsonOrError(rw, instances, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, instances, http.StatusOK, err)
 }
 
 func (c *Context) ServiceInstances(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
 	if _, err := c.repository.GetData(c.buildServiceKey(serviceId), models.Service{}); err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	instances, err := c.getFilteredInstances(models.InstanceTypeService, serviceId)
-	util.WriteJsonOrError(rw, instances, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, instances, http.StatusOK, err)
 }
 
 func (c *Context) ApplicationsInstances(rw web.ResponseWriter, req *web.Request) {
 	instances, err := c.getFilteredInstances(models.InstanceTypeApplication, "")
-	util.WriteJsonOrError(rw, instances, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, instances, http.StatusOK, err)
 }
 
 func (c *Context) ApplicationInstances(rw web.ResponseWriter, req *web.Request) {
 	appId := req.PathParams["applicationId"]
 
 	if _, err := c.repository.GetData(c.buildApplicationKey(appId), models.Application{}); err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	instances, err := c.getFilteredInstances(models.InstanceTypeApplication, appId)
-	util.WriteJsonOrError(rw, instances, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, instances, http.StatusOK, err)
 }
 
 func (c *Context) getFilteredInstances(expectedInstanceType models.InstanceType, expectedClassId string) ([]models.Instance, error) {
@@ -97,7 +97,7 @@ func (c *Context) GetApplicationInstance(rw web.ResponseWriter, req *web.Request
 	applicationId := req.PathParams["applicationId"]
 
 	if _, err := c.getApplication(applicationId); err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
@@ -108,7 +108,7 @@ func (c *Context) GetServiceInstance(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
 	if _, err := c.getService(serviceId); err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
@@ -119,7 +119,7 @@ func (c *Context) GetInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 
 	result, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
-	util.WriteJsonOrError(rw, result, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) GetInstanceBindings(rw web.ResponseWriter, req *web.Request) {
@@ -128,19 +128,19 @@ func (c *Context) GetInstanceBindings(rw web.ResponseWriter, req *web.Request) {
 
 	instance, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	for _, binding := range instance.(models.Instance).Bindings {
 		boundInstance, err := c.repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
 		if err != nil {
-			util.HandleError(rw, err)
+			commonHttp.HandleError(rw, err)
 			return
 		}
 		result = append(result, boundInstance.(models.Instance))
 	}
-	util.WriteJson(rw, result, http.StatusOK)
+	commonHttp.WriteJson(rw, result, http.StatusOK)
 }
 
 func (c *Context) AddApplicationInstance(rw web.ResponseWriter, req *web.Request) {
@@ -161,50 +161,50 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 	if instanceType == models.InstanceTypeService {
 		_, err := c.repository.GetData(c.buildServiceKey(classId), models.Service{})
 		if err != nil {
-			util.Respond404(rw, errors.New("service with id: "+classId+" does not exists!"))
+			commonHttp.Respond404(rw, errors.New("service with id: "+classId+" does not exists!"))
 			return
 		}
 	} else if instanceType == models.InstanceTypeApplication {
 		_, err := c.repository.GetData(c.buildApplicationKey(classId), models.Application{})
 		if err != nil {
-			util.Respond404(rw, errors.New("application with id: "+classId+" does not exists!"))
+			commonHttp.Respond404(rw, errors.New("application with id: "+classId+" does not exists!"))
 			return
 		}
 	}
 
-	err := util.ReadJson(req, reqInstance)
+	err := commonHttp.ReadJson(req, reqInstance)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	err = data.CheckIfIdFieldIsEmpty(reqInstance)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	if instanceType == models.InstanceTypeService && models.GetValueFromMetadata(reqInstance.Metadata, models.OFFERING_PLAN_ID) == "" {
-		util.Respond400(rw, errors.New(fmt.Sprintf("key %s not found!", models.OFFERING_PLAN_ID)))
+		commonHttp.Respond400(rw, errors.New(fmt.Sprintf("key %s not found!", models.OFFERING_PLAN_ID)))
 		return
 	}
 
 	err = data.CheckIfMatchingRegexp(reqInstance.Name, data.RegexpDnsLabelLowercase)
 	if err != nil {
-		util.Respond400(rw, errors.New("Field: Name has incorrect value: "+reqInstance.Name))
+		commonHttp.Respond400(rw, errors.New("Field: Name has incorrect value: "+reqInstance.Name))
 		return
 	}
 
 	for _, binding := range reqInstance.Bindings {
 		_, err = c.repository.GetData(c.buildInstanceKey(binding.Id), models.Instance{})
 		if err != nil {
-			util.Respond400(rw, errors.New(
+			commonHttp.Respond400(rw, errors.New(
 				fmt.Sprintf("Field: binding ID has incorrect value: %s!", binding.Id)))
 			return
 		}
 		for k, _ := range binding.Data {
 			if err = data.CheckIfMatchingRegexp(k, data.RegexpDnsLabel); err != nil {
-				util.Respond400(rw, errors.New("Field: data has incorrect value: "+k))
+				commonHttp.Respond400(rw, errors.New("Field: data has incorrect value: "+k))
 				return
 			}
 		}
@@ -212,16 +212,16 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 
 	exists, err := c.repository.IsExistByName(reqInstance.Name, models.Instance{}, c.getInstanceKey())
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 	if exists {
-		util.Respond409(rw, errors.New("instance with name: "+reqInstance.Name+" already exists!"))
+		commonHttp.Respond409(rw, errors.New("instance with name: "+reqInstance.Name+" already exists!"))
 		return
 	}
 
 	if reqInstance.Id, err = c.reserveID(c.getInstanceKey()); err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
@@ -231,23 +231,23 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 
 	err = c.repository.CreateData(c.mapper.ToKeyValue(c.getInstanceKey(), reqInstance, true))
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
 	instance, err := c.repository.GetData(c.buildInstanceKey(reqInstance.Id), models.Instance{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
-	util.WriteJson(rw, instance, http.StatusCreated)
+	commonHttp.WriteJson(rw, instance, http.StatusCreated)
 }
 
 func (c *Context) PatchServiceInstance(rw web.ResponseWriter, req *web.Request) {
 	serviceID := req.PathParams["serviceId"]
 
 	if _, err := c.getService(serviceID); err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
@@ -258,7 +258,7 @@ func (c *Context) PatchApplicationInstance(rw web.ResponseWriter, req *web.Reque
 	applicationID := req.PathParams["applicationId"]
 
 	if _, err := c.getApplication(applicationID); err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
@@ -269,20 +269,20 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceId := req.PathParams["instanceId"]
 	instanceInt, err := c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	instance, ok := instanceInt.(models.Instance)
 	if !ok {
-		util.Respond500(rw, errors.New("Instance retrieved is in wrong format"))
+		commonHttp.Respond500(rw, errors.New("Instance retrieved is in wrong format"))
 		return
 	}
 
 	patches := []models.Patch{}
-	err = util.ReadJson(req, &patches)
+	err = commonHttp.ReadJson(req, &patches)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
@@ -295,29 +295,29 @@ func (c *Context) PatchInstance(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildInstanceKey(instanceId), models.Instance{}, patches)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	instanceInt, err = c.repository.GetData(c.buildInstanceKey(instanceId), models.Instance{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
-	util.WriteJson(rw, instanceInt, http.StatusOK)
+	commonHttp.WriteJson(rw, instanceInt, http.StatusOK)
 }
 
 func (c *Context) DeleteServiceInstance(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
 	if _, err := c.getService(serviceId); err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
@@ -328,7 +328,7 @@ func (c *Context) DeleteApplicationInstance(rw web.ResponseWriter, req *web.Requ
 	applicationID := req.PathParams["applicationId"]
 
 	if _, err := c.getApplication(applicationID); err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
@@ -338,7 +338,7 @@ func (c *Context) DeleteApplicationInstance(rw web.ResponseWriter, req *web.Requ
 func (c *Context) DeleteInstance(rw web.ResponseWriter, req *web.Request) {
 	instanceID := req.PathParams["instanceId"]
 	err := c.repository.DeleteData(c.buildInstanceKey(instanceID))
-	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
+	commonHttp.WriteJsonOrError(rw, "", http.StatusNoContent, err)
 }
 
 func (c *Context) MonitorInstancesStates(rw web.ResponseWriter, req *web.Request) {

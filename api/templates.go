@@ -24,37 +24,37 @@ import (
 
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *Context) Templates(rw web.ResponseWriter, req *web.Request) {
 	result, err := c.repository.GetListOfData(c.getTemplateKey(), models.Template{})
-	util.WriteJsonOrError(rw, result, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) GetTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 	result, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
-	util.WriteJsonOrError(rw, result, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
 }
 
 func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	reqTemplate := &models.Template{}
 
-	err := util.ReadJson(req, reqTemplate)
+	err := commonHttp.ReadJson(req, reqTemplate)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	err = data.CheckIfIdFieldIsEmpty(reqTemplate)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
 	if reqTemplate.Id, err = c.reserveID(c.getTemplateKey()); err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
@@ -62,39 +62,39 @@ func (c *Context) AddTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateKeyStore := c.mapper.ToKeyValue(c.getTemplateKey(), reqTemplate, true)
 	err = c.repository.CreateData(templateKeyStore)
 	if err != nil {
-		util.Respond500(rw, err)
+		commonHttp.Respond500(rw, err)
 		return
 	}
 
 	template, err := c.repository.GetData(c.buildTemplateKey(reqTemplate.Id), models.Template{})
-	util.WriteJsonOrError(rw, template, http.StatusCreated, err)
+	commonHttp.WriteJsonOrError(rw, template, http.StatusCreated, err)
 }
 
 func (c *Context) DeleteTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 
 	err := c.repository.DeleteData(c.buildTemplateKey(templateId))
-	util.WriteJsonOrError(rw, "", http.StatusNoContent, err)
+	commonHttp.WriteJsonOrError(rw, "", http.StatusNoContent, err)
 }
 
 func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 	templateId := req.PathParams["templateId"]
 	templateInt, err := c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	template, ok := templateInt.(models.Template)
 	if !ok {
-		util.HandleError(rw, errors.New("template retrieved is in wrong format"))
+		commonHttp.HandleError(rw, errors.New("template retrieved is in wrong format"))
 		return
 	}
 
 	patches := []models.Patch{}
-	err = util.ReadJson(req, &patches)
+	err = commonHttp.ReadJson(req, &patches)
 	if err != nil {
-		util.Respond400(rw, err)
+		commonHttp.Respond400(rw, err)
 		return
 	}
 
@@ -107,18 +107,18 @@ func (c *Context) PatchTemplate(rw web.ResponseWriter, req *web.Request) {
 
 	patchedValues, err := c.mapper.ToKeyValueByPatches(c.buildTemplateKey(templateId), models.Template{}, patches)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	err = c.repository.ApplyPatchedValues(patchedValues)
 	if err != nil {
-		util.HandleError(rw, err)
+		commonHttp.HandleError(rw, err)
 		return
 	}
 
 	templateInt, err = c.repository.GetData(c.buildTemplateKey(templateId), models.Template{})
-	util.WriteJsonOrError(rw, templateInt, http.StatusOK, err)
+	commonHttp.WriteJsonOrError(rw, templateInt, http.StatusOK, err)
 }
 
 func (c *Context) getTemplateKey() string {

@@ -19,7 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func SetupRouter(context Context) *web.Router {
@@ -103,7 +103,7 @@ func route(router *web.Router, context *Context) {
 }
 
 func (c *Context) Index(rw web.ResponseWriter, req *web.Request) {
-	util.WriteJson(rw, "I'm OK", http.StatusOK)
+	commonHttp.WriteJson(rw, "I'm OK", http.StatusOK)
 }
 
 func (c *Context) Error(rw web.ResponseWriter, r *web.Request, err interface{}) {
