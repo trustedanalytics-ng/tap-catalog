@@ -150,6 +150,17 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
+	newStateAsString, err := c.getStateChange(patches)
+	newState := models.ServiceState(newStateAsString)
+	if err != nil && newState == models.ServiceStateOffline && service.State == models.ServiceStateReady {
+		if status, err := c.assureOfferingIsNotUsed(serviceId); err != nil {
+			err := fmt.Errorf("cannot change offering state from %q to %q: %v", service.State, newState, err)
+			logger.Error(err.Error())
+			util.GenericRespond(status, rw, err)
+			return
+		}
+	}
+
 	fsmFunc := func() *fsm.FSM {
 		return c.getServicesFSM(service.State)
 	}
@@ -176,7 +187,7 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	serviceId := req.PathParams["serviceId"]
 
-	if status, err := c.assureOfferingCanBeDeleted(serviceId); err != nil {
+	if status, err := c.assureOfferingIsNotUsed(serviceId); err != nil {
 		err := fmt.Errorf("cannot remove offering %q: %v", serviceId, err)
 		util.GenericRespond(status, rw, err)
 		return
@@ -186,7 +197,7 @@ func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
 	util.WriteJsonOrError(rw, serviceId, http.StatusNoContent, err)
 }
 
-func (c *Context) assureOfferingCanBeDeleted(serviceID string) (int, error) {
+func (c *Context) assureOfferingIsNotUsed(serviceID string) (int, error) {
 	instances, err := c.getInstances()
 	if err != nil {
 		return getHttpStatusOrStatusError(http.StatusInternalServerError, err), err
@@ -261,7 +272,7 @@ func (c *Context) getServicesFSM(initialState models.ServiceState) *fsm.FSM {
 	return fsm.NewFSM(string(initialState),
 		fsm.Events{
 			{Name: "READY", Src: []string{"DEPLOYING"}, Dst: "READY"},
-			{Name: "OFFLINE", Src: []string{"DEPLOYING"}, Dst: "OFFLINE"},
+			{Name: "OFFLINE", Src: []string{"DEPLOYING", "READY"}, Dst: "OFFLINE"},
 		},
 		fsm.Callbacks{
 			"enter_state": func(e *fsm.Event) {
