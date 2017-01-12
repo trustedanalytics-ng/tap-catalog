@@ -71,7 +71,7 @@ func (c *Context) AddApplication(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = data.CheckIfMatchingRegexp(reqApplication.Name, data.RegexpDnsLabelLowercase)
+	err = models.CheckIfMatchingRegexp(reqApplication.Name, models.RegexpDnsLabelLowercase)
 	if err != nil {
 		commonHttp.Respond400(rw, fmt.Errorf("field Name has incorrect value: %v", reqApplication.Name))
 		return

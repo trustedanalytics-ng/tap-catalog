@@ -18,9 +18,7 @@ package data
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"reflect"
-	"regexp"
 	"strings"
 
 	"github.com/nu7hatch/gouuid"
@@ -36,9 +34,6 @@ const (
 	bindingsFieldName = "Bindings"
 	stateFieldName    = "State"
 	classIdFieldName  = "ClassId"
-
-	RegexpDnsLabel          = "^[A-Za-z_][A-Za-z0-9_]*$"
-	RegexpDnsLabelLowercase = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
 
 	auditTrailKey = "AuditTrail"
 )
@@ -65,13 +60,6 @@ func CheckIfIdFieldIsEmpty(entity interface{}) error {
 	} else {
 		return nil
 	}
-}
-
-func CheckIfMatchingRegexp(content, regexpRule string) error {
-	if ok, _ := regexp.MatchString(regexpRule, content); !ok {
-		return errors.New(fmt.Sprintf("Content: %s doesn't match regexp: %s !", content, regexpRule))
-	}
-	return nil
 }
 
 func GetEntityKey(organization string, entity string) string {

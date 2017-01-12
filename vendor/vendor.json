@@ -158,12 +158,6 @@
 			"revisionTime": "2016-02-27T15:26:14Z"
 		},
 		{
-			"checksumSHA1": "XlRuAJ79S/WN1F/zTsTCueUaGW4=",
-			"path": "github.com/trustedanalytics/tap-catalog",
-			"revision": "ee401526c131209cbff0a0905d1dd5e0d655ef48",
-			"revisionTime": "2016-08-10T07:13:14Z"
-		},
-		{
 			"checksumSHA1": "cYx5jTa7w/CJ8VZJm2aDgoj5XQI=",
 			"path": "github.com/trustedanalytics/tap-go-common/http",
 			"revision": "4440813b62fde4622df75668583b0aa687291532",

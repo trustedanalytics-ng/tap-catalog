@@ -96,7 +96,7 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = data.CheckIfMatchingRegexp(reqService.Name, data.RegexpDnsLabelLowercase)
+	err = models.CheckIfMatchingRegexp(reqService.Name, models.RegexpDnsLabelLowercase)
 	if err != nil {
 		commonHttp.Respond400(rw, errors.New("Field: Name has incorrect value: "+reqService.Name))
 		return
