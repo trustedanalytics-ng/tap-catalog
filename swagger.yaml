@@ -18,7 +18,7 @@ paths:
           description: OK
         500:
           description: Unexpected error
-  /api/v1/latestIndex:
+  /api/v1/latest-index:
     get:
       responses:
         200:
@@ -610,7 +610,7 @@ paths:
               $ref: '#/definitions/Instance'
         500:
           description: unexpected error
-  /api/v1/instances/nextState:
+  /api/v1/instances/next-state:
     get:
       summary: Long poll for next isntance state change
       parameters:
@@ -687,7 +687,7 @@ paths:
             type: string
         500:
           description: unexpected error
-  /api/v1/instances/{instanceId}/nextState:
+  /api/v1/instances/{instanceId}/next-state:
     get:
       summary: Long poll for next Instance state change
       parameters:
@@ -851,7 +851,7 @@ paths:
           description: bad body or id provided
         500:
           description: unexpected error
-  /api/v1/images/nextState:
+  /api/v1/images/next-state:
     get:
       summary: Long poll for next image state change
       parameters:
@@ -928,7 +928,7 @@ paths:
             type: string
         500:
           description: unexpected error
-  /api/v1/images/{imageId}/nextState:
+  /api/v1/images/{imageId}/next-state:
     get:
       summary: Long poll for next image state change
       parameters:

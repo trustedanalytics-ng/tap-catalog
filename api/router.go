@@ -77,17 +77,17 @@ func route(router *web.Router, context *Context) {
 	router.Delete("/applications/:applicationId/instances/:instanceId", context.DeleteApplicationInstance)
 
 	router.Get("/images", context.Images)
-	router.Get("/images/nextState", context.MonitorImagesStates)
+	router.Get("/images/next-state", context.MonitorImagesStates)
 	router.Get("/images/:imageId", context.GetImage)
-	router.Get("/images/:imageId/nextState", context.MonitorSpecificImageState)
+	router.Get("/images/:imageId/next-state", context.MonitorSpecificImageState)
 	router.Post("/images", context.AddImage)
 	router.Patch("/images/:imageId", context.PatchImage)
 	router.Delete("/images/:imageId", context.DeleteImage)
 
 	router.Get("/instances", context.Instances)
-	router.Get("/instances/nextState", context.MonitorInstancesStates)
+	router.Get("/instances/next-state", context.MonitorInstancesStates)
 	router.Get("/instances/:instanceId", context.GetInstance)
-	router.Get("/instances/:instanceId/nextState", context.MonitorSpecificInstanceState)
+	router.Get("/instances/:instanceId/next-state", context.MonitorSpecificInstanceState)
 	router.Get("/instances/:instanceId/bindings", context.GetInstanceBindings)
 	router.Delete("/instances/:instanceId", context.DeleteInstance)
 	router.Patch("/instances/:instanceId", context.PatchInstance)
@@ -98,7 +98,7 @@ func route(router *web.Router, context *Context) {
 	router.Delete("/templates/:templateId", context.DeleteTemplate)
 	router.Patch("/templates/:templateId", context.PatchTemplate)
 
-	router.Get("/latestIndex", context.LatestIndex)
+	router.Get("/latest-index", context.LatestIndex)
 	router.Get("/stable-state", context.CheckStateStability)
 }
 
