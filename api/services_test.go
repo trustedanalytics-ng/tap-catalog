@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
 
 	"github.com/trustedanalytics/tap-catalog/models"
@@ -30,9 +31,98 @@ const (
 	sampleID1 = "1"
 	sampleID2 = "2"
 
-	sampleName1 = "sample_name_1"
-	sampleName2 = "sample_name_2"
+	sampleName1 = "sample-name-1"
+	sampleName2 = "sample-name-2"
 )
+
+func TestAddService(t *testing.T) {
+	Convey("Testing AddService", t, func() {
+		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+
+		Convey("When Service is proper", func() {
+			sampleService := getSampleServices()[0]
+			sampleService.Id = ""
+			sampleServiceInterface := interface{}(sampleService)
+
+			repositoryMock.EXPECT().IsExistByName(sampleService.Name, models.Service{}, context.getServiceKey()).Return(false, nil)
+			repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil)
+			repositoryMock.EXPECT().CreateData(gomock.Any()).Return(nil)
+			repositoryMock.EXPECT().GetData(gomock.Any(), models.Service{}).Return(sampleServiceInterface, nil)
+
+			service, status, err := catalogClient.AddService(sampleService)
+
+			Convey("err should be nil", func() {
+				So(err, ShouldBeNil)
+			})
+			Convey("status should be Created", func() {
+				So(status, ShouldEqual, http.StatusCreated)
+			})
+			Convey("returned services should be proper", func() {
+				So(service, ShouldResemble, sampleService)
+			})
+		})
+
+		Convey("When Service has no plan", func() {
+			sampleService := models.Service{Id: "", Name: sampleName1}
+
+			_, status, err := catalogClient.AddService(sampleService)
+
+			Convey("err should not be nil", func() {
+				So(err, ShouldNotBeNil)
+			})
+			Convey("status should be BadRequest", func() {
+				So(status, ShouldEqual, http.StatusBadRequest)
+			})
+		})
+
+		Convey("When Service is provided with ID", func() {
+			sampleService := getSampleServices()[0]
+
+			_, status, err := catalogClient.AddService(sampleService)
+
+			Convey("err should not be nil", func() {
+				So(err, ShouldNotBeNil)
+			})
+			Convey("status should be BadRequest", func() {
+				So(status, ShouldEqual, http.StatusBadRequest)
+			})
+		})
+
+		Convey("When Service is provided with wrong name", func() {
+			sampleService := getSampleServices()[0]
+			sampleService.Name = "name_with_underscore"
+
+			_, status, err := catalogClient.AddService(sampleService)
+
+			Convey("err should not be nil", func() {
+				So(err, ShouldNotBeNil)
+			})
+			Convey("status should be BadRequest", func() {
+				So(status, ShouldEqual, http.StatusBadRequest)
+			})
+		})
+
+		Convey("When Service is provided with name already used", func() {
+			sampleService := getSampleServices()[0]
+			sampleService.Id = ""
+
+			repositoryMock.EXPECT().IsExistByName(sampleService.Name, models.Service{}, context.getServiceKey()).Return(true, nil)
+
+			_, status, err := catalogClient.AddService(sampleService)
+
+			Convey("err should not be nil", func() {
+				So(err, ShouldNotBeNil)
+			})
+			Convey("status should be Conflict", func() {
+				So(status, ShouldEqual, http.StatusConflict)
+			})
+		})
+
+		Reset(func() {
+			mockCtrl.Finish()
+		})
+	})
+}
 
 func TestGetServices(t *testing.T) {
 	Convey("Testing GetServices", t, func() {
@@ -45,10 +135,10 @@ func TestGetServices(t *testing.T) {
 
 			services, status, err := catalogClient.GetServices()
 
-			Convey("err should be proper", func() {
+			Convey("err should be nil", func() {
 				So(err, ShouldBeNil)
 			})
-			Convey("status should be proper", func() {
+			Convey("status should be OK", func() {
 				So(status, ShouldEqual, http.StatusOK)
 			})
 			Convey("returned services should be proper", func() {
@@ -63,10 +153,10 @@ func TestGetServices(t *testing.T) {
 
 			_, status, err := catalogClient.GetServices()
 
-			Convey("err should be proper", func() {
+			Convey("err should not be nil", func() {
 				So(err, ShouldNotBeNil)
 			})
-			Convey("status should be proper", func() {
+			Convey("status should be InternalServerError", func() {
 				So(status, ShouldEqual, http.StatusInternalServerError)
 			})
 		})
@@ -90,10 +180,10 @@ func TestGetService(t *testing.T) {
 
 			service, status, err := catalogClient.GetService(id)
 
-			Convey("err should be proper", func() {
+			Convey("err should be nil", func() {
 				So(err, ShouldBeNil)
 			})
-			Convey("status should be proper", func() {
+			Convey("status should be OK", func() {
 				So(status, ShouldEqual, http.StatusOK)
 			})
 			Convey("returned services should be proper", func() {
@@ -108,7 +198,7 @@ func TestGetService(t *testing.T) {
 
 			_, status, err := catalogClient.GetService(id)
 
-			Convey("err should be proper", func() {
+			Convey("err should not be nil", func() {
 				So(err, ShouldNotBeNil)
 			})
 			Convey("status should be proper", func() {
@@ -123,10 +213,10 @@ func TestGetService(t *testing.T) {
 
 			_, status, err := catalogClient.GetService(id)
 
-			Convey("err should be proper", func() {
+			Convey("err should not be nil", func() {
 				So(err, ShouldNotBeNil)
 			})
-			Convey("status should be proper", func() {
+			Convey("status should be InternalServerError", func() {
 				So(status, ShouldEqual, http.StatusInternalServerError)
 			})
 		})
@@ -155,10 +245,10 @@ func TestDeleteService(t *testing.T) {
 
 			status, err := catalogClient.DeleteService(id)
 
-			Convey("err should be proper", func() {
+			Convey("err should be nil", func() {
 				So(err, ShouldBeNil)
 			})
-			Convey("status should be proper", func() {
+			Convey("status should be NoContent", func() {
 				So(status, ShouldEqual, http.StatusNoContent)
 			})
 		})
@@ -172,10 +262,10 @@ func TestDeleteService(t *testing.T) {
 
 			status, err := catalogClient.DeleteService(id)
 
-			Convey("err should be proper", func() {
+			Convey("err should not be nil", func() {
 				So(err, ShouldNotBeNil)
 			})
-			Convey("status should be proper", func() {
+			Convey("status should be Forbidden", func() {
 				So(status, ShouldEqual, http.StatusForbidden)
 			})
 		})
@@ -191,10 +281,10 @@ func TestDeleteService(t *testing.T) {
 
 			status, err := catalogClient.DeleteService(id)
 
-			Convey("err should be proper", func() {
+			Convey("err should not be nil", func() {
 				So(err, ShouldNotBeNil)
 			})
-			Convey("status should be proper", func() {
+			Convey("status should be Forbidden", func() {
 				So(status, ShouldEqual, http.StatusForbidden)
 			})
 		})
@@ -207,8 +297,8 @@ func TestDeleteService(t *testing.T) {
 
 func getSampleServices() []models.Service {
 	return []models.Service{
-		{Id: sampleID1, Name: sampleName1},
-		{Id: sampleID2, Name: sampleName2},
+		{Id: sampleID1, Name: sampleName1, Plans: []models.ServicePlan{models.ServicePlan{}}},
+		{Id: sampleID2, Name: sampleName2, Plans: []models.ServicePlan{models.ServicePlan{}}},
 	}
 }
 
