@@ -612,7 +612,7 @@ paths:
           description: unexpected error
   /api/v1/instances/next-state:
     get:
-      summary: Long poll for next isntance state change
+      summary: Long poll for next instance state change
       parameters:
         - name: afterIndex
           in: query
