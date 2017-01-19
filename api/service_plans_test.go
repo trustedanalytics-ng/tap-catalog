@@ -28,16 +28,16 @@ import (
 
 func TestDeletePlan(t *testing.T) {
 	Convey("Testing DeleteService", t, func() {
-		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+		mockCtrl, context, mocks, catalogClient := prepareMocksAndClient(t)
 		samplePlan := getSampleServicePlan()
 		sampleInstances := getSampleInstances()
 		sampleInstancesAsListOfInterfaces := getSampleInstancesAsListOfInterfaces(sampleInstances)
 
 		Convey("Should delete plan if is not in use by any instance", func() {
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{}).Return(samplePlan, nil),
-				repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil),
-				repositoryMock.EXPECT().DeleteData(context.getServicedPlanIDKey(serviceId, planId)).Return(nil),
+				mocks.repositoryMock.EXPECT().GetData(context.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{}).Return(samplePlan, nil),
+				mocks.repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil),
+				mocks.repositoryMock.EXPECT().DeleteData(context.getServicedPlanIDKey(serviceId, planId)).Return(nil),
 			)
 
 			status, err := catalogClient.DeleteServicePlan(serviceId, planId)
@@ -54,8 +54,8 @@ func TestDeletePlan(t *testing.T) {
 			sampleInstancesAsListOfInterfaces = getSampleInstancesAsListOfInterfaces(sampleInstances)
 
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{}).Return(samplePlan, nil),
-				repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.getServicedPlanIDKey(serviceId, planId), models.ServicePlan{}).Return(samplePlan, nil),
+				mocks.repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil),
 			)
 
 			status, err := catalogClient.DeleteServicePlan(serviceId, planId)

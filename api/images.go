@@ -16,16 +16,17 @@
 package api
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gocraft/web"
-
-	"errors"
-
 	"github.com/looplab/fsm"
+
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
 	commonHttp "github.com/trustedanalytics/tap-go-common/http"
+	"github.com/trustedanalytics/tap-go-common/util"
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {
@@ -110,6 +111,79 @@ func (c *Context) DeleteImage(rw web.ResponseWriter, req *web.Request) {
 	imageId := req.PathParams["imageId"]
 	err := c.repository.DeleteData(c.buildImagesKey(imageId))
 	commonHttp.WriteJsonOrError(rw, "", http.StatusNoContent, err)
+}
+
+func (c *Context) GetImageCheckRefs(rw web.ResponseWriter, req *web.Request) {
+	imageID := req.PathParams["imageId"]
+	var response models.ImageRefsResponse
+	var err error
+
+	response.ApplicationReferences, err = c.applicationImageRefs(imageID)
+	if err != nil {
+		logger.Errorf("applicationImageRefs returned error: %v", err)
+		commonHttp.GenericRespond(http.StatusInternalServerError, rw, err)
+		return
+	}
+
+	response.ServiceReferences, err = c.servicesImageRefs(imageID)
+	if err != nil {
+		logger.Errorf("servicesImageRefs returned error: %v", err)
+		commonHttp.GenericRespond(http.StatusInternalServerError, rw, err)
+		return
+	}
+
+	if len(response.ApplicationReferences) > 0 || len(response.ServiceReferences) > 0 {
+		response.IsAnyRefExist = true
+	}
+	commonHttp.WriteJson(rw, response, http.StatusOK)
+}
+
+func (c *Context) applicationImageRefs(imageID string) ([]models.Application, error) {
+	var appsWhichUsesThisImage []models.Application
+	applications, err := c.repository.GetListOfData(c.getApplicationKey(), models.Application{})
+	if err != nil {
+		return appsWhichUsesThisImage, err
+	}
+	for _, appInterface := range applications {
+		app, ok := appInterface.(models.Application)
+		if !ok {
+			err = errors.New("type assertion error for application!")
+			return appsWhichUsesThisImage, err
+		}
+
+		if app.ImageId == imageID {
+			appsWhichUsesThisImage = append(appsWhichUsesThisImage, app)
+		}
+	}
+	return appsWhichUsesThisImage, nil
+}
+
+func (c *Context) servicesImageRefs(imageID string) ([]models.Service, error) {
+	var servicesWhichUsesThisImage []models.Service
+	services, err := c.repository.GetListOfData(c.getServiceKey(), models.Service{})
+	if err != nil {
+		return servicesWhichUsesThisImage, err
+	}
+	for _, servInterface := range services {
+		srv, ok := servInterface.(models.Service)
+		if !ok {
+			return servicesWhichUsesThisImage, errors.New("type assertion error for service!")
+		}
+
+		for _, meta := range srv.Metadata {
+			if meta.Id == models.APPLICATION_IMAGE_ADDRESS {
+				_, imageIDInService, _, err := util.ParseImageAddress(meta.Value)
+				if err != nil {
+					return servicesWhichUsesThisImage, fmt.Errorf("%s malformed in service: %v , err: %v", models.APPLICATION_IMAGE_ADDRESS, srv.Name, err)
+				}
+
+				if imageIDInService == models.GenerateImageId(imageID) {
+					servicesWhichUsesThisImage = append(servicesWhichUsesThisImage, srv)
+				}
+			}
+		}
+	}
+	return servicesWhichUsesThisImage, nil
 }
 
 func (c *Context) MonitorImagesStates(rw web.ResponseWriter, req *web.Request) {

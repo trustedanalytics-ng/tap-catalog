@@ -36,17 +36,17 @@ const (
 
 func TestAddServiceInstance(t *testing.T) {
 	Convey("Test Add Service Instance", t, func() {
-		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+		mockCtrl, context, mocks, catalogClient := prepareMocksAndClient(t)
 
 		Convey("Adding instance ok, response status is 201", func() {
 			instance := getSampleInstance()
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
-				repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
-				repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(false, nil),
-				repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil),
-				repositoryMock.EXPECT().CreateData(gomock.Any()).Return(nil),
-				repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
+				mocks.repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(false, nil),
+				mocks.repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil),
+				mocks.repositoryMock.EXPECT().CreateData(gomock.Any()).Return(nil),
+				mocks.repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
 			)
 
 			responseInstance, status, err := catalogClient.AddServiceInstance(serviceId, instance)
@@ -61,11 +61,11 @@ func TestAddServiceInstance(t *testing.T) {
 			instance.Type = models.InstanceTypeServiceBroker
 			instance.Metadata = []models.Metadata{}
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
-				repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(false, nil),
-				repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil),
-				repositoryMock.EXPECT().CreateData(gomock.Any()).Return(nil),
-				repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
+				mocks.repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(false, nil),
+				mocks.repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil),
+				mocks.repositoryMock.EXPECT().CreateData(gomock.Any()).Return(nil),
+				mocks.repositoryMock.EXPECT().GetData(gomock.Any(), models.Instance{}).Return(instance, nil),
 			)
 
 			responseInstance, status, err := catalogClient.AddServiceBrokerInstance(serviceId, instance)
@@ -77,7 +77,7 @@ func TestAddServiceInstance(t *testing.T) {
 
 		Convey("Service not exist, response status is 404", func() {
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, errors.New("not exist")),
+				mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, errors.New("not exist")),
 			)
 
 			_, status, err := catalogClient.AddServiceInstance(serviceId, models.Instance{})
@@ -89,7 +89,7 @@ func TestAddServiceInstance(t *testing.T) {
 
 		Convey("Id field not empty, response status is 400", func() {
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
 			)
 
 			instance := getSampleInstance()
@@ -104,7 +104,7 @@ func TestAddServiceInstance(t *testing.T) {
 
 		Convey("Plan not found, response status is 400", func() {
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
 			)
 
 			instance := getSampleInstance()
@@ -119,7 +119,7 @@ func TestAddServiceInstance(t *testing.T) {
 
 		Convey("Instance name does not match lowercase DNS rule, response status is 400", func() {
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
 			)
 
 			instance := getSampleInstance()
@@ -135,9 +135,9 @@ func TestAddServiceInstance(t *testing.T) {
 		Convey("Instance already exist, response status is 409", func() {
 			instance := getSampleInstance()
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
-				repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
-				repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(true, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
+				mocks.repositoryMock.EXPECT().IsExistByName(instance.Name, models.Instance{}, context.getInstanceKey()).Return(true, nil),
 			)
 
 			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)
@@ -154,8 +154,8 @@ func TestAddServiceInstance(t *testing.T) {
 			}
 
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
-				repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
+				mocks.repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
 			)
 
 			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)

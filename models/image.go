@@ -28,6 +28,12 @@ type Image struct {
 	AuditTrail AuditTrail `json:"auditTrail"`
 }
 
+type ImageRefsResponse struct {
+	IsAnyRefExist         bool          `json:"refsExists"`
+	ApplicationReferences []Application `json:"applicationReferences"`
+	ServiceReferences     []Service     `json:"serviceReferences"`
+}
+
 type ImageType string
 
 const (

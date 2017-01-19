@@ -28,13 +28,13 @@ import (
 
 func TestCheckStateStability(t *testing.T) {
 	Convey("Testing CheckStateStability", t, func() {
-		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+		mockCtrl, context, mocks, catalogClient := prepareMocksAndClient(t)
 		sampleInstances := getInstancesInStableState()
 
 		Convey("When all instances are in stable state", func() {
 			sampleInstancesAsListOfInterfaces := getSampleInstancesAsListOfInterfaces(sampleInstances)
 
-			repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
 
 			result, status, err := catalogClient.CheckStateStability()
 
@@ -67,7 +67,7 @@ func TestCheckStateStability(t *testing.T) {
 				sampleInstances = append(sampleInstances, models.Instance{State: stateNotReady})
 				sampleInstancesAsListOfInterfaces := getSampleInstancesAsListOfInterfaces(sampleInstances)
 
-				repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
+				mocks.repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
 
 				result, status, err := catalogClient.CheckStateStability()
 

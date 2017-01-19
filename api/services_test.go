@@ -17,7 +17,7 @@
 package api
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"testing"
 
@@ -126,12 +126,12 @@ func TestAddService(t *testing.T) {
 
 func TestGetServices(t *testing.T) {
 	Convey("Testing GetServices", t, func() {
-		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+		mockCtrl, context, mocks, catalogClient := prepareMocksAndClient(t)
 		sampleServices := getSampleServices()
 		sampleServicesAsListOfInterfaces := getSampleServicesAsListOfInterfaces(sampleServices)
 
 		Convey("When RepositoryAPI returns proper data", func() {
-			repositoryMock.EXPECT().GetListOfData(context.getServiceKey(), models.Service{}).Return(sampleServicesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getServiceKey(), models.Service{}).Return(sampleServicesAsListOfInterfaces, nil)
 
 			services, status, err := catalogClient.GetServices()
 
@@ -149,7 +149,7 @@ func TestGetServices(t *testing.T) {
 		Convey("When RepositoryAPI returns improper data", func() {
 			sampleServicesAsListOfInterfaces = append(sampleServicesAsListOfInterfaces, nil)
 
-			repositoryMock.EXPECT().GetListOfData(context.getServiceKey(), models.Service{}).Return(sampleServicesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getServiceKey(), models.Service{}).Return(sampleServicesAsListOfInterfaces, nil)
 
 			_, status, err := catalogClient.GetServices()
 
@@ -169,14 +169,14 @@ func TestGetServices(t *testing.T) {
 
 func TestGetService(t *testing.T) {
 	Convey("Testing GetService", t, func() {
-		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+		mockCtrl, context, mocks, catalogClient := prepareMocksAndClient(t)
 		sampleService := getSampleServices()[0]
 		id := sampleID1
 
 		Convey("When RepositoryAPI returns proper data", func() {
 			sampleServiceInterface := interface{}(sampleService)
 
-			repositoryMock.EXPECT().GetData(context.buildServiceKey(id), models.Service{}).Return(sampleServiceInterface, nil)
+			mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(id), models.Service{}).Return(sampleServiceInterface, nil)
 
 			service, status, err := catalogClient.GetService(id)
 
@@ -194,7 +194,7 @@ func TestGetService(t *testing.T) {
 		Convey("When service with given ID does not exist", func() {
 			id = "not-existing-id"
 
-			repositoryMock.EXPECT().GetData(context.buildServiceKey(id), models.Service{}).Return(nil, fmt.Errorf("not found"))
+			mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(id), models.Service{}).Return(nil, errors.New("not found"))
 
 			_, status, err := catalogClient.GetService(id)
 
@@ -209,7 +209,7 @@ func TestGetService(t *testing.T) {
 		Convey("When RepositoryAPI returns improper data", func() {
 			sampleServiceInterface := interface{}(2)
 
-			repositoryMock.EXPECT().GetData(context.buildServiceKey(id), models.Service{}).Return(sampleServiceInterface, nil)
+			mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(id), models.Service{}).Return(sampleServiceInterface, nil)
 
 			_, status, err := catalogClient.GetService(id)
 
@@ -231,7 +231,7 @@ func TestDeleteService(t *testing.T) {
 	id := sampleID1
 
 	Convey("Testing DeleteService", t, func() {
-		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+		mockCtrl, context, mocks, catalogClient := prepareMocksAndClient(t)
 
 		Convey("When offering can be deleted", func() {
 			sampleServices := getSampleServices()
@@ -239,9 +239,9 @@ func TestDeleteService(t *testing.T) {
 			sampleInstances := getSampleInstances()
 			sampleInstancesAsListOfInterfaces := getSampleInstancesAsListOfInterfaces(sampleInstances)
 
-			repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
-			repositoryMock.EXPECT().GetListOfData(context.getServiceKey(), models.Service{}).Return(sampleServicesAsListOfInterfaces, nil)
-			repositoryMock.EXPECT().DeleteData(context.buildServiceKey(id)).Return(nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getServiceKey(), models.Service{}).Return(sampleServicesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().DeleteData(context.buildServiceKey(id)).Return(nil)
 
 			status, err := catalogClient.DeleteService(id)
 
@@ -258,7 +258,7 @@ func TestDeleteService(t *testing.T) {
 			sampleInstances[0].ClassId = sampleID1
 			sampleInstancesAsListOfInterfaces := getSampleInstancesAsListOfInterfaces(sampleInstances)
 
-			repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
 
 			status, err := catalogClient.DeleteService(id)
 
@@ -276,8 +276,8 @@ func TestDeleteService(t *testing.T) {
 			sampleInstances := getSampleInstances()
 			sampleInstancesAsListOfInterfaces := getSampleInstancesAsListOfInterfaces(sampleInstances)
 
-			repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
-			repositoryMock.EXPECT().GetListOfData(context.getServiceKey(), models.Service{}).Return(sampleServicesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getServiceKey(), models.Service{}).Return(sampleServicesAsListOfInterfaces, nil)
 
 			status, err := catalogClient.DeleteService(id)
 

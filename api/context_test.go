@@ -29,10 +29,10 @@ func TestInitDB(t *testing.T) {
 	const org = "SAMPLE_ORG"
 
 	Convey(fmt.Sprintf("Given some Context instance and %s organization", org), t, func() {
-		mockCtrl, context, repositoryMock, _ := prepareMocksAndClient(t)
+		mockCtrl, context, mocks, _ := prepareMocksAndClient(t)
 
 		Convey(fmt.Sprintf("Context.initBD should call repository.CreateDirs with %s parameter", org), func() {
-			repositoryMock.EXPECT().CreateDirs(org).Return(nil)
+			mocks.repositoryMock.EXPECT().CreateDirs(org).Return(nil)
 
 			err := context.initDB(org)
 
@@ -51,10 +51,10 @@ func TestReserveID(t *testing.T) {
 	const samplePath = "application"
 
 	Convey("Testing reserveID", t, func() {
-		mockCtrl, context, repositoryMock, _ := prepareMocksAndClient(t)
+		mockCtrl, context, mocks, _ := prepareMocksAndClient(t)
 
 		Convey("when first UUID generation trial is successful", func() {
-			repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil)
+			mocks.repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil)
 
 			retUUID, err := context.reserveID(samplePath)
 
@@ -70,8 +70,8 @@ func TestReserveID(t *testing.T) {
 
 		Convey("When second UUID generation trial is successful", func() {
 			gomock.InOrder(
-				repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(errors.New("")),
-				repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil),
+				mocks.repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(errors.New("")),
+				mocks.repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil),
 			)
 
 			retUUID, err := context.reserveID(samplePath)
@@ -87,7 +87,7 @@ func TestReserveID(t *testing.T) {
 		})
 
 		Convey(fmt.Sprintf("When maxUUIDGenerationTrials=%d generation trials are not successful", maxUUIDGenerationTrials), func() {
-			repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(errors.New("")).AnyTimes()
+			mocks.repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(errors.New("")).AnyTimes()
 
 			_, err := context.reserveID(samplePath)
 

@@ -28,13 +28,18 @@ import (
 	"github.com/trustedanalytics/tap-catalog/data"
 )
 
-func prepareMocksAndClient(t *testing.T) (mockCtrl *gomock.Controller, c Context, repositoryMock *data.MockRepositoryApi, catalogClient client.TapCatalogApi) {
-	mockCtrl = gomock.NewController(t)
-	repositoryMock = data.NewMockRepositoryApi(mockCtrl)
-	c = Context{
-		repository: repositoryMock,
-	}
+type MockPack struct {
+	repositoryMock *data.MockRepositoryApi
+}
 
+func prepareMocksAndClient(t *testing.T) (mockCtrl *gomock.Controller, c Context, mocks MockPack, catalogClient client.TapCatalogApi) {
+	mockCtrl = gomock.NewController(t)
+	mocks = MockPack{
+		repositoryMock: data.NewMockRepositoryApi(mockCtrl),
+	}
+	c = Context{
+		repository: mocks.repositoryMock,
+	}
 	router := SetupRouter(c)
 	catalogClient = getCatalogClient(router, t)
 	return

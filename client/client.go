@@ -34,6 +34,7 @@ type TapCatalogApi interface {
 	GetApplication(applicationId string) (models.Application, int, error)
 	GetCatalogHealth() (int, error)
 	GetImage(imageId string) (models.Image, int, error)
+	GetImageRefs(imageId string) (models.ImageRefsResponse, int, error)
 	GetInstance(instanceId string) (models.Instance, int, error)
 	GetInstanceBindings(instanceId string) ([]models.Instance, int, error)
 	GetServicePlan(serviceId, planId string) (models.ServicePlan, int, error)
@@ -82,6 +83,7 @@ const (
 	images       = apiPrefix + apiVersion + "/images"
 	latestIndex  = apiPrefix + apiVersion + "/latest-index"
 	stableState  = apiPrefix + apiVersion + "/stable-state"
+	checkRefs    = "check-refs"
 	nextState    = "next-state"
 	healthz      = "healthz"
 	bindings     = "bindings"

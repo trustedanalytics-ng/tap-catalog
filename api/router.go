@@ -83,6 +83,7 @@ func route(router *web.Router, context *Context) {
 	router.Post("/images", context.AddImage)
 	router.Patch("/images/:imageId", context.PatchImage)
 	router.Delete("/images/:imageId", context.DeleteImage)
+	router.Get("/images/:imageId/check-refs", context.GetImageCheckRefs)
 
 	router.Get("/instances", context.Instances)
 	router.Get("/instances/next-state", context.MonitorInstancesStates)

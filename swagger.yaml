@@ -953,6 +953,21 @@ paths:
             type: string
         500:
           description: unexpected error
+  /api/v1/images/{imageId}/check-refs:
+      get:
+        summary: Check references of image in application and offerings
+        parameters:
+          - name: imageId
+            in: path
+            required: true
+            type: string
+        responses:
+          200:
+            description: References description
+            schema:
+              $ref: '#/definitions/ImageRefsResponse'
+          500:
+            description: unexpected error
 definitions:
   Image:
     type: object
@@ -1256,3 +1271,16 @@ definitions:
         type: boolean
       message:
         type: string
+  ImageRefsResponse:
+      type: object
+      properties:
+        refsExists:
+          type: boolean
+        applicationReferences:
+          type: array
+          items:
+            $ref: '#/definitions/Application'
+        serviceReferences:
+          type: array
+          items:
+            $ref: '#/definitions/Service'

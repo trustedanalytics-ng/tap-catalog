@@ -28,13 +28,13 @@ import (
 
 func TestLatestIndex(t *testing.T) {
 	Convey("Testing LatestIndex", t, func() {
-		mockCtrl, _, repositoryMock, catalogClient := prepareMocksAndClient(t)
+		mockCtrl, _, mocks, catalogClient := prepareMocksAndClient(t)
 
 		Convey("When making request", func() {
 			latestIndex := uint64(5)
 			index := models.Index{Latest: latestIndex}
 			gomock.InOrder(
-				repositoryMock.EXPECT().GetLatestIndex(gomock.Any()).Return(latestIndex, nil),
+				mocks.repositoryMock.EXPECT().GetLatestIndex(gomock.Any()).Return(latestIndex, nil),
 			)
 
 			responseIndex, status, err := catalogClient.GetLatestIndex()
