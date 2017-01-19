@@ -17,6 +17,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"testing"
@@ -115,6 +116,59 @@ func TestAddService(t *testing.T) {
 			})
 			Convey("status should be Conflict", func() {
 				So(status, ShouldEqual, http.StatusConflict)
+			})
+		})
+
+		Reset(func() {
+			mockCtrl.Finish()
+		})
+	})
+}
+
+func TestPatchServiceUpdate(t *testing.T) {
+	Convey("Testing PatchService with Update operation", t, func() {
+		mockCtrl, context, mocks, catalogClient := prepareMocksAndClient(t)
+
+		sampleService := models.Service{Id: sampleID1, Name: sampleName1, Plans: []models.ServicePlan{models.ServicePlan{}}, State: models.ServiceStateReady}
+		sampleServiceInterface := interface{}(sampleService)
+		fieldName := "state"
+		newValueByte, _ := json.Marshal(models.ServiceStateOffline)
+		patches := []models.Patch{models.Patch{Operation: models.OperationUpdate, Field: &fieldName, Value: (*json.RawMessage)(&newValueByte)}}
+		patchedValues, _ := context.mapper.ToKeyValueByPatches(context.buildServiceKey(sampleService.Id), models.Service{}, patches)
+
+		Convey("When field state is updated from READY to OFFLINE state", func() {
+			sampleInstances := getSampleInstances()
+			sampleInstancesAsListOfInterfaces := getSampleInstancesAsListOfInterfaces(sampleInstances)
+			sampleServices := getSampleServices()
+			sampleServicesAsListOfInterfaces := getSampleServicesAsListOfInterfaces(sampleServices)
+
+			mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(sampleService.Id), models.Service{}).Return(sampleServiceInterface, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getServiceKey(), models.Service{}).Return(sampleServicesAsListOfInterfaces, nil)
+			mocks.repositoryMock.EXPECT().ApplyPatchedValues(patchedValues)
+			mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(sampleService.Id), models.Service{}).Return(sampleServiceInterface, nil)
+
+			service, status, err := catalogClient.UpdateService(sampleService.Id, patches)
+
+			Convey("response should be proper", func() {
+				So(err, ShouldBeNil)
+				So(status, ShouldEqual, http.StatusOK)
+				So(service, ShouldResemble, sampleService)
+			})
+		})
+
+		Convey("When field state is updated from READY to OFFLINE state and there is service instance", func() {
+			sampleInstances := []models.Instance{models.Instance{ClassId: sampleService.Id}}
+			sampleInstancesAsListOfInterfaces := getSampleInstancesAsListOfInterfaces(sampleInstances)
+
+			mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(sampleService.Id), models.Service{}).Return(sampleServiceInterface, nil)
+			mocks.repositoryMock.EXPECT().GetListOfData(context.getInstanceKey(), models.Instance{}).Return(sampleInstancesAsListOfInterfaces, nil)
+
+			_, status, err := catalogClient.UpdateService(sampleService.Id, patches)
+
+			Convey("response should be proper", func() {
+				So(err, ShouldNotBeNil)
+				So(status, ShouldEqual, http.StatusForbidden)
 			})
 		})
 

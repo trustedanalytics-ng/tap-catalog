@@ -63,14 +63,21 @@ func (c *Context) enterState(e *fsm.Event) {
 
 func (c *Context) getStateChange(patches []models.Patch) (string, error) {
 	for _, patch := range patches {
-		if err := models.ValidatePatchStructure(patch); err != nil {
-			return "", err
-		} else if strings.EqualFold(*patch.Field, "state") {
-			value := c.removeQuotes(string(*patch.Value))
+		if value, err := c.getFieldValue(patch, "state"); err == nil {
 			return value, nil
 		}
 	}
 	return "", nil
+}
+
+func (c *Context) getFieldValue(patch models.Patch, field string) (string, error) {
+	if err := models.ValidatePatchStructure(patch); err != nil {
+		return "", err
+	} else if !strings.EqualFold(*patch.Field, field) {
+		return "", err
+	}
+	value := c.removeQuotes(string(*patch.Value))
+	return value, nil
 }
 
 func (c *Context) allowStateChange(newState string, stateMachine *fsm.FSM) error {

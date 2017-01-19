@@ -159,15 +159,9 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	newStateAsString, err := c.getStateChange(patches)
-	newState := models.ServiceState(newStateAsString)
-	if err != nil && newState == models.ServiceStateOffline && service.State == models.ServiceStateReady {
-		if status, err := c.assureOfferingIsNotUsed(serviceId); err != nil {
-			err := fmt.Errorf("cannot change offering state from %q to %q: %v", service.State, newState, err)
-			logger.Error(err.Error())
-			commonHttp.GenericRespond(status, rw, err)
-			return
-		}
+	if status, err := c.checkIfPatchesCanBeApplied(service, patches); err != nil {
+		commonHttp.GenericRespond(status, rw, err)
+		return
 	}
 
 	fsmFunc := func() *fsm.FSM {
@@ -191,6 +185,31 @@ func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {
 
 	serviceInt, err = c.repository.GetData(c.buildServiceKey(serviceId), models.Service{})
 	commonHttp.WriteJsonOrError(rw, serviceInt, http.StatusOK, err)
+}
+
+func (c *Context) checkIfPatchesCanBeApplied(service models.Service, patches []models.Patch) (int, error) {
+	for _, patch := range patches {
+		if patch.Operation == models.OperationUpdate {
+			newStateAsString, err := c.getFieldValue(patch, "state")
+			if err != nil {
+				continue
+			}
+			newState := models.ServiceState(newStateAsString)
+			return c.checkIfStateCanBeUpdated(service, newState)
+		}
+	}
+	return http.StatusOK, nil
+}
+
+func (c *Context) checkIfStateCanBeUpdated(service models.Service, newState models.ServiceState) (int, error) {
+	if newState == models.ServiceStateOffline && service.State == models.ServiceStateReady {
+		if status, err := c.assureOfferingIsNotUsed(service.Id); err != nil {
+			err := fmt.Errorf("cannot change offering state from %q to %q: %v", service.State, newState, err)
+			logger.Error(err.Error())
+			return status, err
+		}
+	}
+	return http.StatusOK, nil
 }
 
 func (c *Context) DeleteService(rw web.ResponseWriter, req *web.Request) {
