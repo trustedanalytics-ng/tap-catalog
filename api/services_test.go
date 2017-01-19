@@ -37,17 +37,17 @@ const (
 
 func TestAddService(t *testing.T) {
 	Convey("Testing AddService", t, func() {
-		mockCtrl, context, repositoryMock, catalogClient := prepareMocksAndClient(t)
+		mockCtrl, context, mocks, catalogClient := prepareMocksAndClient(t)
 
 		Convey("When Service is proper", func() {
 			sampleService := getSampleServices()[0]
 			sampleService.Id = ""
 			sampleServiceInterface := interface{}(sampleService)
 
-			repositoryMock.EXPECT().IsExistByName(sampleService.Name, models.Service{}, context.getServiceKey()).Return(false, nil)
-			repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil)
-			repositoryMock.EXPECT().CreateData(gomock.Any()).Return(nil)
-			repositoryMock.EXPECT().GetData(gomock.Any(), models.Service{}).Return(sampleServiceInterface, nil)
+			mocks.repositoryMock.EXPECT().IsExistByName(sampleService.Name, models.Service{}, context.getServiceKey()).Return(false, nil)
+			mocks.repositoryMock.EXPECT().CreateDir(gomock.Any()).Return(nil)
+			mocks.repositoryMock.EXPECT().CreateData(gomock.Any()).Return(nil)
+			mocks.repositoryMock.EXPECT().GetData(gomock.Any(), models.Service{}).Return(sampleServiceInterface, nil)
 
 			service, status, err := catalogClient.AddService(sampleService)
 
@@ -106,7 +106,7 @@ func TestAddService(t *testing.T) {
 			sampleService := getSampleServices()[0]
 			sampleService.Id = ""
 
-			repositoryMock.EXPECT().IsExistByName(sampleService.Name, models.Service{}, context.getServiceKey()).Return(true, nil)
+			mocks.repositoryMock.EXPECT().IsExistByName(sampleService.Name, models.Service{}, context.getServiceKey()).Return(true, nil)
 
 			_, status, err := catalogClient.AddService(sampleService)
 
