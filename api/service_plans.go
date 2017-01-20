@@ -66,7 +66,7 @@ func (c *Context) AddPlan(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	err = data.CheckIfIdFieldIsEmpty(reqPlan)
+	err = reqPlan.ValidateServicePlanStructCreate()
 	if err != nil {
 		commonHttp.Respond400(rw, err)
 		return

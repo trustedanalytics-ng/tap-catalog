@@ -15,7 +15,10 @@
  */
 package models
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 func init() {
 	RegisterType("Plans", reflect.TypeOf(ServicePlan{}))
@@ -33,6 +36,7 @@ type Service struct {
 	Plans       []ServicePlan `json:"plans"`
 	AuditTrail  AuditTrail    `json:"auditTrail"`
 	Metadata    []Metadata    `json:"metadata"`
+	Tags        []string      `json:"tags"`
 }
 
 type ServicePlan struct {
@@ -59,3 +63,25 @@ const (
 	ServiceStateReady     ServiceState = "READY"
 	ServiceStateOffline   ServiceState = "OFFLINE"
 )
+
+func (servicePlan *ServicePlan) ValidateServicePlanStructCreate() error {
+	if servicePlan.Id != "" {
+		return GetIdFieldHasToBeEmptyError()
+	}
+	return nil
+}
+func (service *Service) ValidateServiceStructCreate() error {
+	if service.Id != "" {
+		return GetIdFieldHasToBeEmptyError()
+	}
+
+	if err := CheckIfMatchingRegexp(service.Name, RegexpDnsLabelLowercase); err != nil {
+		return fmt.Errorf("field \"Name\" has incorrect value %q: %v", service.Name, err)
+	}
+
+	if len(service.Plans) == 0 {
+		return fmt.Errorf("offering should have at least one plan")
+	}
+
+	return nil
+}

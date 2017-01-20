@@ -155,7 +155,6 @@ func TestAddServiceInstance(t *testing.T) {
 
 			gomock.InOrder(
 				mocks.repositoryMock.EXPECT().GetData(context.buildServiceKey(serviceId), models.Service{}).Return(models.Service{}, nil),
-				mocks.repositoryMock.EXPECT().GetData(context.buildInstanceKey(instance.Bindings[0].Id), models.Instance{}).Return(models.Instance{}, nil),
 			)
 
 			_, status, err := catalogClient.AddServiceInstance(serviceId, instance)

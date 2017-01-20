@@ -18,7 +18,7 @@ APP_NAME=tap-catalog
 
 build: verify_gopath
 	go fmt $(APP_DIR_LIST)
-	CGO_ENABLED=0 go install -tags netgo .
+	CGO_ENABLED=0 go install -ldflags "-w" -tags netgo .
 	mkdir -p application && cp -f $(GOBIN)/$(APP_NAME) ./application/$(APP_NAME)
 
 run: build_anywhere
@@ -28,10 +28,9 @@ run-local: build
 	CORE_ORGANIZATION=default BROKER_LOG_LEVEL=DEBUG ETCD_CATALOG_HOST=localhost ETCD_CATALOG_PORT=2379 PORT=8084 CATALOG_USER=admin CATALOG_PASS=password ${GOPATH}/bin/tap-catalog
 
 docker_build: build_anywhere
-	docker build -t tap-catalog .
+	docker build -t $(REPOSITORY_URL)/tap-catalog:latest .
 
 push_docker: docker_build
-	docker tag -f tap-catalog $(REPOSITORY_URL)/tap-catalog:latest
 	docker push $(REPOSITORY_URL)/tap-catalog:latest
 
 kubernetes_deploy: docker_build
@@ -67,7 +66,7 @@ verify_gopath:
 	fi
 
 test: verify_gopath
-	CGO_ENABLED=0 go test --cover -tags netgo $(APP_DIR_LIST)
+	CGO_ENABLED=0 go test --cover -ldflags "-w" -tags netgo $(APP_DIR_LIST)
 	
 prepare_dirs:
 	mkdir -p ./temp/src/github.com/trustedanalytics/tap-catalog

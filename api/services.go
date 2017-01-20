@@ -90,7 +90,9 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 		return
 	}
 
-	if err := validateService(*reqService); err != nil {
+	err = reqService.ValidateServiceStructCreate()
+	if err != nil {
+
 		commonHttp.Respond400(rw, err)
 		return
 	}
@@ -120,22 +122,6 @@ func (c *Context) AddService(rw web.ResponseWriter, req *web.Request) {
 
 	service, err := c.repository.GetData(c.buildServiceKey(reqService.Id), models.Service{})
 	commonHttp.WriteJsonOrError(rw, service, http.StatusCreated, err)
-}
-
-func validateService(service models.Service) error {
-	if err := data.CheckIfIdFieldIsEmpty(service); err != nil {
-		return err
-	}
-
-	if err := models.CheckIfMatchingRegexp(service.Name, models.RegexpDnsLabelLowercase); err != nil {
-		return fmt.Errorf("field \"Name\" has incorrect value %q: %v", service.Name, err)
-	}
-
-	if len(service.Plans) == 0 {
-		return fmt.Errorf("offering should have at least one plan")
-	}
-
-	return nil
 }
 
 func (c *Context) PatchService(rw web.ResponseWriter, req *web.Request) {

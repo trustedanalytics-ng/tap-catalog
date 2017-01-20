@@ -28,3 +28,10 @@ const (
 	TemplateStateReady       TemplateState = "READY"
 	TemplateStateUnavailable TemplateState = "UNAVAILABLE"
 )
+
+func (template *Template) ValidateTemplateStructCreate() error {
+	if template.Id != "" {
+		return GetIdFieldHasToBeEmptyError()
+	}
+	return nil
+}

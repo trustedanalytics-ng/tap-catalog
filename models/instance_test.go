@@ -33,3 +33,38 @@ func TestGetValueFromMetadata(t *testing.T) {
 		So(value, ShouldEqual, "")
 	})
 }
+
+func TestValidateInstanceStructCreate(t *testing.T) {
+	Convey("Test ValidateInstanceStructCreate", t, func() {
+
+		propperInstance := &Instance{
+			Name: "propername",
+			Metadata: []Metadata{
+				{Id: "PLAN_ID", Value: "1"},
+			},
+		}
+
+		Convey("should return error when ID is provided", func() {
+			propperInstance.Id = "1"
+			err := propperInstance.ValidateInstanceStructCreate(InstanceTypeService)
+			So(err, ShouldNotBeNil)
+		})
+
+		Convey("shouldn't return error for proper instance", func() {
+			err := propperInstance.ValidateInstanceStructCreate(InstanceTypeService)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("shouldn't return error when name has - ", func() {
+			propperInstance.Name = "no-proper-name"
+			err := propperInstance.ValidateInstanceStructCreate(InstanceTypeService)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("should return error when name has _ ", func() {
+			propperInstance.Name = "no_proper_name"
+			err := propperInstance.ValidateInstanceStructCreate(InstanceTypeService)
+			So(err, ShouldNotBeNil)
+		})
+	})
+}

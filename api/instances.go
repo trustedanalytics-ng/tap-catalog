@@ -178,20 +178,9 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 		return
 	}
 
-	err = data.CheckIfIdFieldIsEmpty(reqInstance)
+	err = reqInstance.ValidateInstanceStructCreate(instanceType)
 	if err != nil {
 		commonHttp.Respond400(rw, err)
-		return
-	}
-
-	if instanceType == models.InstanceTypeService && models.GetValueFromMetadata(reqInstance.Metadata, models.OFFERING_PLAN_ID) == "" {
-		commonHttp.Respond400(rw, errors.New(fmt.Sprintf("key %s not found!", models.OFFERING_PLAN_ID)))
-		return
-	}
-
-	err = models.CheckIfMatchingRegexp(reqInstance.Name, models.RegexpDnsLabelLowercase)
-	if err != nil {
-		commonHttp.Respond400(rw, errors.New("Field: Name has incorrect value: "+reqInstance.Name))
 		return
 	}
 
@@ -201,12 +190,6 @@ func (c *Context) addInstance(rw web.ResponseWriter, req *web.Request, classId s
 			commonHttp.Respond400(rw, errors.New(
 				fmt.Sprintf("Field: binding ID has incorrect value: %s!", binding.Id)))
 			return
-		}
-		for k, _ := range binding.Data {
-			if err = models.CheckIfMatchingRegexp(k, models.RegexpProperSystemEnvName); err != nil {
-				commonHttp.Respond400(rw, errors.New("Field: data has incorrect value: "+k))
-				return
-			}
 		}
 	}
 

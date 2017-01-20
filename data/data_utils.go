@@ -57,9 +57,8 @@ func CheckIfIdFieldIsEmpty(entity interface{}) error {
 	idPropertyValue := getStructID(reflect.ValueOf(entity))
 	if idPropertyValue != "" {
 		return errors.New("Id field has to be empty!")
-	} else {
-		return nil
 	}
+	return nil
 }
 
 func GetEntityKey(organization string, entity string) string {

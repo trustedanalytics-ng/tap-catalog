@@ -16,6 +16,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 )
@@ -23,6 +24,7 @@ import (
 const (
 	RegexpProperSystemEnvName = "^[A-Za-z_][A-Za-z0-9_]*$"
 	RegexpDnsLabelLowercase   = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+	IdFieldHasToBeEmptyMsg    = "Id field has to be empty!"
 )
 
 func CheckIfMatchingRegexp(content, regexpRule string) error {
@@ -30,4 +32,8 @@ func CheckIfMatchingRegexp(content, regexpRule string) error {
 		return fmt.Errorf("content: %s doesn't match regexp: %s !", content, regexpRule)
 	}
 	return nil
+}
+
+func GetIdFieldHasToBeEmptyError() error {
+	return errors.New(IdFieldHasToBeEmptyMsg)
 }

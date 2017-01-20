@@ -15,7 +15,10 @@
  */
 package models
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 func init() {
 	RegisterType("InstanceDependencies", reflect.TypeOf(InstanceDependency{}))
@@ -36,4 +39,19 @@ type Application struct {
 	AuditTrail           AuditTrail           `json:"auditTrail"`
 	InstanceDependencies []InstanceDependency `json:"instanceDependencies"`
 	Metadata             []Metadata           `json:"metadata"`
+}
+
+func (application *Application) ValidateApplicationStructCreate() error {
+	if application.Id != "" {
+		return GetIdFieldHasToBeEmptyError()
+	}
+	if application.TemplateId == "" {
+		return fmt.Errorf("TemplateId is required")
+	}
+	err := CheckIfMatchingRegexp(application.Name, RegexpDnsLabelLowercase)
+	if err != nil {
+		return fmt.Errorf("field Name has incorrect value: %v", application.Name)
+	}
+
+	return nil
 }
