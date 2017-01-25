@@ -50,7 +50,7 @@ func (application *Application) ValidateApplicationStructCreate() error {
 	}
 	err := CheckIfMatchingRegexp(application.Name, RegexpDnsLabelLowercase)
 	if err != nil {
-		return fmt.Errorf("field Name has incorrect value: %v", application.Name)
+		return GetInvalidValueError("Name", application.Name, err)
 	}
 
 	return nil

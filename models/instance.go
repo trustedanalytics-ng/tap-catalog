@@ -115,14 +115,14 @@ func (instance *Instance) ValidateInstanceStructCreate(instanceType InstanceType
 
 	err := CheckIfMatchingRegexp(instance.Name, RegexpDnsLabelLowercase)
 	if err != nil {
-		return fmt.Errorf("Field: Name has incorrect value: %s", instance.Name)
+		return GetInvalidValueError("Name", instance.Name, err)
 	}
 	//although it copies for loop from instances.go, in this case we don't query etcd before being sure request is proper
 	//in most cases bindings array will be small so no issue with performance should happen here
 	for _, binding := range instance.Bindings {
 		for k := range binding.Data {
 			if err = CheckIfMatchingRegexp(k, RegexpProperSystemEnvName); err != nil {
-				return fmt.Errorf("Field: data has incorrect value: %s", k)
+				return GetInvalidValueError("Data", k, err)
 			}
 		}
 	}

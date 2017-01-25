@@ -37,3 +37,7 @@ func CheckIfMatchingRegexp(content, regexpRule string) error {
 func GetIdFieldHasToBeEmptyError() error {
 	return errors.New(IdFieldHasToBeEmptyMsg)
 }
+
+func GetInvalidValueError(field, value string, err error) error {
+	return fmt.Errorf("field: %s has incorrect value: %s; %v", field, value, err)
+}

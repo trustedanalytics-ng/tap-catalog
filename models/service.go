@@ -76,7 +76,7 @@ func (service *Service) ValidateServiceStructCreate() error {
 	}
 
 	if err := CheckIfMatchingRegexp(service.Name, RegexpDnsLabelLowercase); err != nil {
-		return fmt.Errorf("field \"Name\" has incorrect value %q: %v", service.Name, err)
+		return GetInvalidValueError("Name", service.Name, err)
 	}
 
 	if len(service.Plans) == 0 {

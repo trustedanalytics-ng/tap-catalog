@@ -57,6 +57,7 @@ func TestValidateServiceStructCreate(t *testing.T) {
 			propperService.Name = "no_proper_name"
 			err := propperService.ValidateServiceStructCreate()
 			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldContainSubstring, "field: Name has incorrect value: no_proper_name")
 		})
 	})
 }

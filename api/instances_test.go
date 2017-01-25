@@ -129,7 +129,7 @@ func TestAddServiceInstance(t *testing.T) {
 
 			So(err, ShouldNotBeNil)
 			So(status, ShouldEqual, http.StatusBadRequest)
-			So(err.Error(), ShouldContainSubstring, "Field: Name has incorrect value: "+instance.Name)
+			So(err.Error(), ShouldContainSubstring, "field: Name has incorrect value: "+instance.Name)
 		})
 
 		Convey("Instance already exist, response status is 409", func() {
@@ -161,7 +161,7 @@ func TestAddServiceInstance(t *testing.T) {
 
 			So(err, ShouldNotBeNil)
 			So(status, ShouldEqual, http.StatusBadRequest)
-			So(err.Error(), ShouldContainSubstring, "Field: data has incorrect value:")
+			So(err.Error(), ShouldContainSubstring, "field: Data has incorrect value:")
 		})
 
 		Reset(func() {

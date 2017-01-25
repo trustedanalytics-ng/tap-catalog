@@ -199,7 +199,7 @@ func validatePatch(patchFieldName string, patch models.Patch, isUpdateOp bool) e
 		}
 		for k, _ := range instanceBinding.Data {
 			if err := models.CheckIfMatchingRegexp(k, models.RegexpProperSystemEnvName); err != nil {
-				return errors.New("Field: Data has incorrect value: " + k)
+				return models.GetInvalidValueError("Data", k, err)
 			}
 		}
 	}
