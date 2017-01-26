@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/nu7hatch/gouuid"
@@ -157,6 +158,31 @@ func isObject(property reflect.Value) bool {
 	return isCollection(property.Kind()) || property.Kind() == reflect.Struct
 }
 
+func isSimpleType(kind reflect.Kind) bool {
+	switch kind {
+	case reflect.Bool,
+		reflect.Int,
+		reflect.Int8,
+		reflect.Int16,
+		reflect.Int32,
+		reflect.Int64,
+		reflect.Uint,
+		reflect.Uint8,
+		reflect.Uint16,
+		reflect.Uint32,
+		reflect.Uint64,
+		reflect.Uintptr,
+		reflect.Float32,
+		reflect.Float64,
+		reflect.Complex64,
+		reflect.Complex128,
+		reflect.String:
+		return true
+	default:
+		return false
+	}
+}
+
 func buildEtcdKey(dirKey string, fieldName, id string, addIdToKey bool) string {
 	if addIdToKey {
 		return dirKey + keySeparator + id + keySeparator + fieldName
@@ -167,6 +193,12 @@ func buildEtcdKey(dirKey string, fieldName, id string, addIdToKey bool) string {
 
 func unmarshalJSON(value []byte, fieldName string, structType reflect.Type) (interface{}, error) {
 	entity := getNewInstance(fieldName, structType).Interface()
+	// arrays/slices saved as marshaled strings should have quotes removed before unmarshalling
+	if isCollection(structType.Kind()) {
+		if unquoted, err := strconv.Unquote(string(value)); err == nil {
+			value = []byte(unquoted)
+		}
+	}
 	err := json.Unmarshal(value, &entity)
 	return entity, err
 }

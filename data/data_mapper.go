@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -124,6 +125,12 @@ func (t *DataMapper) ToKeyValueByPatches(mainStructDirKey string, inputStruct in
 
 		patchFieldName := strings.Title(*patch.Field)
 		if originalField := reflect.ValueOf(inputStruct).FieldByName(patchFieldName); originalField.IsValid() {
+			// treat collection of simple types as marshaled string
+			if isCollectionOfSimpleTypes(originalField) {
+				originalField = reflect.ValueOf("")
+				quoted := strconv.Quote(string(*patch.Value))
+				*patch.Value = json.RawMessage(quoted)
+			}
 			newValue, err := unmarshalJSON(*patch.Value, patchFieldName, originalField.Type())
 			if err != nil {
 				return result, err
@@ -225,7 +232,14 @@ func (t *DataMapper) structToMap(dirKey string, structObject reflect.Value, addI
 
 func (t *DataMapper) SingleFieldToMap(key string, fieldValue reflect.Value, fieldName, structId string) map[string]interface{} {
 	result := map[string]interface{}{}
-	if isObject(fieldValue) {
+	if isCollectionOfSimpleTypes(fieldValue) {
+		marshalled, err := json.Marshal(fieldValue.Interface())
+		if err != nil {
+			logger.Error("Error marshalling response:", err)
+		} else {
+			result[key] = string(marshalled)
+		}
+	} else if isObject(fieldValue) {
 		objectAsMap := t.ToKeyValue(key, fieldValue.Interface(), false)
 		result = MergeMap(result, objectAsMap)
 	} else {
@@ -236,4 +250,9 @@ func (t *DataMapper) SingleFieldToMap(key string, fieldValue reflect.Value, fiel
 		}
 	}
 	return result
+}
+
+func isCollectionOfSimpleTypes(fieldValue reflect.Value) bool {
+	return isCollection(fieldValue.Kind()) &&
+		isSimpleType(fieldValue.Type().Elem().Kind())
 }
