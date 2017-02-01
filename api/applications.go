@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2017 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,30 @@ import (
 
 	"github.com/trustedanalytics/tap-catalog/data"
 	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics/tap-catalog/utils"
+
 	commonHttp "github.com/trustedanalytics/tap-go-common/http"
 )
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {
-	result, err := c.repository.GetListOfData(c.getApplicationKey(), models.Application{})
-	commonHttp.WriteJsonOrError(rw, result, http.StatusOK, err)
+	applications := []models.Application{}
+
+	dataList, err := c.repository.GetListOfData(c.getApplicationKey(), models.Application{})
+	if err != nil {
+		err = fmt.Errorf("application list retrieval failed: %v", err)
+		commonHttp.HandleError(rw, err)
+		return
+	}
+
+	filter := commonHttp.CreateItemFilter(req)
+	applications, err = utils.ApplyApplicationFilter(dataList, filter)
+	if err != nil {
+		err = fmt.Errorf("application filter failed: %v", err)
+		commonHttp.HandleError(rw, err)
+		return
+	}
+
+	commonHttp.WriteJsonOrError(rw, applications, http.StatusOK, err)
 }
 
 func (c *Context) getApplication(id string) (models.Application, error) {

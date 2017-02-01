@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2017 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,5 +154,33 @@ func RespondErrorByStatus(rw web.ResponseWriter, statusCode int, operationName s
 		Respond403(rw)
 	} else {
 		GenericRespond(statusCode, rw, fmt.Errorf("error doing: %s", operationName))
+	}
+}
+
+type ItemFilter struct {
+	Name  string
+	Limit int
+	Skip  int
+}
+
+func (i *ItemFilter) BuildQuery() string {
+	constraints := []string{}
+	if i.Name != "" {
+		constraints = append(constraints, "name="+i.Name)
+	}
+	if i.Limit > 0 {
+		constraints = append(constraints, fmt.Sprintf("limit=%d", i.Limit))
+	}
+	if i.Skip > 0 {
+		constraints = append(constraints, fmt.Sprintf("skip=%d", i.Skip))
+	}
+	return strings.Join(constraints, "&")
+}
+
+func CreateItemFilter(req *web.Request) *ItemFilter {
+	return &ItemFilter{
+		Name:  GetQueryParameterCaseInsensitive(req, "name"),
+		Limit: GetQueryParameterCaseInsensitiveAsInt(req, "limit", 0),
+		Skip:  GetQueryParameterCaseInsensitiveAsInt(req, "skip", 0),
 	}
 }

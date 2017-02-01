@@ -22,6 +22,10 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/gocraft/web"
 )
 
 type BasicAuth struct {
@@ -148,4 +152,26 @@ func binaryStreamRequest(url, authHeader string, client *http.Client, dest io.Wr
 
 	logger.Debug("CODE:", resp.StatusCode, "BODY: [ Binary Data ] Size:", resp.ContentLength)
 	return resp.ContentLength, nil
+}
+
+func GetQueryParameterCaseInsensitive(req *web.Request, name string) string {
+	query := req.URL.Query()
+	for key, _ := range query {
+		if strings.ToUpper(key) == strings.ToUpper(name) {
+			return query.Get(key)
+		}
+	}
+	return ""
+}
+
+func GetQueryParameterCaseInsensitiveAsInt(req *web.Request, name string, defaultValue int) int {
+	stringValue := GetQueryParameterCaseInsensitive(req, name)
+	if stringValue == "" {
+		return defaultValue
+	}
+	value, err := strconv.Atoi(stringValue)
+	if err != nil {
+		return defaultValue
+	}
+	return value
 }

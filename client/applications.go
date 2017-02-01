@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2017 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ func (c *TapCatalogApiConnector) AddApplication(application models.Application) 
 	return *result, status, err
 }
 
-func (c *TapCatalogApiConnector) ListApplications() ([]models.Application, int, error) {
-	connector := c.getApiConnector(fmt.Sprintf("%s/%s", c.Address, applications))
+func (c *TapCatalogApiConnector) ListApplications(filter *brokerHttp.ItemFilter) ([]models.Application, int, error) {
+	connector := c.getApiConnector(fmt.Sprintf("%s/%s?%s", c.Address, applications, filter.BuildQuery()))
 	result := &[]models.Application{}
 	status, err := brokerHttp.GetModel(connector, http.StatusOK, result)
 	return *result, status, err
