@@ -33,7 +33,7 @@ const (
 
 func TestNewEtcdKVStore(t *testing.T) {
 	Convey("Test NewEtcdKVStore should return not nil error on bad port and address", t, func() {
-		_, err := NewEtcdKVStore("bad_adress", 1)
+		_, err := NewEtcdKVStore("bad_adress")
 		So(err, ShouldBeNil)
 	})
 }
