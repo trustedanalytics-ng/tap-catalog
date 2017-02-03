@@ -18,7 +18,6 @@ package etcd
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/coreos/etcd/client"
@@ -46,16 +45,15 @@ type EtcdKVStore interface {
 }
 
 type EtcdConnector struct {
-	addresses []string
-	keysAPI   client.KeysAPI
+	address string
+	port    int
+	keysAPI client.KeysAPI
 }
 
 var logger, _ = commonLogger.InitLogger("etcd")
 
-//takes address in form of "https://hostname:port,https://hostname2:port2"
-func NewEtcdKVStore(addresses string) (EtcdKVStore, error) {
-	splitAddresses := strings.Split(addresses, ",")
-	res := &EtcdConnector{addresses: splitAddresses}
+func NewEtcdKVStore(address string, port int) (EtcdKVStore, error) {
+	res := &EtcdConnector{address: address, port: port}
 	err := res.Connect()
 	return res, err
 }
@@ -65,7 +63,7 @@ func (c *EtcdConnector) Connect() error {
 	headerTimeout := time.Duration(headerTimeoutFromEnv) * time.Millisecond
 
 	cfg := client.Config{
-		Endpoints:               c.addresses,
+		Endpoints:               []string{fmt.Sprintf("https://%s:%d", c.address, c.port)},
 		Transport:               client.DefaultTransport,
 		HeaderTimeoutPerRequest: headerTimeout,
 	}
