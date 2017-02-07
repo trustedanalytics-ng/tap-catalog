@@ -68,13 +68,14 @@ func setupRouter(context api.Context) *web.Router {
 }
 
 func setupRepository() data.RepositoryApi {
-	etcdAddress, etcdPort, err := util.GetConnectionHostAndPortFromEnvs(EtcdComponentName)
+	addressesVarName := EtcdComponentName + "_ADDRESSES"
+	etcdAddresses, err := util.GetEnvOrError(addressesVarName)
 	if err != nil {
-		logger.Fatalf("Cannot get ETCD address and port: %v", err)
+		logger.Fatalf("Cannot get ETCD addresses: %v", err)
 	}
-	etcdKVStore, err := etcd.NewEtcdKVStore(etcdAddress, etcdPort)
+	etcdKVStore, err := etcd.NewEtcdKVStore(etcdAddresses)
 	if err != nil {
-		logger.Fatalf("Cannot connect to ETCD on %s:%d: %v", etcdAddress, etcdPort, err)
+		logger.Fatalf("Cannot connect to ETCD on %s: %v", etcdAddresses, err)
 	}
 	return data.NewRepositoryAPI(etcdKVStore, data.DataMapper{})
 }

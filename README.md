@@ -94,4 +94,5 @@ Following environment variables configure Catalog:
 
 | Variable | Description |
 | --- | --- |
+| ETCD_CATALOG_ADDRESSES | etcd-catalog nodes addresses in form of "https://hostname:port,https://hostname2:port2" |
 | ETCD_CONNECTION_HEADER_TIMEOUT | ETCD connection header timeout per request in ms. Default value is 60000 (1 minute). |
