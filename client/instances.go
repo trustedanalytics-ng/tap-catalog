@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/trustedanalytics/tap-catalog/models"
-	brokerHttp "github.com/trustedanalytics/tap-go-common/http"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
+	brokerHttp "github.com/trustedanalytics-ng/tap-go-common/http"
 )
 
 func (c *TapCatalogApiConnector) ListApplicationInstances(applicationId string) ([]models.Instance, int, error) {

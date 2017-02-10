@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"net/http"
 
-	brokerHttp "github.com/trustedanalytics/tap-go-common/http"
+	brokerHttp "github.com/trustedanalytics-ng/tap-go-common/http"
 
-	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
 )
 
 func (c *TapCatalogApiConnector) CheckStateStability() (models.StateStability, int, error) {

@@ -22,8 +22,8 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/trustedanalytics/tap-catalog/etcd"
-	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics-ng/tap-catalog/etcd"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
 )
 
 type RepositoryApi interface {

@@ -21,11 +21,11 @@ import (
 
 	"github.com/gocraft/web"
 
-	"github.com/trustedanalytics/tap-catalog/data"
-	"github.com/trustedanalytics/tap-catalog/models"
-	"github.com/trustedanalytics/tap-catalog/utils"
+	"github.com/trustedanalytics-ng/tap-catalog/data"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
+	"github.com/trustedanalytics-ng/tap-catalog/utils"
 
-	commonHttp "github.com/trustedanalytics/tap-go-common/http"
+	commonHttp "github.com/trustedanalytics-ng/tap-go-common/http"
 )
 
 func (c *Context) Applications(rw web.ResponseWriter, req *web.Request) {

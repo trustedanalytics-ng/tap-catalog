@@ -24,7 +24,7 @@ import (
 
 	"github.com/nu7hatch/gouuid"
 
-	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
 )
 
 const (

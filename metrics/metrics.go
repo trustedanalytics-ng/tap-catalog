@@ -24,9 +24,9 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/trustedanalytics/tap-catalog/data"
-	"github.com/trustedanalytics/tap-catalog/models"
-	mutils "github.com/trustedanalytics/tap-metrics/utils"
+	"github.com/trustedanalytics-ng/tap-catalog/data"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
+	mutils "github.com/trustedanalytics-ng/tap-metrics/utils"
 )
 
 const (

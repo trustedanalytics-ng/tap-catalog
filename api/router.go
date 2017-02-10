@@ -19,7 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gocraft/web"
-	commonHttp "github.com/trustedanalytics/tap-go-common/http"
+	commonHttp "github.com/trustedanalytics-ng/tap-go-common/http"
 )
 
 func SetupRouter(context Context) *web.Router {

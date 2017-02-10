@@ -24,14 +24,14 @@ import (
 
 	"github.com/gocraft/web"
 
-	"github.com/trustedanalytics/tap-catalog/api"
-	"github.com/trustedanalytics/tap-catalog/data"
-	"github.com/trustedanalytics/tap-catalog/etcd"
-	"github.com/trustedanalytics/tap-catalog/metrics"
-	httpGoCommon "github.com/trustedanalytics/tap-go-common/http"
-	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
-	"github.com/trustedanalytics/tap-go-common/util"
-	mutils "github.com/trustedanalytics/tap-metrics/utils"
+	"github.com/trustedanalytics-ng/tap-catalog/api"
+	"github.com/trustedanalytics-ng/tap-catalog/data"
+	"github.com/trustedanalytics-ng/tap-catalog/etcd"
+	"github.com/trustedanalytics-ng/tap-catalog/metrics"
+	httpGoCommon "github.com/trustedanalytics-ng/tap-go-common/http"
+	commonLogger "github.com/trustedanalytics-ng/tap-go-common/logger"
+	"github.com/trustedanalytics-ng/tap-go-common/util"
+	mutils "github.com/trustedanalytics-ng/tap-metrics/utils"
 )
 
 const EtcdComponentName = "ETCD_CATALOG"

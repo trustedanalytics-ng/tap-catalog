@@ -21,7 +21,7 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/trustedanalytics/tap-catalog/models"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
 )
 
 func TestMakePatch(t *testing.T) {

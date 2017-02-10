@@ -21,8 +21,8 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	catalogModels "github.com/trustedanalytics/tap-catalog/models"
-	commonHttp "github.com/trustedanalytics/tap-go-common/http"
+	catalogModels "github.com/trustedanalytics-ng/tap-catalog/models"
+	commonHttp "github.com/trustedanalytics-ng/tap-go-common/http"
 )
 
 func makeAbstractApps(apps []catalogModels.Application) []interface{} {

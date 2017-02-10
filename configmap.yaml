@@ -9,7 +9,7 @@
     domain: "example.com"
     tap-version: "0.8"
     cli-version: "0.8"
-    core-organization: "trustedanalytics"
+    core-organization: "trustedanalytics-ng"
 ---
   kind: "ConfigMap"
   apiVersion: "v1"

@@ -24,8 +24,8 @@ import (
 	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
 
-	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
-	"github.com/trustedanalytics/tap-go-common/util"
+	commonLogger "github.com/trustedanalytics-ng/tap-go-common/logger"
+	"github.com/trustedanalytics-ng/tap-go-common/util"
 )
 
 type EtcdKVStore interface {

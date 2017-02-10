@@ -23,10 +23,10 @@ import (
 	"github.com/gocraft/web"
 	"github.com/looplab/fsm"
 
-	"github.com/trustedanalytics/tap-catalog/data"
-	"github.com/trustedanalytics/tap-catalog/models"
-	commonHttp "github.com/trustedanalytics/tap-go-common/http"
-	"github.com/trustedanalytics/tap-go-common/util"
+	"github.com/trustedanalytics-ng/tap-catalog/data"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
+	commonHttp "github.com/trustedanalytics-ng/tap-go-common/http"
+	"github.com/trustedanalytics-ng/tap-go-common/util"
 )
 
 func (c *Context) Images(rw web.ResponseWriter, req *web.Request) {

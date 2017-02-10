@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	catalogModels "github.com/trustedanalytics/tap-catalog/models"
-	commonHttp "github.com/trustedanalytics/tap-go-common/http"
+	catalogModels "github.com/trustedanalytics-ng/tap-catalog/models"
+	commonHttp "github.com/trustedanalytics-ng/tap-go-common/http"
 )
 
 func ApplyApplicationFilter(dataList []interface{}, filter *commonHttp.ItemFilter) ([]catalogModels.Application, error) {

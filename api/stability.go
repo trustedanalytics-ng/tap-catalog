@@ -22,8 +22,8 @@ import (
 
 	"github.com/gocraft/web"
 
-	"github.com/trustedanalytics/tap-catalog/models"
-	commonHttp "github.com/trustedanalytics/tap-go-common/http"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
+	commonHttp "github.com/trustedanalytics-ng/tap-go-common/http"
 )
 
 var stableStates = []models.InstanceState{

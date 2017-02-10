@@ -23,8 +23,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/trustedanalytics/tap-catalog/models"
-	commonLogger "github.com/trustedanalytics/tap-go-common/logger"
+	"github.com/trustedanalytics-ng/tap-catalog/models"
+	commonLogger "github.com/trustedanalytics-ng/tap-go-common/logger"
 )
 
 var logger, _ = commonLogger.InitLogger("DataMapper")

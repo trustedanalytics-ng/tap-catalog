@@ -24,8 +24,8 @@ import (
 	"github.com/gocraft/web"
 	"github.com/golang/mock/gomock"
 
-	"github.com/trustedanalytics/tap-catalog/client"
-	"github.com/trustedanalytics/tap-catalog/data"
+	"github.com/trustedanalytics-ng/tap-catalog/client"
+	"github.com/trustedanalytics-ng/tap-catalog/data"
 )
 
 type MockPack struct {
